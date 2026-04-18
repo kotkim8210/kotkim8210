@@ -10,5 +10,10 @@
   },
   "enabledPlugins": {
     "everything-claude-code@everything-claude-code": true
+  },
+  "preferredSkills": ["everything-claude-code", "gstack-prod"],
+  "workflowHierarchy": {
+    "CREATION": "everything-claude-code",
+    "VALIDATION": "gstack-prod"
   }
 }
