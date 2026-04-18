@@ -1,1 +1,9 @@
 .claude/settings.local.json
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+*.log
+.env*.local
+next-env.d.ts
