@@ -1,5 +1,18 @@
 # kotkim8210
 
+Next.js 15 (App Router) + Tailwind CSS v4 스캐폴드.
+
+## Getting Started
+
+```bash
+npm install
+npm run dev
+```
+
+브라우저에서 [http://localhost:3000](http://localhost:3000) 으로 접속하세요. `app/page.tsx` 를 수정하면 즉시 반영됩니다.
+
+## Claude Code 플러그인
+
 This repo is pre-configured to use the [`everything-claude-code`](https://github.com/affaan-m/everything-claude-code) plugin — a toolkit of subagents, skills, and automation hooks (code review, TDD, security scanning, formatting, multi-language patterns).
 
 ## Automatic setup
