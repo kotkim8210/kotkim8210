@@ -10,5 +10,30 @@
   },
   "enabledPlugins": {
     "everything-claude-code@everything-claude-code": true
+  },
+  "model": "claude-haiku-4-5-20251001",
+  "alwaysThinkingEnabled": false,
+  "autoCompactWindow": 100000,
+  "skillListingMaxDescChars": 256,
+  "skillListingBudgetFraction": 0.005,
+  "includeGitInstructions": false,
+  "spinnerTipsEnabled": false,
+  "cleanupPeriodDays": 7,
+  "effortLevel": "low",
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Bash(git *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(find *)",
+      "Bash(grep *)",
+      "Bash(echo *)",
+      "Bash(pwd)",
+      "Bash(which *)",
+      "Read",
+      "Glob",
+      "Grep"
+    ]
   }
 }
