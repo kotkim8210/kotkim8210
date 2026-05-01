@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 1080px;
+    height: 1920px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0a0a0f;
+    color: #ffffff;
+    -webkit-font-smoothing: antialiased;
+  }
+  .stage {
+    position: relative;
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 80% 12%, rgba(249,115,22,0.22), transparent 45%),
+      radial-gradient(circle at 15% 88%, rgba(180,83,9,0.28), transparent 50%),
+      #0a0a0f;
+  }
+  .dots {
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48'><circle cx='1.5' cy='1.5' r='1.5' fill='%23f97316' opacity='0.13'/></svg>");
+    background-size: 48px 48px;
+  }
+  .card {
+    position: absolute;
+    top: 70px;
+    left: 50px;
+    right: 50px;
+    bottom: 70px;
+    padding: 70px 60px;
+    background: rgba(30,15,8,0.85);
+    border: 1px solid rgba(249,115,22,0.22);
+    border-radius: 36px;
+    display: flex;
+    flex-direction: column;
+  }
+  .section-title {
+    font-size: 56px;
+    font-weight: 900;
+    letter-spacing: -1.5px;
+    line-height: 1.25;
+    margin-bottom: 40px;
+    color: #ffffff;
+  }
+  .section-title .accent { color: #fdba74; }
+  .table {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr;
+    gap: 0;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid rgba(249,115,22,0.25);
+  }
+  .cell {
+    padding: 28px 24px;
+    display: flex;
+    align-items: center;
+    line-height: 1.35;
+    border-bottom: 1px solid rgba(249,115,22,0.12);
+  }
+  .cell:nth-child(3n+1) { border-right: 1px solid rgba(249,115,22,0.12); }
+  .cell:nth-child(3n+2) { border-right: 1px solid rgba(249,115,22,0.12); }
+
+  .header-cell {
+    background: rgba(249,115,22,0.18);
+    font-size: 32px;
+    font-weight: 900;
+    color: #fdba74;
+    justify-content: center;
+    text-align: center;
+    letter-spacing: -0.5px;
+    border-bottom: 2px solid #f97316;
+  }
+  .header-cell:first-child { color: #ffffff; }
+
+  .row-label {
+    background: rgba(255,255,255,0.04);
+    font-size: 26px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.5px;
+  }
+  .row-value {
+    font-size: 26px;
+    color: #e2e8f0;
+    font-weight: 500;
+    justify-content: center;
+    text-align: center;
+  }
+  .footer {
+    margin-top: 30px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(249,115,22,0.18);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footnote { font-size: 22px; color: #475569; line-height: 1.4; max-width: 70%; }
+  .handle { font-size: 28px; font-weight: 700; color: #f97316; }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="dots"></div>
+    <div class="card">
+      <div class="section-title">{{section_title}}</div>
+      <div class="table">
+        {{#each headers}}
+          <div class="cell header-cell">{{this}}</div>
+        {{/each}}
+        {{#each rows}}
+          {{#each this}}
+            <div class="cell {{#if @first}}row-label{{else}}row-value{{/if}}">{{this}}</div>
+          {{/each}}
+        {{/each}}
+      </div>
+      <div class="footer">
+        <div class="footnote">{{footnote}}</div>
+        <div class="handle">{{handle}}</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
