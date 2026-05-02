@@ -15,12 +15,16 @@ const TEMPLATE_FILES = {
   cta: "cta.hbs",
 };
 
+let cachedTemplates = null;
+
 async function loadTemplates() {
+  if (cachedTemplates) return cachedTemplates;
   const compiled = {};
   for (const [type, file] of Object.entries(TEMPLATE_FILES)) {
     const src = await readFile(join(TEMPLATE_DIR, file), "utf-8");
     compiled[type] = Handlebars.compile(src, { noEscape: false });
   }
+  cachedTemplates = compiled;
   return compiled;
 }
 
@@ -39,21 +43,33 @@ function buildSlideContext(slide, globals) {
   return ctx;
 }
 
-export async function renderImages(content, outputDir, { handle } = {}) {
+function getLaunchOptions() {
+  const opts = {
+    headless: "new",
+    args: ["--no-sandbox", "--disable-setuid-sandbox", "--font-render-hinting=none"],
+  };
+  if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+    opts.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+  }
+  return opts;
+}
+
+export async function launchRenderer() {
+  return puppeteer.launch(getLaunchOptions());
+}
+
+export async function renderImages(
+  content,
+  outputDir,
+  { handle, browser: providedBrowser } = {},
+) {
   await mkdir(outputDir, { recursive: true });
 
   const templates = await loadTemplates();
   const globals = { handle: handle ?? process.env.DEFAULT_HANDLE ?? "@알쓸지잡10" };
 
-  const launchOpts = {
-    headless: "new",
-    args: ["--no-sandbox", "--disable-setuid-sandbox", "--font-render-hinting=none"],
-  };
-  if (process.env.PUPPETEER_EXECUTABLE_PATH) {
-    launchOpts.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
-  }
-
-  const browser = await puppeteer.launch(launchOpts);
+  const browser = providedBrowser ?? (await puppeteer.launch(getLaunchOptions()));
+  const ownsBrowser = !providedBrowser;
   const outputs = [];
   try {
     const page = await browser.newPage();
@@ -86,8 +102,10 @@ export async function renderImages(content, outputDir, { handle } = {}) {
       console.log(`[render-images] saved ${filename}`);
       outputs.push(path);
     }
+
+    await page.close();
   } finally {
-    await browser.close();
+    if (ownsBrowser) await browser.close();
   }
 
   return outputs;

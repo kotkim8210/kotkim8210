@@ -5,7 +5,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "pipeline": "node src/pipeline.js"
+    "pipeline": "node src/pipeline.js",
+    "batch": "node src/batch.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.65.0",

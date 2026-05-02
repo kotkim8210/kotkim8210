@@ -44,6 +44,43 @@ node src/pipeline.js "20대 모르면 손해보는 정부지원금"    # checkli
 node src/pipeline.js "네이버 vs 카카오 신입 복지 비교"   # comparison
 ```
 
+## 배치 실행 (10~30개 한 번에)
+
+`data/topics.json`에 주제 배열을 넣고 한 번에 처리합니다.
+
+```bash
+# 기본: data/topics.json 의 모든 주제 처리
+npm run batch
+
+# 다른 주제 파일 사용
+node src/batch.js my-topics.json
+
+# 첫 3개만 (테스트/예산 절약용)
+node src/batch.js --limit 3
+
+# 이전 실행에서 실패한 항목 재시도
+node src/batch.js --retry-errors
+```
+
+**상태 추적**: `output/batch-state.json`에 주제별 진행 상태가 저장됩니다.
+- `pending` → `json_done` → `done`
+- 실패 시: `error_json` (Claude 호출 실패) / `error_image` (렌더링 실패)
+- 재실행 시 `done` 항목은 건너뜀 → API 토큰/시간 절약
+
+**한 Puppeteer 브라우저 인스턴스 재사용**: 30개 주제를 처리해도 Chromium은 1번만
+launch → 약 60초 절약.
+
+**Ctrl-C 중단**: 현재 처리 중인 주제까지 마치고 깨끗이 종료. 다음 실행 시 이어서.
+
+`data/topics.json` 예시:
+```json
+[
+  "2026 대기업 신입 초봉 티어표",
+  "인서울 대학교 등록금 순위 TOP 15",
+  "20대 모르면 손해보는 정부지원금"
+]
+```
+
 ## 환경 변수
 
 | 변수 | 필수 | 설명 |
@@ -67,13 +104,16 @@ node src/pipeline.js "네이버 vs 카카오 신입 복지 비교"   # compariso
 │   ├── checklist.hbs        # 체크리스트
 │   ├── comparison.hbs       # 비교형 (3열 테이블)
 │   └── cta.hbs              # CTA
+├── data/
+│   └── topics.json          # 배치 처리할 주제 리스트
 ├── src/
 │   ├── prompts/
 │   │   └── content-generator.md  # 시스템 프롬프트
 │   ├── generate-content.js  # 주제 → JSON (Claude + web_search)
 │   ├── render-images.js     # JSON → 이미지 (Handlebars + Puppeteer)
-│   └── pipeline.js          # CLI 엔트리포인트
-└── output/                  # 생성된 JSON과 이미지
+│   ├── pipeline.js          # 단일 주제 CLI
+│   └── batch.js             # 배치 실행기 (상태 추적 + 재개)
+└── output/                  # 생성된 JSON, 이미지, batch-state.json
 ```
 
 ## 동작 원리
