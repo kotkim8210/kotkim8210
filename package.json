@@ -6,7 +6,9 @@
   "private": true,
   "scripts": {
     "pipeline": "node src/pipeline.js",
-    "batch": "node src/batch.js"
+    "batch": "node src/batch.js",
+    "upload": "node src/upload-instagram.js",
+    "refresh-token": "node src/refresh-token.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.65.0",

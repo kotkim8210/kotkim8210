@@ -81,6 +81,61 @@ launch → 약 60초 절약.
 ]
 ```
 
+## Instagram 자동 업로드
+
+생성된 이미지를 Instagram 비즈니스 계정에 캐러셀 게시물로 자동 발행합니다.
+
+### 사전 세팅 (처음 1회, ~30분)
+
+`docs/instagram-setup.md` 참고. 필요한 것:
+- Instagram 비즈니스/크리에이터 계정 + Facebook 페이지 연결
+- Meta 개발자 앱 + Graph API 권한 5종
+- 60일 long-lived access token + Instagram Business Account ID
+- imgbb 무료 API 키 (이미지를 IG가 fetch할 수 있게 공개 URL로 호스팅)
+
+`.env` 채우기:
+```
+IMGBB_API_KEY=...
+IG_ACCESS_TOKEN=...
+IG_USER_ID=17841400000000000
+```
+
+### 사용
+
+```bash
+# 특정 토픽 업로드 (output/{topic_id}.json + 이미지 3장 필요)
+npm run upload <topic_id>
+
+# output/의 모든 미업로드 토픽 자동 발견 + 업로드
+npm run upload -- --all
+
+# 처음 5개만 (rate limit 안전 / 신규 계정)
+npm run upload -- --all --limit 5
+
+# imgbb까지만 검증 (IG 발행 안 함)
+node src/upload-instagram.js <topic_id> --dry-run
+
+# 60일 토큰 갱신 (월 1회 권장)
+npm run refresh-token
+```
+
+### 처리 흐름
+
+1. `output/{topic_id}.json` + 이미지 파일 존재 확인
+2. 각 이미지를 imgbb로 업로드 → 공개 HTTPS URL 3개 받음
+3. IG Graph API: 자식 컨테이너 3개 → 캐러셀 컨테이너 1개 → 발행
+4. `output/upload-state.json`에 `media_id`, `permalink`, 타임스탬프 저장
+5. 다음 실행 시 status=`uploaded`인 토픽은 자동 스킵 (중복 방지)
+
+### 한도 / 안전 가이드
+
+- **24시간당 50개 게시물** (신규 계정 25개부터). 점진적으로 늘리세요:
+  - Week 1: 3개/일 → Week 5+: 30개/일
+- 시간당 200 API 호출. 캐러셀 1개 = ~10 호출 → 시간당 ~20개 안전.
+- 같은 IP/계정에서 갑자기 30개 이상 = 스팸 판정 위험.
+
+자세한 설정/트러블슈팅은 `docs/instagram-setup.md` 참고.
+
 ## 환경 변수
 
 | 변수 | 필수 | 설명 |
@@ -106,14 +161,20 @@ launch → 약 60초 절약.
 │   └── cta.hbs              # CTA
 ├── data/
 │   └── topics.json          # 배치 처리할 주제 리스트
+├── docs/
+│   └── instagram-setup.md   # Meta 앱 등록 + 토큰 발급 walkthrough
 ├── src/
 │   ├── prompts/
 │   │   └── content-generator.md  # 시스템 프롬프트
 │   ├── generate-content.js  # 주제 → JSON (Claude + web_search)
 │   ├── render-images.js     # JSON → 이미지 (Handlebars + Puppeteer)
 │   ├── pipeline.js          # 단일 주제 CLI
-│   └── batch.js             # 배치 실행기 (상태 추적 + 재개)
-└── output/                  # 생성된 JSON, 이미지, batch-state.json
+│   ├── batch.js             # 배치 실행기 (상태 추적 + 재개)
+│   ├── image-host.js        # imgbb 업로드 (공개 URL 발급)
+│   ├── instagram.js         # Instagram Graph API 클라이언트
+│   ├── upload-instagram.js  # 캐러셀 업로드 러너
+│   └── refresh-token.js     # 60일 토큰 갱신 유틸
+└── output/                  # JSON, 이미지, batch-state.json, upload-state.json
 ```
 
 ## 동작 원리
