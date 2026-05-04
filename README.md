@@ -136,6 +136,77 @@ npm run refresh-token
 
 자세한 설정/트러블슈팅은 `docs/instagram-setup.md` 참고.
 
+## Google Sheets 연동 (DB-driven 운영)
+
+Google Sheets 를 콘텐츠 입력 DB 로 사용. 사용자가 시트 D열에 주제, J열에 `pending` 입력 →
+시스템이 자동으로 JSON 생성 → 이미지 렌더링 → imgbb 업로드 → (선택) Instagram 발행 →
+시트에 결과 URL/permalink 기록.
+
+### 사전 세팅 (처음 1회, ~15분)
+
+`docs/sheets-setup.md` 참고. 필요한 것:
+- GCP 프로젝트 + Google Sheets API enable
+- Service Account 생성 + JSON 키 다운로드
+- 시트를 service account 이메일에 편집자로 공유
+
+`.env`:
+```
+GOOGLE_SHEETS_ID=AbCdEf...
+GOOGLE_SERVICE_ACCOUNT_JSON=./credentials/service-account.json
+```
+
+### 사용
+
+```bash
+# 1회 실행: 모든 pending row 처리 → uploaded
+npm run sheets
+
+# IG 발행은 스킵 (imgbb URL까지만 시트에 쓰기)
+npm run sheets -- --no-publish
+
+# 한 사이클당 최대 N개
+npm run sheets -- --limit 3
+
+# 5분마다 자동 폴링 (상시 실행)
+npm run sheets -- --watch --interval 300
+
+# 시트 헤더만 자동 생성 (첫 사용)
+npm run sheets -- --no-publish --limit 0
+```
+
+### 시트 컬럼
+
+| 열 | 이름 | 방향 |
+|----|------|------|
+| A | topic_id | 시스템 쓰기 |
+| B | category | 시스템 쓰기 |
+| C | card_type | 시스템 쓰기 |
+| **D** | **topic_title** | **사용자 입력** |
+| E | json_data | 시스템 쓰기 |
+| F | cover_img_url | 시스템 쓰기 |
+| G | body_img_url | 시스템 쓰기 |
+| H | cta_img_url | 시스템 쓰기 |
+| I | caption | 시스템 쓰기 |
+| **J** | **status** | **사용자/시스템** |
+| K | error_message / permalink | 시스템 쓰기 |
+| L | processed_at | 시스템 쓰기 |
+
+### Status 흐름
+
+```
+사용자: pending → 시스템: processing → images_done (--no-publish) | uploaded
+실패 시: error_json | error_image | error_upload
+```
+
+크래시 시 멈춘 `processing` row 는 다음 실행 시 자동으로 `pending` 으로 리셋됨.
+
+### Cron 으로 production 운영
+
+```bash
+# 평일 9시/12시/15시/18시 각 5개 = 하루 20개 (Week 4~5 권장)
+0 9,12,15,18 * * 1-5 cd /home/user/kotkim8210 && /usr/bin/node src/sheets-runner.js --limit 5 >> /var/log/kotkim.log 2>&1
+```
+
 ## 환경 변수
 
 | 변수 | 필수 | 설명 |
@@ -160,20 +231,24 @@ npm run refresh-token
 │   ├── comparison.hbs       # 비교형 (3열 테이블)
 │   └── cta.hbs              # CTA
 ├── data/
-│   └── topics.json          # 배치 처리할 주제 리스트
+│   └── topics.json          # 배치 처리할 주제 리스트 (Sheets 안 쓸 때)
 ├── docs/
-│   └── instagram-setup.md   # Meta 앱 등록 + 토큰 발급 walkthrough
+│   ├── instagram-setup.md   # Meta 앱 등록 + 토큰 발급 walkthrough
+│   └── sheets-setup.md      # GCP + service account + 시트 공유 walkthrough
+├── credentials/             # service-account.json (gitignored)
 ├── src/
 │   ├── prompts/
 │   │   └── content-generator.md  # 시스템 프롬프트
 │   ├── generate-content.js  # 주제 → JSON (Claude + web_search)
 │   ├── render-images.js     # JSON → 이미지 (Handlebars + Puppeteer)
 │   ├── pipeline.js          # 단일 주제 CLI
-│   ├── batch.js             # 배치 실행기 (상태 추적 + 재개)
+│   ├── batch.js             # 로컬 배치 (data/topics.json 입력)
 │   ├── image-host.js        # imgbb 업로드 (공개 URL 발급)
 │   ├── instagram.js         # Instagram Graph API 클라이언트
 │   ├── upload-instagram.js  # 캐러셀 업로드 러너
-│   └── refresh-token.js     # 60일 토큰 갱신 유틸
+│   ├── refresh-token.js     # 60일 IG 토큰 갱신 유틸
+│   ├── sheets-client.js     # Google Sheets API 래퍼
+│   └── sheets-runner.js     # Sheets DB 기반 자동화 러너
 └── output/                  # JSON, 이미지, batch-state.json, upload-state.json
 ```
 

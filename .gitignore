@@ -6,3 +6,5 @@ output/*
 *.log
 .DS_Store
 credentials.json
+credentials/
+service-account*.json
