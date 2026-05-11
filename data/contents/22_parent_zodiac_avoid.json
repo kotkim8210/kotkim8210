@@ -1,0 +1,38 @@
+{
+  "topic_id": "22_parent_zodiac_avoid",
+  "category": "심리/관계",
+  "card_type": "checklist",
+  "season": "상시",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#재미로보기 🔮",
+      "headline_line1": "부모와 멀리할수록",
+      "headline_line2": "좋은 띠 조합",
+      "subheadline": "재미로 보는 사주 / 진짜 가족 사이는 노력"
+    },
+    {
+      "slide_number": 2,
+      "type": "checklist",
+      "section_title": "부모-자녀 띠 충돌 조합 (재미용)",
+      "items": [
+        {"icon": "💥", "name": "쥐(부) ↔ 말(자)", "detail": "12지신 정충 관계 / 충돌 잦음", "badge": "충"},
+        {"icon": "💥", "name": "소(부) ↔ 양(자)", "detail": "성격 차로 의견 충돌", "badge": "충"},
+        {"icon": "💥", "name": "호랑이(부) ↔ 원숭이(자)", "detail": "에너지 차이 큼", "badge": "충"},
+        {"icon": "💥", "name": "토끼(부) ↔ 닭(자)", "detail": "리듬이 안 맞음", "badge": "충"},
+        {"icon": "💥", "name": "용(부) ↔ 개(자)", "detail": "이상-현실 충돌", "badge": "충"},
+        {"icon": "💥", "name": "뱀(부) ↔ 돼지(자)", "detail": "취향이 정반대", "badge": "충"}
+      ],
+      "footnote": "★ 재미로 보는 결과 · 사주는 미신이며 과학 근거 없음 · 가족 관계는 노력으로 만들어짐"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "🔮 부모-자녀 띠 충돌",
+    "body": "재미로 보는 결과! 본인 부모님 띠 댓글로 같이 웃자.\n진짜 가족관계는 띠가 아니라 노력으로 만들어집니다.",
+    "cta": "부모님 띠 댓글 ⭐",
+    "hashtags": "#운세 #띠궁합 #부모자녀 #사주 #12지신 #재미로보기 #가족 #알쓸지잡10",
+    "source": "★ 재미로 보는 결과 — 사실 아님"
+  }
+}

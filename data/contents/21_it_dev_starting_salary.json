@@ -1,0 +1,39 @@
+{
+  "topic_id": "21_it_dev_starting_salary",
+  "category": "취업/연봉",
+  "card_type": "ranking",
+  "season": "2026 3월",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#취준생필독 💼",
+      "headline_line1": "IT 대기업 개발자",
+      "headline_line2": "초봉 TOP 7",
+      "subheadline": "신입 개발자 / 스톡 별도"
+    },
+    {
+      "slide_number": 2,
+      "type": "ranking",
+      "section_title": "IT 대기업 개발자 초봉 TOP 7",
+      "items": [
+        {"rank": 1, "name": "쿠팡 개발자", "detail": "RSU 수억 + 연봉", "value": "약 6,500~8,000만", "badge": "🥇"},
+        {"rank": 2, "name": "네이버 개발자", "detail": "스톡 별도 지급", "value": "약 5,500만", "badge": "🥈"},
+        {"rank": 3, "name": "카카오 개발자", "detail": "RSU 4년 베스팅", "value": "약 5,300만", "badge": "🥉"},
+        {"rank": 4, "name": "라인플러스", "detail": "라인 글로벌 팀", "value": "약 5,200만"},
+        {"rank": 5, "name": "토스(비바리퍼블리카)", "detail": "성과급 별도", "value": "약 5,500만"},
+        {"rank": 6, "name": "삼성전자 SW직군", "detail": "DS/MX 부문", "value": "약 5,500만"},
+        {"rank": 7, "name": "LG CNS / 삼성SDS", "detail": "SI 대형사", "value": "약 4,800만"}
+      ],
+      "footnote": "[2025 블라인드/잡플래닛 종합] 신입 + 추정 스톡 · 부서/포지션별 차이 큼 · 참고용"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "💻 IT 개발자 초봉 TOP 7",
+    "body": "쿠팡 RSU 까지 합치면 1억 근접. 네카라쿠배 다 5,000+ 라인.\n근데 진입은 다 어렵다는 게 문제.",
+    "cta": "개발자 친구 태그 ⭐",
+    "hashtags": "#개발자 #신입개발자 #쿠팡 #네이버 #카카오 #라인 #토스 #IT대기업 #초봉 #취준생 #알쓸지잡10",
+    "source": "[2025 블라인드/잡플래닛] 추정 + 스톡 포함 · 변동 가능"
+  }
+}

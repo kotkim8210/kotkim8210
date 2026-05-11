@@ -1,0 +1,39 @@
+{
+  "topic_id": "01_big_corp_salary",
+  "category": "취업/연봉",
+  "card_type": "ranking",
+  "season": "2026 3월",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#취준생필독 💼",
+      "headline_line1": "2026 대기업 신입",
+      "headline_line2": "초봉 TOP 7",
+      "subheadline": "블라인드 현직자 제보 기반 / 30초 컷"
+    },
+    {
+      "slide_number": 2,
+      "type": "ranking",
+      "section_title": "2026 대기업 신입 초봉 TOP 7 (세전)",
+      "items": [
+        {"rank": 1, "name": "SK하이닉스", "detail": "성과급(PS) 연 1500% 별도", "value": "약 5,800만", "badge": "🥇"},
+        {"rank": 2, "name": "삼성전자 DS", "detail": "메모리·파운드리 부문", "value": "약 5,500만", "badge": "🥈"},
+        {"rank": 3, "name": "네이버", "detail": "스톡옵션 별도 지급", "value": "약 5,200만", "badge": "🥉"},
+        {"rank": 4, "name": "카카오", "detail": "복지 포인트 600만 별도", "value": "약 5,000만"},
+        {"rank": 5, "name": "현대자동차", "detail": "특근수당 별도", "value": "약 4,800만"},
+        {"rank": 6, "name": "LG에너지솔루션", "detail": "기숙사 / 사택 제공", "value": "약 4,700만"},
+        {"rank": 7, "name": "포스코", "detail": "지역 근무 가산 별도", "value": "약 4,500만"}
+      ],
+      "footnote": "[2025 블라인드/잡플래닛 종합] 성과급 제외 기본 연봉 추정치 · 부서/직군별 차이 큼 · 참고용"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "💼 2026 대기업 신입 초봉 현실",
+    "body": "SK하이닉스 5,800만 / 삼성DS 5,500만 / 네이버 5,200만.\n성과급 빼면 의외로 비슷비슷한 라인이라는 게 함정.",
+    "cta": "취준생 친구한테 공유 필수 ⭐",
+    "hashtags": "#취준생 #대기업연봉 #신입연봉 #2026채용 #SK하이닉스 #삼성전자 #네이버 #카카오 #현대차 #초봉 #블라인드 #알쓸지잡10",
+    "source": "[2025 블라인드/잡플래닛 평균] 부서별 차이 있음 · 참고용"
+  }
+}

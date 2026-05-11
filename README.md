@@ -12,15 +12,36 @@
 
 ## 빠른 시작
 
+### API 키 없이 (사전 생성 콘텐츠 30개)
+
+`data/contents/` 에 30개 콘텐츠 JSON 이 들어있어 Claude API 호출 없이 즉시 렌더링 가능.
+시스템 점검·디자인 검증·인스타 업로드 테스트용.
+
 ```bash
 # 1. 의존성 설치 (Puppeteer가 Chromium ~170MB 다운로드)
 npm install
 
-# 2. API 키 설정
+# 2. 단일 렌더링 (3장 이미지)
+node src/pipeline.js --from-json data/contents/01_big_corp_salary.json
+
+# 3. 30개 전체 (90장 이미지)
+node src/batch.js --from-dir data/contents
+
+# 5개만 빠르게
+node src/batch.js --from-dir data/contents --limit 5
+```
+
+분포: 취업/연봉 10 · 대학/입시 9 · 재테크 4 · 심리/관계 4 · 생활꿀팁 3
+카드: ranking 12 · checklist 11 · comparison 7
+
+### Claude API 로 실제 생성
+
+```bash
+# 1. API 키 설정
 cp .env.example .env
 # .env 파일을 열어 ANTHROPIC_API_KEY 입력
 
-# 3. 한 주제로 end-to-end 실행
+# 2. 한 주제로 end-to-end 실행
 node src/pipeline.js "2026 대기업 신입 초봉 티어"
 ```
 
@@ -231,7 +252,8 @@ npm run sheets -- --no-publish --limit 0
 │   ├── comparison.hbs       # 비교형 (3열 테이블)
 │   └── cta.hbs              # CTA
 ├── data/
-│   └── topics.json          # 배치 처리할 주제 리스트 (Sheets 안 쓸 때)
+│   ├── topics.json          # 배치 처리할 주제 리스트 (Sheets 안 쓸 때)
+│   └── contents/            # 사전 생성된 30개 콘텐츠 JSON (API 키 없이 렌더링용)
 ├── docs/
 │   ├── instagram-setup.md   # Meta 앱 등록 + 토큰 발급 walkthrough
 │   └── sheets-setup.md      # GCP + service account + 시트 공유 walkthrough

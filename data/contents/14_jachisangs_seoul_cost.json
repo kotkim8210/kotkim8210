@@ -1,0 +1,38 @@
+{
+  "topic_id": "14_jachisangs_seoul_cost",
+  "category": "재테크/돈",
+  "card_type": "checklist",
+  "season": "상시",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#돈되는정보 💰",
+      "headline_line1": "서울 자취생",
+      "headline_line2": "월 생활비 현실",
+      "subheadline": "월급 250 받아도 통장 비는 이유"
+    },
+    {
+      "slide_number": 2,
+      "type": "checklist",
+      "section_title": "서울 자취 월 평균 지출 (1인 기준)",
+      "items": [
+        {"icon": "🏠", "name": "월세 (원룸)", "detail": "관악·동대문·성북 평균", "badge": "55~70만"},
+        {"icon": "💡", "name": "공과금 (관리비+가스+전기)", "detail": "겨울 + 30~40%", "badge": "10~15만"},
+        {"icon": "📱", "name": "통신비", "detail": "알뜰폰 활용 시 절반", "badge": "3~6만"},
+        {"icon": "🍱", "name": "식비 (자취 + 외식)", "detail": "외식만 하면 60만 +", "badge": "35~45만"},
+        {"icon": "🚇", "name": "교통비", "detail": "K-패스 환급 후 실비용", "badge": "5~8만"},
+        {"icon": "🛍", "name": "생필품·구독 (넷플 등)", "detail": "OTT·세제·휴지 등", "badge": "8~12만"}
+      ],
+      "footnote": "[2025년 서울 1인가구 평균 추정] 합계 약 116~156만 · 외식·취미·여행 별도"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "💰 서울 자취 월 116~156만",
+    "body": "월세만 60+ 공과금 12+ 식비 40+ 통신 5+ 교통 7+ 생필 10.\n외식 줄여도 120만 밑은 어려움.",
+    "cta": "자취생 친구 태그 ⭐",
+    "hashtags": "#자취생 #서울자취 #월세 #생활비 #1인가구 #식비 #공과금 #돈관리 #자취꿀팁 #알쓸지잡10",
+    "source": "[2025 통계청 가계동향+체감 평균] 변동 큼 · 참고용"
+  }
+}

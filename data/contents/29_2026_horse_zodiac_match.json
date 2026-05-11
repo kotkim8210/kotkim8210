@@ -1,0 +1,38 @@
+{
+  "topic_id": "29_2026_horse_zodiac_match",
+  "category": "심리/관계",
+  "card_type": "checklist",
+  "season": "2026 3월",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#재미로보기 🔮",
+      "headline_line1": "2026 말띠해",
+      "headline_line2": "궁합 좋은 띠 6",
+      "subheadline": "재미로 보는 띠궁합 / 진짜는 본인 노력"
+    },
+    {
+      "slide_number": 2,
+      "type": "checklist",
+      "section_title": "2026 (말띠해) 궁합 좋은 띠 조합 (재미용)",
+      "items": [
+        {"icon": "🐎", "name": "말띠 ↔ 호랑이띠", "detail": "삼합 / 시너지 폭발", "badge": "최상"},
+        {"icon": "🐎", "name": "말띠 ↔ 개띠", "detail": "삼합 / 신뢰 + 안정", "badge": "최상"},
+        {"icon": "🐎", "name": "말띠 ↔ 양띠", "detail": "육합 / 잘 맞는 한 쌍", "badge": "최상"},
+        {"icon": "💕", "name": "말띠 ↔ 토끼띠", "detail": "온화한 케미", "badge": "좋음"},
+        {"icon": "💕", "name": "말띠 ↔ 뱀띠", "detail": "지적 균형", "badge": "좋음"},
+        {"icon": "💕", "name": "말띠 ↔ 닭띠", "detail": "현실 + 꿈 균형", "badge": "좋음"}
+      ],
+      "footnote": "★ 재미로 보는 결과 · 사주는 미신이며 과학 근거 없음 · 인간관계는 노력과 대화로 만들어짐"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "🔮 2026 말띠해 궁합",
+    "body": "재미로 보세요! 본인 띠 + 친구/연인 띠 매칭해보기.\n진짜 관계는 띠 아니라 노력이 만듭니다.",
+    "cta": "본인 띠 + 상대 띠 댓글 ⭐",
+    "hashtags": "#운세 #2026 #말띠해 #띠궁합 #삼합 #육합 #사주 #재미로보기 #연애 #알쓸지잡10",
+    "source": "★ 재미로 보는 결과 — 사실 아님"
+  }
+}

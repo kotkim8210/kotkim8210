@@ -1,0 +1,39 @@
+{
+  "topic_id": "07_salary_take_home",
+  "category": "재테크/돈",
+  "card_type": "ranking",
+  "season": "상시",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#돈되는정보 💰",
+      "headline_line1": "연봉별 실수령액",
+      "headline_line2": "한눈에 보기",
+      "subheadline": "2025 4대보험 + 소득세 반영"
+    },
+    {
+      "slide_number": 2,
+      "type": "ranking",
+      "section_title": "연봉 구간별 월 실수령액 (단독세대)",
+      "items": [
+        {"rank": 1, "name": "연봉 8,000만", "detail": "월 평균 세전 666만", "value": "월 약 555만", "badge": "🥇"},
+        {"rank": 2, "name": "연봉 6,000만", "detail": "월 평균 세전 500만", "value": "월 약 422만", "badge": "🥈"},
+        {"rank": 3, "name": "연봉 5,000만", "detail": "월 평균 세전 416만", "value": "월 약 357만", "badge": "🥉"},
+        {"rank": 4, "name": "연봉 4,500만", "detail": "신입 평균 구간", "value": "월 약 326만"},
+        {"rank": 5, "name": "연봉 4,000만", "detail": "중소기업 신입 평균", "value": "월 약 295만"},
+        {"rank": 6, "name": "연봉 3,500만", "detail": "최저시급 풀타임", "value": "월 약 263만"},
+        {"rank": 7, "name": "연봉 3,000만", "detail": "최저임금 근접", "value": "월 약 232만"}
+      ],
+      "footnote": "[2025 4대보험·소득세] 부양가족 0명 단독세대 기준 · 비과세·연금 미반영 · 참고용"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "💰 연봉별 실수령액 정리",
+    "body": "연봉 5,000 = 월 357만, 연봉 6,000 = 월 422만.\n4대보험+세금 빠지면 12% ~ 17% 사라짐.",
+    "cta": "월급 확인용 저장 ⭐",
+    "hashtags": "#연봉 #실수령액 #4대보험 #소득세 #월급 #신입연봉 #재테크 #돈관리 #직장인 #알쓸지잡10",
+    "source": "[2025 국세청 간이세액표 + 4대보험요율] 단독세대 기준"
+  }
+}
