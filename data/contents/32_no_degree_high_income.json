@@ -1,0 +1,39 @@
+{
+  "topic_id": "32_no_degree_high_income",
+  "category": "취업/연봉",
+  "card_type": "ranking",
+  "season": "상시",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#취준생필독 💼",
+      "headline_line1": "학벌 없어도",
+      "headline_line2": "돈 잘 버는 직업 7",
+      "subheadline": "기술·자격증 하나로 고소득 가는 길"
+    },
+    {
+      "slide_number": 2,
+      "type": "ranking",
+      "section_title": "학벌 무관 고소득 직업 TOP 7",
+      "items": [
+        {"rank": 1, "name": "항공정비사", "detail": "면허 + 경력 / 항공사·MRO", "value": "약 6,000~9,000만", "badge": "🥇"},
+        {"rank": 2, "name": "발전·플랜트 설비기사", "detail": "교대수당 + 위험수당", "value": "약 6,000~8,000만", "badge": "🥈"},
+        {"rank": 3, "name": "특수용접·비파괴검사", "detail": "조선·플랜트 / 자격증 핵심", "value": "약 5,000~8,000만", "badge": "🥉"},
+        {"rank": 4, "name": "타워크레인 기사", "detail": "면허 + 현장 경력", "value": "약 5,000~7,000만"},
+        {"rank": 5, "name": "반도체 장비 엔지니어", "detail": "전문대·교육과정 다수", "value": "약 4,500~6,500만"},
+        {"rank": 6, "name": "보험계리/손해사정 (자격)", "detail": "국가자격 취득 시", "value": "약 4,500~7,000만"},
+        {"rank": 7, "name": "개발자 (부트캠프 출신)", "detail": "포트폴리오로 실력 증명", "value": "약 4,000~6,000만"}
+      ],
+      "footnote": "경력·자격증·근무지에 따라 편차 매우 큼 · 신입은 하단, 숙련은 상단 · 참고용"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "💼 학벌 없어도 고소득 직업 7",
+    "body": "항공정비·특수용접·발전설비… 학위 대신 면허·기술이 돈을 법니다.\n자격증 하나가 4년제보다 셀 수 있어요.",
+    "cta": "진로 고민 친구 태그 ⭐",
+    "hashtags": "#고소득직업 #기술직 #자격증 #항공정비사 #용접 #반도체 #개발자 #부트캠프 #진로 #취업 #알쓸지잡10",
+    "source": "기술직 채용공고/현직자 후기 종합 (2025) · 편차 큼 · 참고용"
+  }
+}

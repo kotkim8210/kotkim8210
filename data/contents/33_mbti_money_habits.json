@@ -1,0 +1,39 @@
+{
+  "topic_id": "33_mbti_money_habits",
+  "category": "심리/관계",
+  "card_type": "checklist",
+  "season": "상시",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#재미로보기 🔮",
+      "headline_line1": "MBTI별",
+      "headline_line2": "돈 모으는 유형",
+      "subheadline": "재미로 보는 소비 성향 / 내 MBTI는?"
+    },
+    {
+      "slide_number": 2,
+      "type": "checklist",
+      "section_title": "MBTI별 돈 쓰는 스타일 (재미용)",
+      "items": [
+        {"icon": "📊", "name": "ISTJ / ISFJ", "detail": "통장 쪼개기 장인 · 가계부 철저", "badge": "저축왕"},
+        {"icon": "🧮", "name": "INTJ / INTP", "detail": "투자·분석은 잘하나 귀찮으면 방치", "badge": "전략가"},
+        {"icon": "🛍", "name": "ESFP / ENFP", "detail": "기분 따라 지름 · 경험에 돈 씀", "badge": "플렉스"},
+        {"icon": "🎯", "name": "ESTJ / ENTJ", "detail": "목표 세우면 독하게 모음", "badge": "목표형"},
+        {"icon": "💝", "name": "ENFJ / ESFJ", "detail": "남에게 잘 씀 · 선물·모임비 지출↑", "badge": "인심형"},
+        {"icon": "🤔", "name": "INFP / INFJ", "detail": "충동구매 후 자책 무한반복", "badge": "고민형"},
+        {"icon": "⚡", "name": "ESTP / ISTP", "detail": "필요하면 바로 지름 · 미니멀", "badge": "직진형"}
+      ],
+      "footnote": "★ 재미로 보는 결과 · MBTI는 과학적 진단 아님 · 소비 습관은 본인 의지로 바뀝니다"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "🔮 MBTI별 돈 모으는 유형",
+    "body": "ISTJ는 저축왕, ENFP는 플렉스파… 내 MBTI 맞나요?\n재미로 보고, 통장은 본인 의지로 지키기!",
+    "cta": "본인 MBTI + 맞는지 댓글 ⭐",
+    "hashtags": "#MBTI #돈관리 #소비습관 #저축 #INTJ #ENFP #ISTJ #재테크 #재미로보기 #성격유형 #알쓸지잡10",
+    "source": "★ 재미로 보는 결과 — MBTI는 과학적 진단 X"
+  }
+}
