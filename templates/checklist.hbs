@@ -54,6 +54,7 @@
     line-height: 1.25;
     margin-bottom: 50px;
     color: #ffffff;
+    word-break: keep-all;
   }
   .section-title .accent { color: #fdba74; }
   .items {
@@ -117,7 +118,7 @@
   <div class="stage">
     <div class="dots"></div>
     <div class="card">
-      <div class="section-title">{{section_title}}</div>
+      <div class="section-title" data-autofit data-autofit-lines="2" data-autofit-min="34">{{section_title}}</div>
       <div class="items">
         {{#each items}}
         <div class="item">

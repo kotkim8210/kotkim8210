@@ -86,6 +86,26 @@ export async function renderImages(
 
       // Wait for Google Fonts to load before screenshot
       await page.evaluate(() => document.fonts.ready);
+
+      // Auto-shrink marked text so it stays within its line budget (prevents
+      // mid-word wrapping on long headlines/titles). Must run after fonts load.
+      await page.evaluate(() => {
+        for (const el of document.querySelectorAll("[data-autofit]")) {
+          const maxLines = Number(el.dataset.autofitLines || 2);
+          const minSize = Number(el.dataset.autofitMin || 48);
+          const cs = getComputedStyle(el);
+          let size = parseFloat(cs.fontSize);
+          const lhRatio = parseFloat(cs.lineHeight) / size || 1.2;
+          let guard = 60;
+          while (guard-- > 0 && size > minSize) {
+            const allowed = Math.ceil(size * lhRatio * maxLines) + 2;
+            if (el.scrollHeight <= allowed) break;
+            size -= 3;
+            el.style.fontSize = `${size}px`;
+          }
+        }
+      });
+
       // Small additional buffer for layout settle
       await new Promise((r) => setTimeout(r, 200));
 

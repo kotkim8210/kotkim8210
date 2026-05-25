@@ -67,6 +67,7 @@
     line-height: 1.18;
     letter-spacing: -3px;
     margin-top: 80px;
+    word-break: keep-all;
   }
   .headline .accent { color: #fdba74; }
   .subheadline {
@@ -101,7 +102,7 @@
     <div class="card">
       <div>
         <div class="tag">{{tag}}</div>
-        <div class="headline">
+        <div class="headline" data-autofit data-autofit-lines="2" data-autofit-min="60">
           {{headline_line1}}<br>
           <span class="accent">{{headline_line2}}</span>
         </div>
