@@ -93,6 +93,8 @@
     line-height: 1.2;
     letter-spacing: -1px;
     color: #ffffff;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
   }
   .item.top3 .name { font-size: 44px; }
   .detail {
@@ -100,6 +102,7 @@
     color: #cbd5e1;
     line-height: 1.4;
     font-weight: 500;
+    word-break: keep-all;
   }
   .value {
     font-size: 44px;
@@ -132,7 +135,7 @@
         <div class="item{{#if top3}} top3{{/if}}">
           <div class="badge">{{#if badge}}{{badge}}{{else}}{{rank}}{{/if}}</div>
           <div class="item-body">
-            <div class="name">{{name}}</div>
+            <div class="name" data-autofit data-autofit-lines="1" data-autofit-min="26">{{name}}</div>
             {{#if detail}}<div class="detail">{{detail}}</div>{{/if}}
           </div>
           {{#if value}}<div class="value">{{value}}</div>{{/if}}

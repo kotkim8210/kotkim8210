@@ -85,12 +85,15 @@
     line-height: 1.2;
     letter-spacing: -1px;
     color: #ffffff;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
   }
   .detail {
     font-size: 27px;
     color: #cbd5e1;
     line-height: 1.45;
     font-weight: 500;
+    word-break: keep-all;
   }
   .badge {
     padding: 10px 20px;
@@ -124,7 +127,7 @@
         <div class="item">
           <div class="icon">{{#if icon}}{{icon}}{{else}}✓{{/if}}</div>
           <div class="item-body">
-            <div class="name">{{name}}</div>
+            <div class="name" data-autofit data-autofit-lines="1" data-autofit-min="26">{{name}}</div>
             {{#if detail}}<div class="detail">{{detail}}</div>{{/if}}
           </div>
           {{#if badge}}<div class="badge">{{badge}}</div>{{/if}}
