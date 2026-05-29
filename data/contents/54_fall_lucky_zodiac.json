@@ -1,0 +1,38 @@
+{
+  "topic_id": "54_fall_lucky_zodiac",
+  "category": "심리/관계",
+  "card_type": "ranking",
+  "season": "하반기",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#오늘의운세 🔮",
+      "headline_line1": "2026 하반기",
+      "headline_line2": "운 트이는 띠 TOP 5",
+      "subheadline": "병오년 붉은 말의 해 · 후반 반등하는 띠"
+    },
+    {
+      "slide_number": 2,
+      "type": "ranking",
+      "section_title": "하반기 상승운 띠 TOP 5",
+      "items": [
+        {"rank": 1, "name": "쥐띠", "detail": "마른나무에 꽃 · 뜻밖의 행운", "value": "재물 ↑↑", "badge": "🔥"},
+        {"rank": 2, "name": "돼지띠", "detail": "꾸준함이 큰 결실로", "value": "안정 상승", "badge": "🔥"},
+        {"rank": 3, "name": "말띠", "detail": "본인의 해 · 노력형 수입 길함", "value": "성취운"},
+        {"rank": 4, "name": "소띠", "detail": "성실함이 빛 보는 시기", "value": "차곡차곡"},
+        {"rank": 5, "name": "토끼띠", "detail": "인연·귀인운 상승", "value": "관계운 ↑"},
+        {"rank": 6, "name": "공통 꿀팁", "detail": "땀 흘린 만큼 보상 · 부업운 좋음", "value": "💪"}
+      ],
+      "footnote": "재미로 보는 운세입니다 🔮 · 역학·출처별 해석 차이 큼 · 과몰입 금지 · 참고용"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "🔮 2026 하반기 운 트이는 띠 TOP 5",
+    "body": "병오년 붉은 말의 해, 하반기 반등하는 띠는?\n쥐·돼지·말·소·토끼띠 주목. 올해는 '노력형 수입'에 길함이 있대요!",
+    "cta": "본인 띠 댓글로 ⭐",
+    "hashtags": "#운세 #띠별운세 #2026운세 #병오년 #재물운 #말띠 #신년운세 #하반기운세 #오늘의운세 #재미로보는 #알쓸지잡10",
+    "source": "재미로 보는 운세 · 역학/출처별 해석 차이 · 참고용"
+  }
+}

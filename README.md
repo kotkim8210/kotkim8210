@@ -12,9 +12,9 @@
 
 ## 빠른 시작
 
-### API 키 없이 (사전 생성 콘텐츠 30개)
+### API 키 없이 (사전 생성 콘텐츠 55개)
 
-`data/contents/` 에 30개 콘텐츠 JSON 이 들어있어 Claude API 호출 없이 즉시 렌더링 가능.
+`data/contents/` 에 55개 콘텐츠 JSON 이 들어있어 Claude API 호출 없이 즉시 렌더링 가능.
 시스템 점검·디자인 검증·인스타 업로드 테스트용.
 
 ```bash
@@ -24,15 +24,19 @@ npm install
 # 2. 단일 렌더링 (3장 이미지)
 node src/pipeline.js --from-json data/contents/01_big_corp_salary.json
 
-# 3. 30개 전체 (90장 이미지)
+# 3. 55개 전체 (165장 이미지)
 node src/batch.js --from-dir data/contents
 
 # 5개만 빠르게
 node src/batch.js --from-dir data/contents --limit 5
 ```
 
-분포: 취업/연봉 10 · 대학/입시 9 · 재테크 4 · 심리/관계 4 · 생활꿀팁 3
-카드: ranking 12 · checklist 11 · comparison 7
+분포: 취업/연봉 19 · 대학/입시 13 · 재테크/돈 11 · 심리/관계 7 · 생활꿀팁 5
+카드: ranking 20 · checklist 20 · comparison 15
+
+> 36~55번은 2026년 5월 최신 트렌드 조사 기반(청년미래적금/청년형 ISA/K-패스,
+> 하반기 공채·AI 채용 역량, 무전공·등록금·유망 전공, 병오년 운세, 요노 등 MZ 소비
+> 트렌드, SQLD 등 유망 자격증). 주제 원본 리스트는 `data/topics-36plus.json`.
 
 ### Claude API 로 실제 생성
 

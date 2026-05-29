@@ -1,0 +1,39 @@
+{
+  "topic_id": "49_ai_era_majors",
+  "category": "대학/입시",
+  "card_type": "ranking",
+  "season": "상시",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#입시정보 🎓",
+      "headline_line1": "AI 시대 취업 잘되는",
+      "headline_line2": "유망 전공 TOP 7",
+      "subheadline": "10년 뒤를 보고 고르는 전공 가이드"
+    },
+    {
+      "slide_number": 2,
+      "type": "ranking",
+      "section_title": "지금 뜨는 유망 전공 TOP 7",
+      "items": [
+        {"rank": 1, "name": "AI·데이터사이언스", "detail": "모든 산업의 필수 기술", "value": "최상위", "badge": "🔥"},
+        {"rank": 2, "name": "반도체·전자", "detail": "AI 인프라 수요 폭발", "value": "강세", "badge": "🔥"},
+        {"rank": 3, "name": "바이오·헬스", "detail": "고령화+의료 수요 ↑", "value": "유망"},
+        {"rank": 4, "name": "통계학", "detail": "빅데이터로 재조명", "value": "상승세"},
+        {"rank": 5, "name": "전기·에너지", "detail": "데이터센터·신에너지", "value": "재부상"},
+        {"rank": 6, "name": "경영·산업공학", "detail": "AI+비즈니스 융합", "value": "안정"},
+        {"rank": 7, "name": "콘텐츠·디자인", "detail": "AI 활용형으로 진화", "value": "변화"}
+      ],
+      "footnote": "[2026 진로 전망 추정] 인기·취업률은 시점·기관별 차이 · 적성도 함께 고려 · 참고용"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "🎓 AI 시대 유망 전공 TOP 7",
+    "body": "AI·데이터, 반도체, 바이오, 통계가 강세.\n인문은 자유전공·융합으로, 콘텐츠는 'AI 활용형'으로 진화 중이에요.",
+    "cta": "전공 고민이면 저장 ⭐",
+    "hashtags": "#유망전공 #대학전공 #AI #데이터사이언스 #반도체 #바이오 #입시 #진로 #대입 #입시정보 #알쓸지잡10",
+    "source": "[2026 진로 전망 추정] 시점·기관별 차이 · 참고용"
+  }
+}

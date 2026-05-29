@@ -1,0 +1,39 @@
+{
+  "topic_id": "39_kpass_transport_refund",
+  "category": "재테크/돈",
+  "card_type": "checklist",
+  "season": "상시",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#꿀팁모음 💡",
+      "headline_line1": "교통비 연 90만원",
+      "headline_line2": "돌려받는 법",
+      "subheadline": "K-패스 안 쓰면 매달 그냥 버리는 돈"
+    },
+    {
+      "slide_number": 2,
+      "type": "checklist",
+      "section_title": "K-패스 환급 핵심 7",
+      "items": [
+        {"icon": "🚌", "name": "이용 조건", "detail": "월 15회 이상 대중교통", "badge": "필수"},
+        {"icon": "🔢", "name": "환급 횟수", "detail": "월 최대 60회까지 적립"},
+        {"icon": "🧒", "name": "청년 환급률", "detail": "만 19~34세 30% 돌려받음", "badge": "핵심"},
+        {"icon": "🆕", "name": "모두의 카드", "detail": "기준 초과분 100% 환급"},
+        {"icon": "🚇", "name": "적용 수단", "detail": "버스·지하철·신분당·GTX"},
+        {"icon": "📱", "name": "신청", "detail": "K-패스 앱·홈페이지 카드 등록"},
+        {"icon": "📅", "name": "지급", "detail": "다음 달 자동 환급 입금"}
+      ],
+      "footnote": "[2026 K-패스 기준] 청년 30% · 지역(경기/인천 등) 상이 · 기준금액·환급률 변동 가능 · 공식 앱 확인"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "💡 K-패스로 교통비 연 90만원 환급",
+    "body": "월 15회만 타도 청년은 교통비 30% 환급.\n2026년엔 '모두의 카드'로 기준 초과분 100%까지 돌려받아요.",
+    "cta": "교통비 아끼게 저장 ⭐",
+    "hashtags": "#K패스 #교통비 #대중교통 #환급 #청년혜택 #절약 #지하철 #버스 #꿀팁 #돈되는정보 #알쓸지잡10",
+    "source": "[2026 K-패스 공식 안내] 지역·카드별 상이 · 참고용"
+  }
+}

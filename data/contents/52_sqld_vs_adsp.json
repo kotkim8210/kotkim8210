@@ -1,0 +1,40 @@
+{
+  "topic_id": "52_sqld_vs_adsp",
+  "category": "취업/연봉",
+  "card_type": "comparison",
+  "season": "상시",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#취업정보 💼",
+      "headline_line1": "데이터 자격증",
+      "headline_line2": "SQLD vs ADsP",
+      "subheadline": "둘 다 인기 폭발 · 나는 뭘 따야 할까"
+    },
+    {
+      "slide_number": 2,
+      "type": "comparison",
+      "section_title": "SQLD vs ADsP 한눈 비교",
+      "headers": ["항목", "SQLD", "ADsP"],
+      "rows": [
+        ["핵심", "SQL 개발", "데이터 분석"],
+        ["다루는 것", "DB·쿼리 작성", "통계·분석 기초"],
+        ["난이도", "암기+실전", "이론 위주"],
+        ["적합 직무", "개발·DBA", "기획·마케팅"],
+        ["코딩", "쿼리 필요", "거의 없음"],
+        ["조합", "둘 다 인기", "같이 따면 ↑"],
+        ["트렌드", "응시 21%↑", "꾸준한 인기"]
+      ],
+      "footnote": "[자격증 통념 기준] SQLD 최근 응시 약 5.9만명·전년比 +21% · 시험 범위·일정은 공식 안내 확인 · 참고용"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "💼 데이터 자격증 SQLD vs ADsP",
+    "body": "SQLD는 'SQL로 데이터 다루기', ADsP는 '데이터 분석 기초'.\n개발·DB면 SQLD, 기획·마케팅이면 ADsP. 둘 다 따면 시너지!",
+    "cta": "자격증 고민이면 저장 ⭐",
+    "hashtags": "#SQLD #ADsP #데이터자격증 #SQL #데이터분석 #자격증 #취업 #스펙 #IT자격증 #취업정보 #알쓸지잡10",
+    "source": "[자격증 통념 기준] 시험 범위·일정 공식 안내 확인 · 참고용"
+  }
+}

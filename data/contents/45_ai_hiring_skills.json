@@ -1,0 +1,38 @@
+{
+  "topic_id": "45_ai_hiring_skills",
+  "category": "취업/연봉",
+  "card_type": "checklist",
+  "season": "상시",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#취업정보 💼",
+      "headline_line1": "2026 합격하는",
+      "headline_line2": "AI 활용 역량 5",
+      "subheadline": "스펙 나열은 끝 · 이제 'AI 리터러시' 시대"
+    },
+    {
+      "slide_number": 2,
+      "type": "checklist",
+      "section_title": "채용이 보는 AI 역량 5",
+      "items": [
+        {"icon": "🧠", "name": "AI 리터러시", "detail": "AI로 일하는 기본 이해도", "badge": "1순위"},
+        {"icon": "✍️", "name": "프롬프트 능력", "detail": "원하는 결과 끌어내는 질문력"},
+        {"icon": "⚙️", "name": "업무 자동화", "detail": "반복 업무를 AI로 줄인 경험"},
+        {"icon": "🔍", "name": "검증 능력", "detail": "AI 결과 사실확인·수정 역량"},
+        {"icon": "🛠", "name": "도구 활용", "detail": "직무별 AI 툴 실사용 경험"},
+        {"icon": "📊", "name": "데이터 감각", "detail": "데이터로 판단·설득하는 힘"}
+      ],
+      "footnote": "[2026 채용 트렌드 기준] 단순 스펙 < 실무 즉시투입·AI 활용 · 직무·기업별 가중치 다름 · 참고용"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "💼 2026 합격하는 AI 활용 역량 5",
+    "body": "이제 스펙 나열은 안 통해요. 키워드는 'AI 리터러시'.\n프롬프트·자동화·검증 경험을 자소서에 녹이는 게 합격 포인트!",
+    "cta": "취준이면 저장 필수 ⭐",
+    "hashtags": "#취업 #AI #AI역량 #프롬프트 #자소서 #채용트렌드 #취준생 #신입채용 #스펙 #취업정보 #알쓸지잡10",
+    "source": "[2026 채용 트렌드 추정] 직무·기업별 상이 · 참고용"
+  }
+}
