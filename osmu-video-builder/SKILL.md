@@ -30,8 +30,9 @@ description: >
 2. **`python auto.py <config> --era <17c/18c/19c/20c>`** 실행.
 3. **factcheck_todo.json 의 pending 항목을 전부 해결**(↓ 2절 — 필수).
 4. 해결 후 **`python auto.py <config> --era … --force`** 재실행(검증 반영·tts 갱신).
-5. **현황판 출력**을 사용자에게 전달: "이미지 N개·음성 N개만 만들어 저장하면 끝"이라고
-   `image_prompts.16x9.md`(프롬프트)·`config.tts.json`(읽을 대본)·정확한 파일명을 함께 안내.
+5. **현황판 + handoff 안내**: auto.py가 만든 **`human_tasks.md`**(체크리스트)와
+   **`voice_script.md`**(세그먼트별 음성 복붙 대본 + 전체 블록)를 사용자에게 가리켜,
+   "이미지 N개·음성 N개만 파일명대로 저장하면 끝"이라고 안내.
 6. 사용자가 자산을 채우면 **`python auto.py <config> --build`** → out/ 에 본편+클립.
 
 ## 2. 고증 게이트 — MANDATORY (시키지 않아도 매번)

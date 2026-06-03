@@ -9,6 +9,8 @@ tts_report.md
 image_prompts.*.json
 image_prompts.*.md
 image_manifest.json
+voice_script.md
+human_tasks.md
 
 # factlog.json 은 검증 기록이라 보존(커밋) — 무시하지 않음
 __pycache__/

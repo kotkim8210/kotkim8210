@@ -8,12 +8,14 @@
 
 ---
 
-## 이제 당신이 하는 일은 딱 3가지
-1. **대본 검토·★관점 승인** (Claude가 초안 작성, 당신은 두세 군데만 본인 말투로)
-2. **이미지 만들기** — `image_prompts.16x9.md` 프롬프트 → ChatGPT/ImageFX → 적힌 파일명대로 `assets/`에 저장
-3. **음성 만들기** — `config.tts.json`의 `tts_text` → 브루(보이저 X) → 적힌 파일명대로 `assets/`에 저장
+## 이제 당신이 하는 일은 딱 3가지 — **`human_tasks.md` 한 장이면 끝**
+실행하면 `human_tasks.md`(체크리스트)와 `voice_script.md`(음성 복붙용 대본)가 자동 생성됩니다.
+1. **대본 ★관점 승인** (Claude가 초안 작성, 당신은 두세 군데만 본인 말투로)
+2. **음성 만들기** — **`voice_script.md`** 열어서 세그먼트별 대본을 브루에 복붙 → 적힌 파일명대로 저장
+3. **이미지 만들기** — `image_prompts.16x9.md` 프롬프트 → ChatGPT/ImageFX → 적힌 파일명대로 저장
 
-나머지(고증 검색·검증, TTS 교정, 프롬프트 생성, 길이 계산, 영상 조립)는 전부 자동.
+`voice_script.md`는 (저장 파일명 + 읽을 내용)이 세그먼트별로 분리돼 있고, 맨 아래 '전체 한 번에
+복사' 블록도 있습니다. 나머지(고증 검색·검증, TTS 교정, 프롬프트 생성, 길이 계산, 조립)는 전부 자동.
 
 ---
 
@@ -55,6 +57,7 @@ id/text/caption만 적으면 경로는 자동 유도(`assets/<id>.jpg`, `assets/
 | `factcheck.py` | 고증 검출 → `factcheck_todo.json`(Claude 작업목록) + factlog 연동 |
 | `ttsfix.py` | 숫자·영문 한글화, 호흡 분할 → `config.tts.json`(읽기용) |
 | `promptgen.py` | 이미지 프롬프트 16:9/9:16 + `image_manifest.json`(파일명 매핑) |
+| `handoff.py` | **`voice_script.md`(음성 복붙용)** + **`human_tasks.md`(체크리스트)** 생성 |
 | `images.py` | (선택) 이미지 자동 생성 — `images.backend` 설정 시 |
 | `voice.py` | 음성 백엔드: files(브루)/elevenlabs/xtts |
 | `captions.py` | Whisper 동기화 자막 |

@@ -97,9 +97,11 @@ def print_board(cfg, root):
     else:
         print(f"  · 고증: {GREEN}전부 검증 완료{END}")
     if miss_img:
-        print(f"  · 이미지 {len(miss_img)}개 필요 → image_prompts.16x9.md 프롬프트로 만들어 파일명대로 저장")
+        print(f"  · 이미지 {len(miss_img)}개 필요 → {BOLD}image_prompts.16x9.md{END} 프롬프트로 만들어 파일명대로 저장")
     if miss_aud:
-        print(f"  · 음성 {len(miss_aud)}개 필요 → config.tts.json의 tts_text를 브루로 녹음해 파일명대로 저장")
+        print(f"  · 음성 {len(miss_aud)}개 필요 → {BOLD}voice_script.md{END} 열어서 브루에 복붙(파일명까지 표시됨)")
+    if miss_img or miss_aud:
+        print(f"  · {BOLD}👉 human_tasks.md{END} 한 장에 할 일·체크박스 전부 정리돼 있음")
     if not miss_img and not miss_aud and (pend == [] or pend is None):
         print(f"  · {GREEN}자산 준비 완료 — python auto.py {os.path.basename(sys.argv[1] if len(sys.argv)>1 else 'config.json')} --build{END}")
     return miss_img, miss_aud, (pend or [])
@@ -143,6 +145,9 @@ def main():
         run("promptgen.py", [cfg_path, "--ar", "9x16"], "3/5 이미지 프롬프트 9:16")
     else:
         print("\n[3/5 promptgen] 최신 → 건너뜀")
+
+    # [3.5] handoff — 사람용 음성 대본 + 체크리스트
+    run("handoff.py", [cfg_path], "3/5 사람용 대본·체크리스트 (handoff)")
 
     # [4] images (선택적 자동 생성)
     if cfg.get("images", {}).get("backend", "prompts") != "prompts":
