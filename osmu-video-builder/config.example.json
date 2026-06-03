@@ -1,5 +1,5 @@
 {
-  "_help": "lean config. id/text/caption 만 적으면 image=assets/<id>.jpg, audio=assets/<id>.mp3 가 자동 유도됩니다. 20분이면 text 합계 6,400~7,000자 목표.",
+  "_help": "lean config. id/text/caption 만 적으면 image=assets/<id>.jpg, audio=assets/<id>.mp3 가 자동 유도됩니다. 20분이면 text 합계 6,400~7,000자 목표. ★관점 들어가는 세그먼트엔 \"pov\": true 를 넣으면 human_tasks.md 체크리스트 1번에 자동 표시됩니다(심리/교훈 블록).",
   "voice": { "backend": "files" },
   "images": { "backend": "prompts" },
   "captions": { "mode": "whisper" },

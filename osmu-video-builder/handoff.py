@@ -62,9 +62,9 @@ def gen_human_tasks(cfg, root):
     backend_v = cfg.get("voice", {}).get("backend", "files")
     backend_i = cfg.get("images", {}).get("backend", "prompts")
 
-    # ★관점 세그먼트 추출(text/caption에 ★가 있으면), 없으면 심리/교훈 휴리스틱 안내
+    # ★관점 세그먼트 추출: "pov":true 필드 또는 text/caption의 ★ 마커
     star = [s["id"] for s in cfg["segments"]
-            if "★" in s.get("text", "") or "★" in s.get("caption", "")]
+            if s.get("pov") is True or "★" in s.get("text", "") or "★" in s.get("caption", "")]
 
     # 고증 대기 건수
     pend = 0
