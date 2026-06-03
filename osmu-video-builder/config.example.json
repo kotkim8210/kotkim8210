@@ -1,0 +1,21 @@
+{
+  "_help": "lean config. id/text/caption 만 적으면 image=assets/<id>.jpg, audio=assets/<id>.mp3 가 자동 유도됩니다. 20분이면 text 합계 6,400~7,000자 목표.",
+  "voice": { "backend": "files" },
+  "images": { "backend": "prompts" },
+  "captions": { "mode": "whisper" },
+  "segments": [
+    {
+      "id": "s1",
+      "text": "꽃 한 송이가 집 한 채였다는 그 이야기. 그리고 어느 날 아침, 그 모든 것이 무너졌습니다. 그런데 이 이야기의 대부분은 사실이 아닙니다.",
+      "caption": "당신이 아는 튤립 버블은\n거의 다 거짓말입니다"
+    },
+    {
+      "id": "s2",
+      "text": "튤립은 16세기 후반 오스만 제국에서 건너와, 곧 신분의 증명이 됐습니다. 불꽃처럼 번지는 줄무늬는 사실 바이러스 감염으로 생긴 것이었죠.",
+      "caption": "줄무늬는 바이러스가 만든\n복제 불가능한 희소성"
+    }
+  ],
+  "clips": [
+    { "name": "01_hook", "from_segments": ["s1"], "hook": "당신이 아는 튤립 버블은 거짓말" }
+  ]
+}
