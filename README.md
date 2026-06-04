@@ -25,6 +25,37 @@
 
 ---
 
+## 🏪 당근스토어 상품등록 자동채움
+
+도매상품(참외 / 초당옥수수 / 콜라비) 7종의 등록 초안 + 폼 자동채움 북마클릿.
+당근스토어 상품등록 페이지에서 북마클릿 클릭 → 상품 선택 → 폼 자동 채움 + 클립보드 복사.
+
+| 파일 | 용도 |
+|---|---|
+| `listings/drafts.md` | 7종 상품의 제목/상세설명/옵션가/해시태그/사진 가이드 (사람이 읽는 초안). |
+| `listings/products.json` | 같은 데이터의 구조화 버전. 북마클릿이 임베드해 사용. |
+| `bookmarklet/store_filler.js` | 자동채움 북마클릿 풀 소스. |
+| `bookmarklet/store_filler.min.js` | 압축본 (`javascript:` 프리픽스 포함). |
+| `bookmarklet/store_filler_install.html` | 북마클릿 드래그&드롭 설치 페이지. |
+
+### 임베드된 상품
+1. 성주 가정용 참외 (혼합과) — 1/2/3/5kg
+2. 성주 가정용 참외 (중소과) — 1/1.5/3/5kg
+3. 성주 가정용 참외 (로얄과) — 3/5kg
+4. 제주 초당옥수수 (중품 9~14cm) — 5/10/15/20개
+5. 제주 초당옥수수 (특품 14cm+) — 5/10/15/20개
+6. 애플 초당옥수수 (특품) — 5/10/15/20개
+7. 제주 콜라비 (정품) — 3/5/10kg
+
+> 🍉 **수박**은 도매가 데이터 미수신으로 누락. 가격 알려주시면 같은 양식으로 추가됩니다.
+
+### 빠른 시작
+1. `bookmarklet/store_filler_install.html` 을 브라우저로 열고 주황 버튼을 북마크 바로 드래그
+2. 당근스토어 상품등록 페이지 열기
+3. 북마클릿 클릭 → 상품/옵션 선택 → [⚡ 자동채움] 또는 [복사]
+
+---
+
 ## Claude Code 플러그인 (저장소 공통)
 
 This repo is pre-configured to use the [`everything-claude-code`](https://github.com/affaan-m/everything-claude-code) plugin — a toolkit of subagents, skills, and automation hooks (code review, TDD, security scanning, formatting, multi-language patterns).
