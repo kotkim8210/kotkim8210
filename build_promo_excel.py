@@ -122,6 +122,8 @@ GUIDE = [
     ["3. 한방병원(수도권)", "보양·체질 메시지와 연결되는 제휴 후보"],
     ["4. 건강검진센터", "건강 관심층 밀집 — 대기공간 비치·제휴 제안용"],
     ["5. 로컬푸드직매장", "원물 신뢰도·선물 수요 — 입점(위탁) 제안용"],
+    ["6. 온라인커뮤니티(밴드)", "활성 네이버 밴드·카페 — 공구 제안·체험단·운영진 제휴 채널"],
+    ["7. 공급처(B2B)", "온라인 입점 플랫폼·친환경 유통·산후조리원 등 납품/입점 경로"],
     [""],
     ["우선순위(G열) 기준 — 구매력 상위 지역"],
     ["1순위", "서울 강남·서초·송파·용산 / 성남 분당(판교)·과천·하남·용인 수지·수원 영통(광교)·안양 동안(평촌)·화성 동탄 / 인천 연수(송도) 등"],
@@ -131,9 +133,57 @@ GUIDE = [
     ["데이터 출처"],
     ["요양병원·한방병원", "건강보험심사평가원(HIRA) 병원·약국 찾기 (공식 데이터, 전수)"],
     ["건강원·검진센터·로컬푸드", "웹 검색 교차 확인 (대표 업체 선별 수집)"],
+    ["밴드·공급처", "웹 검색 교차 확인 — 밴드 멤버수·활동성은 검색 노출 기준이라 가입 전 재확인 권장"],
     [""],
     ["참고", "이메일·팩스는 공공 데이터에 공개되지 않아 대부분 빈칸 — 전화/홈페이지 문의폼 활용 권장"],
 ]
+
+
+def write_table(wb: Workbook, title: str, columns: list[str], rows: list[list], widths: dict) -> None:
+    """우선순위 없는 일반 표 시트를 기록한다."""
+    ws = wb.create_sheet(title)
+    for col, text in enumerate(columns, start=1):
+        cell = ws.cell(row=1, column=col, value=text)
+        cell.font = Font(bold=True)
+        cell.fill = HEADER_FILL
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+    for r_idx, row in enumerate(rows, start=2):
+        for c_idx, val in enumerate(row, start=1):
+            ws.cell(row=r_idx, column=c_idx, value=val)
+    for col, width in widths.items():
+        ws.column_dimensions[col].width = width
+    ws.freeze_panes = "A2"
+    last_col = chr(ord("A") + len(columns) - 1)
+    ws.auto_filter.ref = f"A1:{last_col}{len(rows) + 1}"
+
+
+def write_band_sheet(wb: Workbook, rows: list[dict]) -> None:
+    table = [
+        [r.get("name", ""), r.get("category", ""), r.get("members", ""),
+         r.get("link", ""), r.get("activity", ""), r.get("note", "")]
+        for r in rows
+    ]
+    write_table(
+        wb, "온라인커뮤니티(밴드)",
+        ["커뮤니티명", "분류", "멤버수", "링크", "활동성 근거", "비고(접근법)"],
+        table,
+        {"A": 34, "B": 16, "C": 14, "D": 44, "E": 44, "F": 44},
+    )
+
+
+def write_supply_sheet(wb: Workbook, rows: list[dict]) -> None:
+    table = [
+        [r.get("name", ""), r.get("category", ""), r.get("region", ""),
+         r.get("phone", ""), r.get("email", ""), r.get("homepage", ""),
+         r.get("how", ""), r.get("note", "")]
+        for r in rows
+    ]
+    write_table(
+        wb, "공급처(B2B)",
+        ["공급처명", "구분", "지역", "전화번호", "이메일", "입점·안내 페이지", "입점·납품 방법", "비고(요건·특징)"],
+        table,
+        {"A": 30, "B": 14, "C": 14, "D": 16, "E": 24, "F": 44, "G": 50, "H": 44},
+    )
 
 
 def write_guide(wb: Workbook) -> None:
@@ -171,6 +221,12 @@ def main() -> None:
     write_sheet(wb, "한방병원(수도권)", "병원명", hanbang)
     write_sheet(wb, "건강검진센터", "기관명", checkup)
     write_sheet(wb, "로컬푸드직매장", "매장명", localfood)
+    bands = load_json("data/band_communities.json")
+    supply = load_json("data/supply_channels.json")
+    if bands:
+        write_band_sheet(wb, bands)
+    if supply:
+        write_supply_sheet(wb, supply)
     wb.save(OUTPUT)
 
     print(f"저장: {OUTPUT}")
