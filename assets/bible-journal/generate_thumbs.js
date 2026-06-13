@@ -56,9 +56,9 @@ function sprig(x, cx, topY, scale, color) {
   const reading = await loadImage(`${D}/p_reading_ot.png`);
 
   // T1 — 대표 (product hero; title readable on cover)
-  { const { c, x } = P(CREAM); frame(x, 38, 'rgba(76,90,60,0.45)', 3); sprig(x, S / 2, 58, .6, INK);
-    shot(x, cover, S / 2, 188, 452);
-    multi(x, '자녀를 위해, 매일 한 장', S / 2, 868, 50, 'NMX', INK, 60);
+  { const { c, x } = P(CREAM); frame(x, 38, 'rgba(76,90,60,0.45)', 3); sprig(x, S / 2, 52, .54, INK);
+    shot(x, cover, S / 2, 168, 432);
+    multi(x, '자녀를 위해, 매일 한 장', S / 2, 828, 62, 'NMX', INK, 74);
     fs.writeFileSync(`${D}/thumb_1_main.png`, c.toBuffer('image/png')); }
 
   // T2 — 후킹 (deep green, all fresh text, no small cover)
@@ -77,21 +77,21 @@ function sprig(x, cx, topY, scale, color) {
     fs.writeFileSync(`${D}/thumb_3_feature.png`, c.toBuffer('image/png')); }
 
   // T4 — 구성: 페이지 컷 + 각 컷 아래 큰 캡션
-  { const { c, x } = P(PANEL); multi(x, '이 한 권에 담긴 것', S / 2, 86, 56, 'NMX', INK, 70);
-    multi(x, '기도 92편 · 응답 기록 · 통독표 · 약 110p', S / 2, 232, 35, 'NMB', STRONG, 56);
-    const w = 232, gap = 44, total = w * 3 + gap * 2, x0 = (S - total) / 2, ty = 410;
-    const labels = ['자녀를 위한 기도', '기도 응답 기록', '성경 통독표'];
+  { const { c, x } = P(PANEL); multi(x, '이 한 권에 담긴 것', S / 2, 84, 58, 'NMX', INK, 72);
+    multi(x, '기도 92편 · 응답 기록 · 통독표 · 약 110p', S / 2, 240, 40, 'NMB', STRONG, 56);
+    const w = 226, gap = 46, total = w * 3 + gap * 2, x0 = (S - total) / 2, ty = 374;
+    const labels = ['자녀 기도', '응답 기록', '성경 통독표'];
     [daily, log, reading].forEach((im, i) => {
       const cx = x0 + w / 2 + i * (w + gap); const h = shot(x, im, cx, ty, w);
-      multi(x, labels[i], cx, ty + h + 26, 28, 'NMB', INK, 36);
+      multi(x, labels[i], cx, ty + h + 28, 38, 'NMB', INK, 46);
     });
     fs.writeFileSync(`${D}/thumb_4_inside.png`, c.toBuffer('image/png')); }
 
   // T5 — 선물 (cover sized within frame)
   { const { c, x } = P(CREAM); frame(x, 38, 'rgba(76,90,60,0.4)', 3); sprig(x, S / 2, 70, .56, INK);
-    multi(x, '믿음의 엄마에게\n드리는 선물', S / 2, 188, 58, 'NMX', INK, 80);
-    pill(x, '권사님께 · 며느리에게 · 나에게', S / 2, 372, 30, INK, CTXT);
-    shot(x, cover, S / 2, 470, 300);
+    multi(x, '믿음의 엄마에게\n드리는 선물', S / 2, 178, 60, 'NMX', INK, 82);
+    pill(x, '권사님께 · 며느리에게 · 나에게', S / 2, 358, 36, INK, CTXT);
+    shot(x, cover, S / 2, 482, 300);
     fs.writeFileSync(`${D}/thumb_5_gift.png`, c.toBuffer('image/png')); }
 
   console.log('DONE thumbnails 5 (v3)');
