@@ -82,8 +82,9 @@
 
 <script>
 /* ====== CONFIG (배포 전) ====== */
-const CONFIG={ paymentLink:"", proCode:"PDP-PRO-2026", gaEnabled:true, pixelEnabled:true };
+const CONFIG={ paymentLink:"", proCode:"PDP-PRO-2026", gaId:"", gaEnabled:true, pixelEnabled:true };
 /* ============================== */
+if(CONFIG.gaId){ const gs=document.createElement('script'); gs.async=true; gs.src='https://www.googletagmanager.com/gtag/js?id='+CONFIG.gaId; document.head.appendChild(gs); window.dataLayer=window.dataLayer||[]; window.gtag=function(){dataLayer.push(arguments);}; gtag('js',new Date()); gtag('config',CONFIG.gaId); }
 const $=id=>document.getElementById(id);
 const SKEY="pdp_stats_v1";
 let stats=JSON.parse(localStorage.getItem(SKEY)||'{"runs":0,"upgrades":0,"unlocked":false}');

@@ -109,8 +109,9 @@
 /* ============ CONFIG (배포 전 설정) ============
    paymentLink : PRO 결제 링크(Gumroad/Lemon Squeezy/Stripe/토스). 비우면 안내만.
    proCode     : 구매자에게 전달할 잠금해제 코드(원하는 값으로 변경). */
-const CONFIG = { paymentLink:"", proCode:"HOOK-PRO-2026", gaEnabled:true, pixelEnabled:true };
+const CONFIG = { paymentLink:"", proCode:"HOOK-PRO-2026", gaId:"", gaEnabled:true, pixelEnabled:true };
 /* ============================================== */
+if(CONFIG.gaId){ const gs=document.createElement('script'); gs.async=true; gs.src='https://www.googletagmanager.com/gtag/js?id='+CONFIG.gaId; document.head.appendChild(gs); window.dataLayer=window.dataLayer||[]; window.gtag=function(){dataLayer.push(arguments);}; gtag('js',new Date()); gtag('config',CONFIG.gaId); }
 
 const $=id=>document.getElementById(id);
 const SKEY="hook_stats_v1";
