@@ -12,6 +12,22 @@
 
 ---
 
+## 0단계 — 정책 컴플라이언스 (먼저 읽기)
+
+"인스타가 자동 업로드를 문제 삼지 않나?" 자주 묻습니다. 결론: **공식 Graph API로 본인 비즈니스 계정에 발행하는 것은 Meta가 명시적으로 허용하는 정상 경로**입니다. 단, 세 가지를 구분해야 합니다.
+
+| 구분 | 허용 ✅ | 금지 ❌ |
+|------|--------|--------|
+| 접근 방식 | 공식 Graph API (이 가이드가 쓰는 방식) | 비공식 봇·브라우저 자동화·스크레이퍼 (계정 영구정지 위험) |
+| 권한 범위 | **본인 계정**만 발행 → 앱 리뷰 불필요, Development 모드 유지 가능 | 남의 계정을 대행 발행 → 앱 리뷰 + Advanced Access 필요 (2~4주) |
+| 발행 속도 | rate limit 내 점진 확대 | 신규 계정 즉시 대량 발행 → 공식 API여도 스팸 시스템에 잡힘 |
+
+**근거**: Meta Platform Terms — 승인된 API를 통한 자동화는 rate limit 준수 시 compliant. 본인 계정만 다루는 앱은 App Review 면제, Development 모드에서 운영 가능 (단, 인스타/페이스북 계정이 앱에 **Admin·Developer·Tester 역할로 등록**돼 있어야 함 → 2단계 참고).
+
+**즉**: 이 가이드 그대로 따르면 정책 위반이 아니며, 인스타가 문제 삼지 않습니다. 다만 "공식 API = 도달 보장"은 아니므로 속도 조절은 별개로 지켜야 합니다 (마지막 "한도" 섹션 참고).
+
+---
+
 ## 1단계 — Instagram 비즈니스 계정 + Facebook 페이지 연결
 
 Instagram Graph API는 **개인 계정에선 작동하지 않습니다.** 비즈니스(또는 크리에이터) 계정으로 전환 필요.
@@ -30,8 +46,12 @@ Instagram Graph API는 **개인 계정에선 작동하지 않습니다.** 비즈
 2. 앱 타입: **Business** 선택
 3. 앱 이름은 자유 (예: `kotkim-uploader`)
 4. 생성 후 좌측 메뉴 → **Add Product** → **Instagram Graph API** 추가
+5. **앱 역할 등록 (중요)**: 대시보드 → **Roles → Roles** (또는 **Settings → Roles**) →
+   - 본인 Facebook 계정을 **Admin** 또는 **Developer**로 추가
+   - **Roles → Instagram Testers** 에서 발행 대상 인스타 계정 추가 → Instagram 앱(@계정 → 설정 → 앱·웹사이트 → 초대) 에서 초대 수락
+6. **앱은 Development 모드로 유지**: 상단 토글이 "In development"이면 OK. Live 모드로 바꿀 필요 없습니다 — 본인 계정 발행은 Dev 모드에서 정상 동작.
 
-이 단계에서 별도 권한 신청 절차(앱 리뷰)는 필요 없습니다 — 본인 계정에 게시하는 한.
+본인 계정만 다루는 한 별도 권한 신청 절차(앱 리뷰)는 필요 없습니다. **단, 위 5·6번을 빠뜨리면 토큰은 받아도 발행 단계에서 `#200 permission` 또는 빈 응답이 납니다** — 앱이 "내가 관리하는 계정"으로 인지해야 권한이 통과되기 때문.
 
 ---
 
@@ -154,7 +174,7 @@ npm run upload <topic_id>
 |------|------------|
 | `401 invalid x-api-key` (Anthropic) | `.env` 의 `ANTHROPIC_API_KEY` 잘못 |
 | `code=190 OAuthException` | IG 토큰 만료/revoke → 3~4단계 재진행 |
-| `code=10 #200 permission` | 권한 부족 — Step 3의 권한 5개 다 부여했는지 확인 |
+| `code=10 #200 permission` | 권한 부족 — Step 3 권한 5개 + **Step 2-5·6의 역할 등록(Admin/Developer + Instagram Tester) & Development 모드** 둘 다 확인 (가장 흔한 함정) |
 | `Instagram User ID is invalid` | `IG_USER_ID` 가 페이지 ID 와 혼동된 경우. 17자리 숫자 ID 인지 확인 |
 | imgbb `400` | API 키 오타 |
 | imgbb `429` | rate limit (분당 호출 너무 많음) — 잠시 대기 후 재시도 |
