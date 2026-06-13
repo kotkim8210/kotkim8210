@@ -144,6 +144,35 @@ node src/upload-instagram.js <topic_id> --dry-run
 npm run refresh-token
 ```
 
+### 안전 발행 (throttle) + A/B 시간대 테스트
+
+신규 계정이 한 번에 대량 발행하면 공식 API여도 스팸으로 잡힙니다. 분산 발행용 플래그:
+
+```bash
+--interval <초>    한 실행 안에서 발행 사이 대기 (예: 1800 = 30분)
+--daily-cap <N>    지난 24시간 누적 발행 상한 (upload-state 기준 자동 계산)
+--label <이름>     각 발행에 슬롯 태그 저장 (A/B 비교용)
+--report           업로드 게시물 인사이트를 슬롯별로 집계 (reach/♥/💬/🔖)
+```
+
+**A/B 시간대 비교 (출근길 vs 저녁) — cron 2슬롯, 하루 2개:**
+
+```bash
+# crontab -e  (KST 기준 7:55 / 21:30, 각 1개 · 24h 상한 2)
+55  7 * * *  cd /path/kotkim8210 && /usr/bin/node src/upload-instagram.js --all --limit 1 --daily-cap 2 --label morning >> /var/log/kotkim.log 2>&1
+30 21 * * *  cd /path/kotkim8210 && /usr/bin/node src/upload-instagram.js --all --limit 1 --daily-cap 2 --label evening >> /var/log/kotkim.log 2>&1
+```
+
+- `--limit 1` = 슬롯당 1개, `--daily-cap 2` = cron 중복 실행돼도 24h 2개 넘지 않게 방어
+- 2주 누적 후 어느 시간대가 reach가 높은지 비교:
+
+```bash
+npm run upload -- --report
+# 슬롯별 평균: morning n=14 reach=...  ♥=...  / evening n=14 reach=...
+```
+
+> 시간대 A/B는 슬롯마다 다른 주제가 섞이므로 완벽한 실험은 아닙니다(참고용). 슬롯당 7건+ 쌓인 뒤 판단하세요. 서버 타임존이 UTC면 cron 시간을 KST-9h(=22:55 / 12:30 UTC)로 환산하거나 `CRON_TZ=Asia/Seoul`을 지정하세요.
+
 ### 처리 흐름
 
 1. `output/{topic_id}.json` + 이미지 파일 존재 확인

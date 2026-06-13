@@ -166,6 +166,17 @@ npm run upload <topic_id>
 - **JPEG만 지원**: PNG/WEBP/GIF 거부됨 (우리는 JPEG 출력이라 OK).
 - **이미지 fetch 실패**: 컨테이너 status가 `ERROR`로 끝나면 imgbb URL 이 IG 에서 안 열린다는 뜻. 다른 호스트로 교체 시도.
 
+### 분산 발행 throttle (위 한도를 코드로 강제)
+
+수동으로 개수를 세지 않아도 되도록 발행 러너에 안전장치가 있습니다:
+
+- `--daily-cap N` — `upload-state.json`의 타임스탬프로 **지난 24시간 발행 수를 자동 계산**, N 초과 시 중단. cron이 중복 실행돼도 한도 방어.
+- `--interval 초` — 한 실행에서 여러 개 발행 시 사이 간격 (스팸 버스트 방지).
+- `--label 이름` + `--report` — 슬롯(예: 출근길/저녁)별 태그 저장 후 인사이트 비교.
+
+권장 운영(신규 계정): cron으로 하루 2슬롯 × 1개 = `--all --limit 1 --daily-cap 2 --label <slot>`.
+자세한 cron 예시는 `README.md`의 "안전 발행 (throttle) + A/B 시간대 테스트" 참고.
+
 ---
 
 ## 트러블슈팅

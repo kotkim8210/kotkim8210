@@ -106,6 +106,35 @@ export class InstagramClient {
 
     return { mediaId: body.id, permalink };
   }
+
+  /**
+   * 게시물 인사이트 조회 (A/B 비교용, best-effort).
+   * reach/saved/total_interactions 는 insights endpoint, like/comment 는 노드 필드.
+   */
+  async getMediaInsights(mediaId) {
+    const out = { mediaId, reach: null, likes: null, comments: null, saved: null, interactions: null, timestamp: null, permalink: null };
+    try {
+      const f = await graphFetch(`${GRAPH_BASE}/${mediaId}?fields=like_count,comments_count,timestamp,permalink&access_token=${encodeURIComponent(this.accessToken)}`);
+      out.likes = f.like_count ?? null;
+      out.comments = f.comments_count ?? null;
+      out.timestamp = f.timestamp ?? null;
+      out.permalink = f.permalink ?? null;
+    } catch (e) {
+      out.error = e.message;
+    }
+    try {
+      const ins = await graphFetch(`${GRAPH_BASE}/${mediaId}/insights?metric=reach,saved,total_interactions&access_token=${encodeURIComponent(this.accessToken)}`);
+      for (const d of ins.data ?? []) {
+        const v = d.values?.[0]?.value;
+        if (d.name === "reach") out.reach = v;
+        else if (d.name === "saved") out.saved = v;
+        else if (d.name === "total_interactions") out.interactions = v;
+      }
+    } catch (e) {
+      out.insightsError = e.message;
+    }
+    return out;
+  }
 }
 
 /**
