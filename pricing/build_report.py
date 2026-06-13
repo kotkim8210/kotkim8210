@@ -20,11 +20,13 @@
 import json
 import os
 
-# ── 비용/수수료 가정 (★실제 값 확인되면 여기만 고치고 재실행) ─────────────
-PG_FEE_RATE       = 0.033   # 당근 결제(PG/카드) 수수료 가정
-PLATFORM_FEE_RATE = 0.0     # 당근스토어 판매 수수료(현재 무료로 가정)
-PACKAGING_COST    = 0       # 산지직송·무료배송(공급가 포함) → 사용자 물류비 0 가정
-MARGIN_FLOOR      = 0.05    # 손익 안전선(이 아래면 ⚠️)
+# ── 비용/수수료 (당근 공식 안내 기준) ────────────────────────────────────
+# 출처: 당근 비즈프로필 상품 판매 안내 — "구매확정된 주문에 대해 결제 수수료를 포함한
+#       3.3%(부가세 포함)가 부과됩니다. 정산은 구매확정일로부터 영업일 3일 뒤."
+# → 결제+판매 통합 단일 수수료 3.3%. 별도 결제수수료가 추가되지 않음.
+CARROT_FEE_RATE = 0.033   # 당근 통합 수수료(결제+판매 합산, VAT 포함)
+PACKAGING_COST  = 0       # 산지직송·무료배송(공급가에 포함) → 추가 물류비 0 가정
+MARGIN_FLOOR    = 0.05    # 손익 안전선(이 아래면 ⚠️)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -66,7 +68,7 @@ def opt_label(it):
 
 
 def fee_on(sale):
-    return round(sale * (PG_FEE_RATE + PLATFORM_FEE_RATE)) + PACKAGING_COST
+    return round(sale * CARROT_FEE_RATE) + PACKAGING_COST
 
 
 def margin(sale, supply):
@@ -120,8 +122,8 @@ def main():
     w("")
     w(f"> **기준일 {base_date}** · 통화 KRW · `pricing/build_report.py` 자동 생성 — 직접 편집 금지")
     w(f"> 공급가 출처: {latest['source']}")
-    w(f"> 비용 가정: 결제수수료 {PG_FEE_RATE*100:.1f}% + 판매수수료 {PLATFORM_FEE_RATE*100:.1f}% + 포장비 {won(PACKAGING_COST)} "
-      f"(산지직송·무료배송 → 물류비 0 가정)")
+    w(f"> 비용: **당근 통합 수수료 {CARROT_FEE_RATE*100:.1f}%(결제+판매, VAT 포함, 당근 공식 안내 기준)** + 포장비 {won(PACKAGING_COST)} "
+      "(산지직송·무료배송 → 물류비 0 가정)")
     w("")
     w("> **핵심**: 실제로 '받는 가격'은 보통 등록 판매가(list)가 아니라 **시세(경쟁사 가격)**다. "
       "그래서 마진은 *판매가 − 공급가*가 아니라 **시세 − 공급가**로 봐야 현실적이다. "
@@ -170,7 +172,7 @@ def main():
     # ── 3. 마진 분석 (판매가 기준 vs 시세 기준) ─────────────────────────
     w("## 3. 마진 분석 — 등록 판매가(list) 기준 vs 시세 기준")
     w("")
-    w("| 옵션 | 등록판매가 | 공급가 | 결제수수료 | 순마진(판매가) | 마진율(판매가) | 시세 | 마진율(시세) |")
+    w("| 옵션 | 등록판매가 | 공급가 | 수수료(3.3%) | 순마진(판매가) | 마진율(판매가) | 시세 | 마진율(시세) |")
     w("|---|---:|---:|---:|---:|---:|---:|---:|")
     for pid in order:
         for it in [i for i in latest["items"] if i["product_id"] == pid]:
@@ -193,46 +195,52 @@ def main():
     w("")
 
     # ── 4. 인사이트 & 권장 ──────────────────────────────────────────────
-    # 시세 기준 마진율이 잡히는 옵션들의 직전 대비 회복폭 계산(중품)
-    insights = []
+    # 시세 기준 마진율이 잡히는 옵션들의 직전 대비 회복폭 계산
+    insights, danger = [], []
     for pid in order:
         for it in [i for i in latest["items"] if i["product_id"] == pid]:
             qty, supply = it["qty"], it["supply"]
             mk = market.get((pid, qty))
             if not mk:
                 continue
-            mk_price = mk[0]
+            mk_price, mk_sample = mk
             _, mr_now = margin(mk_price, supply)
+            if mr_now is not None and mr_now < MARGIN_FLOOR:
+                danger.append((opt_label(it), mr_now, mk_sample))
             p = prev_supply.get((pid, qty))
             if p is None:
                 continue
             _, mr_then = margin(mk_price, p)
-            insights.append((opt_label(it), mr_then, mr_now))
+            if abs(mr_now - mr_then) >= 0.005:
+                insights.append((opt_label(it), mr_then, mr_now))
 
     w("## 4. 인사이트 & 권장")
     w("")
     if insights:
-        w("**같은 시세에서 공급가 하락만으로 회복된 마진율(중품)**")
+        w("**같은 시세에서 공급가 변동만으로 움직인 마진율** (변동폭 0.5% 미만은 생략)")
         w("")
         w("| 옵션 | 시즌피크 공급가 기준 | 현재 공급가 기준 | 회복폭 |")
         w("|---|---:|---:|---:|")
         for name, then, now in insights:
             w(f"| {name} | {pct(then)} | {pct(now)} | {signed_pct((now-then))} |")
         w("")
-    w("- **협상 보류가 맞다.** 시즌 종료로 중품 공급가가 자연 하락(−18~29%)해, 시세에 맞춰 팔아도 "
-      "마진이 ~0%대에서 ~30%대로 회복됐다. 추가 단가 인하 압박의 실익이 작다.")
-    w("- **등록 판매가가 시세보다 한참 높다.** 예: 중품 5개 등록가 "
-      f"{won(list_price.get(('corn-mid',5)))} vs 경쟁 시세 {won(market.get(('corn-mid',5),(None,))[0])}. "
-      "list 기준 마진율은 좋아 보여도 실제 전환은 시세 근처에서 일어난다 → **시세 기준 열을 진짜 지표로 볼 것.**")
-    w("- **다음 액션은 협상이 아니라 추적·정렬:** ①시세추적기로 특품·애플 실측 시세 확보(현재 비어 있음) "
-      "②중품은 시세 대비 마진 여유가 크므로 시세 근처로 내려 전환·리뷰 확보 가능 "
-      "③공급가는 PBF 캡처를 받을 때마다 이 원장에 스냅샷 추가.")
+    if danger:
+        names = ", ".join(f"{n}({pct(m)}{'*' if s else ''})" for n, m, s in danger)
+        w(f"- ⚠️ **시세 기준 안전선({MARGIN_FLOOR*100:.0f}%) 아래 옵션:** {names}. "
+          "시세 추정이 보수적이라 그런 경우가 많으니 추적기 실측으로 검증 후 가격/공급가 재검토 권장.")
+    w("- **협상 보류 OK.** 시즌 종료로 중품 공급가가 자연 하락(−18~29%)했고, 등록가도 시세 근처로 조정했다. "
+      "추가 단가 인하 압박의 실익은 작다.")
+    w("- **list = 시세 매칭 완료(2026-06-13).** 옥수수 12개 옵션 모두 시세에 산지직송 프리미엄(중품 +1,000원 / "
+      "특품 +2,000원 / 애플 +2,000원)만 얹은 수준으로 내렸다. 받을 가격과 표시가가 거의 같아져 list 마진 ≈ 시세 마진.")
+    w("- **다음 액션은 실측 추적:** ①시세추적기를 라이브로 돌려 일·주 단위 시세 변동 감지 "
+      "②특품/애플의 sample 시세를 실측으로 교체(특히 애플 — 현재 +20% 추정값) "
+      "③PBF 캡처 받을 때마다 `supply_prices.json`에 스냅샷 추가.")
     w("")
     w("---")
     w("")
     w("### 가정 / 한계")
-    w(f"- 결제수수료 {PG_FEE_RATE*100:.1f}%·판매수수료 {PLATFORM_FEE_RATE*100:.1f}%·포장비 {won(PACKAGING_COST)}는 "
-      "**가정값**. 실제 수수료가 확인되면 `build_report.py` 상단 상수만 고치고 재실행.")
+    w(f"- 통합 수수료 {CARROT_FEE_RATE*100:.1f}%는 **당근 공식 안내**(비즈프로필 상품판매 — 결제수수료 포함 3.3% VAT 포함, "
+      f"구매확정 후 영업일 3일 정산). 별도 결제수수료 없음. 포장비 {won(PACKAGING_COST)}은 산지직송·무료배송 가정.")
     w("- 광고비는 옵션별 변동이라 단위 마진에서 제외(별도 관리).")
     w("- 시세는 임시 예시값(`*`) 위주 — 추적기 실측이 모이면 `market_prices.json` 갱신 후 재생성.")
     w("- 공급가는 비공개 데이터. 이 리포트와 `supply_prices.json`을 고객 노출 산출물에 노출 금지.")

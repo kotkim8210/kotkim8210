@@ -38,10 +38,10 @@
 | `bookmarklet/store_filler.min.js` | 압축본 (`javascript:` 프리픽스 포함). |
 | `bookmarklet/store_filler_install.html` | 북마클릿 드래그&드롭 설치 페이지. |
 
-> ✅ **옥수수 마진 회복 (2026-06-13)** — 시즌 종료로 공급가가 자연 하락(중품 −18~29%)해
-> 시세 기준 마진이 ~0%대 → ~30%대로 올라왔습니다. **협상은 보류**하고 추적으로 운영합니다.
-> 마진 현황 → [`pricing/MARGIN_REPORT.md`](./pricing/MARGIN_REPORT.md)
-> (보류된 협상 초안은 [`legacy/negotiation_drafts.md`](./legacy/negotiation_drafts.md))
+> ✅ **옥수수 시세 매칭 + 마진 회복 (2026-06-13)** — 시즌 종료로 공급가 자연 하락(중품 −18~29%) +
+> 등록가를 시세 근처로 일괄 조정(중품 −31%, 특품 −23%, 애플 −27% 평균). 시세 기준 마진 ~0%대 → ~30%대.
+> 수수료는 **당근 공식 안내인 통합 3.3%(결제+판매, VAT 포함)** 로 확정.
+> 마진 현황 → [`pricing/MARGIN_REPORT.md`](./pricing/MARGIN_REPORT.md) · 협상 보류 초안 → [`legacy/negotiation_drafts.md`](./legacy/negotiation_drafts.md)
 
 ### 임베드된 상품
 1. 성주 가정용 참외 (혼합과) — 1/2/3/5kg

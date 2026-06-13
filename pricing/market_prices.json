@@ -4,22 +4,67 @@
     "note": "당근 시세(경쟁사 판매가) 참고 원장. 라이브 수집은 시세추적기(Google Apps Script + 구글시트)가 담당하고, 여기에는 마진계산에 쓸 대표 시세를 캐싱한다.",
     "live_source": "당근_시세추적기_v3 (Google Sheet)",
     "live_sheet_url": "https://docs.google.com/spreadsheets/d/1g0Bxmz773DqPjCfYgBNyBtlYKxYuLJYY2zasqiC5u7Y/edit?gid=1683225896",
-    "disclaimer": "sample=true 항목은 추적기 가동 전 임시 참고치(코드 기본 예시값). 추적기에서 실측 시세가 모이면 sample=false 항목으로 교체/추가할 것.",
+    "sheet_access_note": "위 시트는 비공개라 챗봇이 직접 못 읽음. 'link로 보기' 공유 설정 후 다시 알려주거나, 대시보드 캡처를 보내면 references[]에 갱신.",
+    "disclaimer": "sample=true 항목은 시세추적기 가동 전 임시 참고치. 라이브 데이터로 교체될 때까지의 갱신용.",
     "how_to_update": "추적기 대시보드의 '검색어×단위 최저/평균 단위당단가' 또는 옵션별 최저가를 보고 references 배열에 갱신. 이후 python3 pricing/build_report.py 실행."
   },
   "references": [
     {
       "date": "2026-06-13",
-      "keyword": "초당옥수수",
-      "competitor": "오늘팜365",
-      "grade_hint": "일반/중품급",
+      "keyword": "초당옥수수 중품",
+      "competitor": "다수 경쟁사 중앙값(우체국·오아시스·G마켓 등 WebSearch 집계, 한정특가·할인쿠폰 적용 후)",
+      "grade_hint": "중품(9cm+) — corn-mid 매칭",
       "applies_to": ["corn-mid"],
+      "sample": false,
+      "options": [
+        { "qty": 5,  "price": 10000 },
+        { "qty": 10, "price": 16500 },
+        { "qty": 15, "price": 24080 },
+        { "qty": 20, "price": 28900 }
+      ],
+      "notes": [
+        "5개: 우체국 산지직송 14cm+ 10,900원(35% 할인) / 오아시스 급냉 애플 중품 9,800원 → 중간 10,000",
+        "10개: 오아시스 급냉 애플 중품 15,900원 / 인터파크 산지직송 14cm+ 17,900원 → 중간 16,500",
+        "15개: 한정특가 9cm+ 24,080원(10% 할인) — 단일 관측",
+        "20개: 오아시스 급냉 애플 중품 28,900원 — 단일 관측"
+      ]
+    },
+    {
+      "date": "2026-06-13",
+      "keyword": "초당옥수수 특품",
+      "competitor": "다수 경쟁사 중앙값(인터파크·오아시스·동원몰·옥션 등 WebSearch 집계, 쿠폰 적용 후)",
+      "grade_hint": "특품(14~15cm+) — corn-premium 매칭",
+      "applies_to": ["corn-premium"],
+      "sample": false,
+      "options": [
+        { "qty": 5,  "price": 12900 },
+        { "qty": 10, "price": 20000 },
+        { "qty": 15, "price": 27000 },
+        { "qty": 20, "price": 42000 }
+      ],
+      "notes": [
+        "5개: 오아시스 급냉 애플 특품 12,900원 — 주된 관측",
+        "10개: 오아시스 특품 20,900원 / 인터파크 17,900원 / 제주다움 26,500원 → 중간 20,000",
+        "15개: GS SHOP 17cm+ 17,500원(예외적 저가) 외 데이터 부족, 보수적 중간값 27,000원 추정",
+        "20개: 동원몰 44,900 / 오아시스 44,500 / 옥션 48,900(쿠폰) / 오아시스 해남 15cm+ 36,700 → 중간 42,000"
+      ]
+    },
+    {
+      "date": "2026-06-13",
+      "keyword": "애플 초당옥수수",
+      "competitor": "직접 관측치 없음. 일반 특품(corn-premium) 대비 +20% 프리미엄 추정.",
+      "grade_hint": "애플 품종(별개 카테고리) — corn-apple 매칭",
+      "applies_to": ["corn-apple"],
       "sample": true,
       "options": [
-        { "qty": 5,  "price": 9820 },
-        { "qty": 10, "price": 14820 },
-        { "qty": 15, "price": 20820 },
-        { "qty": 20, "price": 25820 }
+        { "qty": 5,  "price": 15500 },
+        { "qty": 10, "price": 24000 },
+        { "qty": 15, "price": 32400 },
+        { "qty": 20, "price": 50400 }
+      ],
+      "notes": [
+        "WebSearch에서 '애플 초당옥수수' 정확한 가격 관측 실패 — 특품 시세 × 1.2 추정으로 임시 사용.",
+        "시세추적기로 실측되면 sample=false로 교체."
       ]
     }
   ]
