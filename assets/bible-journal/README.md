@@ -25,3 +25,11 @@
 - `detail_full.png` : 상세페이지 전체 (1080px wide, 세로 롱) — 후킹→공감→해결→기능3→종이의이유→사양→선물→한정CTA
 - `detail_hero.png` : 첫 화면(후킹) 단독
 - `generate_detail.js` : 재생성 스크립트
+
+## v1.3 — 대표 썸네일 (목록 노출용)
+- `thumb_1_main.png` : **대표이미지**(검색 목록) — 깔끔 제품 hero
+- `thumb_2_hook.png` : 후킹(올리브 밴드, 그리드에서 시선 강탈)
+- `thumb_3_feature.png` : 기능(기록)
+- `thumb_4_inside.png` : 구성(110p 한눈에)
+- `thumb_5_gift.png` : 선물 앵글
+- `generate_thumbs.js` : 재생성 스크립트 (1:1 1000×1000)
