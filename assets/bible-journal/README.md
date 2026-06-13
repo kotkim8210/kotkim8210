@@ -48,3 +48,11 @@
 - 상세페이지 어두운 밴드 올리브→**딥그린(#2E3A32)** 통일(썸네일과 톤 일치)
 - `detail_part_1~6.png` : 스마트스토어 업로드용 조각(섹션 경계 컷 → 글자 안 잘림)
 - `brand-and-pricing.md` : 브랜드명 5후보 + 가격·옵션·SEO 상품명
+
+## v1.5 — 브랜드 확정: 씨앗과 기도
+- 브랜드 = **씨앗과 기도**, 제품 = 엄마의 기도 노트
+- 로고(새싹 심볼 = 씨앗→발아, 이름과 의미 일치):
+  - `logo_primary.png` 가로형 / `logo_stacked.png` 세로형
+  - `logo_profile_cream.png` · `logo_profile_green.png` 프로필(인스타/쓰레드)
+- `generate_logo.js` 재생성 스크립트
+- TODO: 표지 하단·썸네일 코너에 워드마크 스탬프(브랜드 통일) — 승인 시 진행
