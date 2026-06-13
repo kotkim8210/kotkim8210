@@ -37,6 +37,11 @@
 | `bookmarklet/store_filler.js` | 자동채움 북마클릿 풀 소스. |
 | `bookmarklet/store_filler.min.js` | 압축본 (`javascript:` 프리픽스 포함). |
 | `bookmarklet/store_filler_install.html` | 북마클릿 드래그&드롭 설치 페이지. |
+| `listings/negotiation_drafts.md` | 공급가 협상 메시지 초안 (제주다팜·쥬얼리프룻용). |
+
+> ⚠️ **옥수수 마진 박함 (0~2%, 일부 적자)** — 공급가 협상 + 시세 데이터 수집 권장.
+> 1. `listings/negotiation_drafts.md`의 메시지로 공급처에 단가 인하 요청
+> 2. [`시세추적기_설치가이드_v3.md`](./시세추적기_설치가이드_v3.md) A섹션으로 추적기 가동 → 1~2주 시장가 수집 후 가격/옵션 조정
 
 ### 임베드된 상품
 1. 성주 가정용 참외 (혼합과) — 1/2/3/5kg
