@@ -126,7 +126,7 @@ def gen_human_tasks(cfg, root):
             L.append(f"  - [ ] {s['id']} → `{first}`  ({s.get('caption','').splitlines()[0] if s.get('caption') else ''})")
         L.append("- 나머지 컷은 build.py 켄번즈로 자동 처리(영상화 불필요).")
         if cfg.get("image_style", {}).get("character"):
-            L.append("- 🔑 캐릭터 일관성: Nano Banana Pro에서 내레이터 1장을 먼저 만들고 **sref(스타일 참조)로 고정** → 모든 컷에 재사용.")
+            L.append("- 🔑 캐릭터 일관성: **CHARACTER.md**의 레퍼런스 시트로 내레이터 1장 만들고 sref 고정 → 등장 컷에 재사용.")
         L.append("")
 
     L.append("## (참고) 고증 검증")
