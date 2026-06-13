@@ -5,9 +5,10 @@
 
 ## 📊 통계
 - 주제 문서: **6**
+- 누적 통찰(insights): **3**
 - 보관(archive): 0
 - 마지막 수집(ingest): 2026-06-13
-- 마지막 드림 시퀀스: (아직 없음 — `ANTHROPIC_API_KEY` 설정 후 야간 자동 실행)
+- 마지막 드림 시퀀스: 2026-06-13 (드림 #1 — 통찰 2건 합성)
 
 ## 📚 주제 색인 (Topic Index)
 
@@ -35,9 +36,13 @@ data-dumping ──(입력 공급)──► self-evolving-wiki ──(정제 대
 
 zettelkasten ──(지적 선조/이론적 뿌리)──► second-brain, self-evolving-wiki, data-dumping
    └ "분류 말고 연결" · 링크 기반 창발 = 이 시스템 설계 철학의 원류
+
+💡 zettelkasten.창발 ══(드림#1 통찰)══ dream-sequence
+   └ 드림 시퀀스 = 체텔카스텐 창발을 자동화·가속한 엔진 (INSIGHTS.md 참고)
 ```
 
 ## ⚠️ 미해결 모순 / 확인필요
 - [확인필요] [[data-dumping]] — "5분 내 스캔"은 데이터 규모에 따라 달라질 수 있는 예시 수치.
+- [확인필요] 설계 긴장 — '자기 언어 재작성'을 AI가 대신하면 사람의 학습 이득이 줄 수 있음(드림#1, INSIGHTS.md). 완화책 검토 필요.
 
 *(이 인덱스는 `/ingest`·`/dream` 실행 시마다 자동 갱신된다.)*
