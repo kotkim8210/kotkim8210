@@ -14,3 +14,9 @@
 - `generate.js` : 재생성 스크립트 (@napi-rs/canvas + pdfkit; 나눔명조 TTF 필요)
 
 재생성: `npm i @napi-rs/canvas pdfkit` 후 나눔명조(Regular/Bold/ExtraBold) TTF를 같은 폴더에 두고 `node generate.js`.
+
+## v1.1 — 완제품 (110p)
+- `mom-prayer-journal_full-110p.pdf` : **입고용 완제품** (A5 300DPI)
+  - 표지·속표지·사용법·헌사·자녀 인덱스 / 데일리 ×92 / 기도응답표 ×7 / 성경 통독표(구약·신약) / 연말 회고
+- `generate_full.js` : 완제품 재생성 스크립트
+- `06~10_*.png` : 신규 페이지 미리보기
