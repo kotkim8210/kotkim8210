@@ -1,0 +1,74 @@
+name: 🌙 Dream Sequence (야간 지식 정제)
+
+# 백그라운드 정제기(Refiner): 사람이 잠든 사이 클로드가 스스로 지식을 검토·정제한다.
+on:
+  schedule:
+    # 비용 최소화를 위해 주 1회: 매주 일요일 KST 새벽 03:00 (= 토요일 UTC 18:00).
+    # 더 자주/덜 자주 원하면 cron만 바꾸면 된다. (cron: 분 시 일 월 요일, 요일 6=토)
+    - cron: "0 18 * * 6"
+  workflow_dispatch: {}        # Actions 탭에서 언제든 수동 실행 가능
+
+# ⚠️ 이 자동화는 '선택'이다. ANTHROPIC_API_KEY 시크릿이 없으면 아무 비용 없이 그냥 건너뛴다.
+#    키를 설정하지 않아도 아무 클로드 세션에서 /dream 을 직접 실행하면 동일하게 동작한다.
+
+# 정제 결과를 저장소에 커밋하려면 쓰기 권한이 필요하다.
+permissions:
+  contents: write
+
+concurrency:
+  group: dream-sequence
+  cancel-in-progress: false
+
+jobs:
+  dream:
+    runs-on: ubuntu-latest
+    steps:
+      # API 키가 없으면 실패 대신 우아하게 건너뛴다 (최초 설정 전 빨간 X 방지)
+      - name: API 키 확인
+        id: check
+        env:
+          KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "has_key=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::ANTHROPIC_API_KEY 시크릿이 없어 자동 드림 시퀀스를 건너뜁니다(정상). 아무 클로드 세션에서 /dream 을 직접 실행하면 됩니다. 자동화를 원하면 README의 드림 시퀀스 안내를 참고하세요."
+          else
+            echo "has_key=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout
+        if: steps.check.outputs.has_key == 'true'
+        uses: actions/checkout@v4
+
+      - name: 🌙 드림 시퀀스 실행 (클로드)
+        if: steps.check.outputs.has_key == 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            너는 이 저장소의 제2의 뇌(Second Brain)를 위한 야간 드림 시퀀스를 실행한다.
+            `.claude/commands/dream.md`의 절차를 그대로 따르고, `CLAUDE.md`의 규칙(특히 안전 규칙)을 지켜라.
+
+            수행할 일:
+            - 모순 해소, 중복 병합, 구식 지식은 brain/archive/로 보관(삭제 금지)
+            - 여러 주제를 가로지르는 새 통찰을 brain/insights/INSIGHTS.md에 누적
+            - brain/wiki/MAP.md 재색인, brain/.state/dream-log.md에 감사 로그 추가
+            - 보수적으로: 한 번에 가장 가치 있는 소수의 변경에만 집중
+
+            파일 변경은 직접 수행하라. git 커밋은 하지 마라(이후 워크플로 단계가 커밋한다).
+          claude_args: |
+            --allowedTools Read,Write,Edit,Glob,Grep,Bash
+            --max-turns 30
+
+      - name: 변경 사항 커밋 & 푸시
+        if: steps.check.outputs.has_key == 'true'
+        run: |
+          git config user.name "dream-sequence[bot]"
+          git config user.email "dream-sequence@users.noreply.github.com"
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "정제할 변경 사항 없음 — 깔끔한 밤이었습니다."
+          else
+            git add -A
+            git commit -m "🌙 dream: 야간 지식 정제 (모순/중복/구식 정리 + 통찰 합성)"
+            git push
+          fi
