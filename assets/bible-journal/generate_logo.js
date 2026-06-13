@@ -42,18 +42,18 @@ function measure(x, t, size, fam) { x.font = `${size}px "${fam}"`; return x.meas
 
 // 3) PROFILE — cream bg (square 1000)
 { const c = createCanvas(1000, 1000); const x = c.getContext('2d'); x.fillStyle = CREAM; x.fillRect(0, 0, 1000, 1000);
-  x.strokeStyle = 'rgba(46,58,50,0.28)'; x.lineWidth = 6; x.beginPath(); x.arc(500, 500, 442, 0, 7); x.stroke();
-  sprout(x, 500, 470, 2.6, GREEN);
-  textC(x, '씨앗과 기도', 500, 560, 120, 'NMX', GREEN);
-  textC(x, '엄마의 기도 노트', 500, 712, 42, 'NMB', SOFT_D);
+  x.strokeStyle = 'rgba(46,58,50,0.28)'; x.lineWidth = 6; x.beginPath(); x.arc(500, 500, 430, 0, 7); x.stroke();
+  sprout(x, 500, 530, 1.7, GREEN);
+  textC(x, '씨앗과 기도', 500, 585, 112, 'NMX', GREEN);
+  textC(x, '엄마의 기도 노트', 500, 724, 40, 'NMB', SOFT_D);
   fs.writeFileSync(`${D}/logo_profile_cream.png`, c.toBuffer('image/png')); }
 
 // 4) PROFILE — deep green bg (square 1000)
 { const c = createCanvas(1000, 1000); const x = c.getContext('2d'); x.fillStyle = GREEN; x.fillRect(0, 0, 1000, 1000);
-  x.strokeStyle = 'rgba(243,238,222,0.32)'; x.lineWidth = 6; x.beginPath(); x.arc(500, 500, 442, 0, 7); x.stroke();
-  sprout(x, 500, 470, 2.6, CTXT);
-  textC(x, '씨앗과 기도', 500, 560, 120, 'NMX', CTXT);
-  textC(x, '엄마의 기도 노트', 500, 712, 42, 'NMB', SOFT_C);
+  x.strokeStyle = 'rgba(243,238,222,0.32)'; x.lineWidth = 6; x.beginPath(); x.arc(500, 500, 430, 0, 7); x.stroke();
+  sprout(x, 500, 530, 1.7, CTXT);
+  textC(x, '씨앗과 기도', 500, 585, 112, 'NMX', CTXT);
+  textC(x, '엄마의 기도 노트', 500, 724, 40, 'NMB', SOFT_C);
   fs.writeFileSync(`${D}/logo_profile_green.png`, c.toBuffer('image/png')); }
 
 console.log('DONE logos 4');
