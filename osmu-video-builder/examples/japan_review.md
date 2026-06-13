@@ -1,0 +1,92 @@
+# 검토용 대본 — 3화 — 일본 부동산 버블 / 잃어버린 30년
+> 명제: 세상에서 가장 신중한 나라가, '우리는 예외다'라는 확신 때문에 한 세대를 잃었다. (자만 = 1·2화 콜백)
+> 분량: 12세그먼트 · 6390자 · 약 19.1분 · OSMU 클립 3개
+> 고증: [수치확인]·[실명위험] **전부 검증완료**(factlog.json) — 발행 가능
+
+## ✅ 검증한 핵심 수치
+- 플라자 합의 1985 · 엔 240→120엔대 / BOJ 금리 2.5%→6% / 닛케이 **38,915.87 (1989.12.29)**
+- 일본 땅값 ≈ 미국 4배 / 도쿄 도심 ≈ 맨해튼 350배 / 골프회원권 수억엔~$1M
+- 미쓰비시 **록펠러센터 80% $14억(1989)** → 몇 년 뒤 손실 보며 되팔림
+- 도시 땅값 정점比 80%+ 폭락 / 닛케이 회복 **2024.2 (34년)** / 저점 7천 아래
+
+---
+
+## s1  (609자, era=20c)
+**[화면 자막]** 한 나라가 30년을 잃었다 / 시작은 '모두가 부자'였던 순간
+**[내레이션]** 한 나라가 삼십 년을 잃었습니다. 전쟁도, 천재지변도 아니었습니다. 시작은 오히려 정반대였죠. 모두가 부자가 됐다고 믿던 바로 그 순간이었습니다. 1980년대 후반, 도쿄 한복판 황궁이 깔고 앉은 땅. 그 한 자리의 값이 미국 캘리포니아주 전체의 부동산과 맞먹는다는 계산이 나돌았습니다. 누가 봐도 말이 안 되는 숫자였지만, 그때 사람들은 그걸 농담이 아니라 현실로 받아들였습니다. 세계 2위 경제 대국, 끝도 없이 오르는 땅과 주식, 미국의 상징적인 건물까지 사들이는 자신감. 그런데 바로 그 정점에서, 일본은 천천히, 그리고 아주 길게 무너지기 시작합니다. 오늘 이야기의 주인공은 꽃에 홀린 네덜란드도, 천재가 당한 영국도 아닙니다. 세상에서 가장 부지런하고 가장 합리적이라 믿었던 나라가, 어떻게 한 세대를 통째로 잃었는가. 그리고 그 무너짐의 진짜 원인이, 지금 당신의 통장과 얼마나 닮아 있는가입니다. 미리 말씀드리면, 이건 미친 투기꾼들의 이야기가 아닙니다. 오히려 세상에서 가장 성실한 사람들이, 가장 성실하게 행동하다 무너진 이야기에 가깝습니다. 바로 그 점이, 이 이야기를 진짜 섬뜩하게 만듭니다. 천재가 아니라 모범생이 무너진 이야기, 그래서 더 남 일 같지가 않습니다.
+**[고증]** 단정표현 · 수치확인  ·  모두 factlog 검증완료
+**[이미지 프롬프트]** a crowded 17th-century Dutch tavern marketplace, blurred crowd, tense speculative atmosphere, lantern light, wide cinematic 16:9 composition, cinematic documentary still, moody dramatic lighting, muted desaturated color grade, fine film grain, shallow depth of field, painterly historical atmosphere, no text, no watermark, no on-screen captions, no recognizable real person, no celebrity likeness, faces hidden or turned away or silhouetted
+
+## s2  (531자, era=20c)
+**[화면 자막]** 환율 하나가 / 나라의 운명을 바꿨다
+**[내레이션]** 이야기는 의외로 환율에서 시작됩니다. 1985년 가을, 뉴욕의 한 호텔에 미국, 일본, 영국, 서독, 프랑스의 경제 수장들이 모였습니다. 합의의 핵심은 하나였습니다. 너무 강한 달러를 끌어내리고, 엔화의 가치를 끌어올린다. 이른바 플라자 합의였죠. 결과는 즉각적이고 강력했습니다. 합의 직전 달러당 240엔이던 환율이, 불과 삼 년 만에 120엔대까지 치솟았습니다. 엔화의 값이 거의 두 배가 됐다는 뜻입니다. 문제는 일본이 수출로 먹고사는 나라였다는 겁니다. 엔화가 비싸지자 일본 제품은 해외에서 순식간에 비싸졌고, 잘나가던 수출 공장들이 휘청였습니다. 정부는 다급해졌습니다. 수출이 막히면 경기가 식을 테니, 안에서라도 돈을 돌게 만들어야 했죠. 그래서 꺼내 든 카드가, 이 모든 비극의 진짜 출발점이 됩니다. 바로 초저금리였습니다. 경기를 살리려던 그 선택이, 거대한 거품의 씨앗이 될 줄은 그때는 아무도 몰랐습니다. 불을 끄려고 부은 물이, 사실은 기름이었던 셈입니다. 돌이켜 보면 가장 큰 거품은, 종종 위기를 막으려던 선의에서 시작됩니다.
+**[고증]** 단정표현 · 수치확인  ·  모두 factlog 검증완료
+**[이미지 프롬프트]** an old leather-bound history book half-open in dim candlelight, dust motes in a single shaft of light, wide cinematic 16:9 composition, cinematic documentary still, moody dramatic lighting, muted desaturated color grade, fine film grain, shallow depth of field, painterly historical atmosphere, no text, no watermark, no on-screen captions, no recognizable real person, no celebrity likeness, faces hidden or turned away or silhouetted
+
+## s3  (580자, era=20c)
+**[화면 자막]** 돈이 넘쳤고 / '땅은 안 떨어진다'를 믿었다
+**[내레이션]** 일본은행은 금리를 당시로선 사상 최저인 2.5퍼센트까지 내렸습니다. 그리고 경기가 이미 회복된 뒤에도, 무려 이 년 넘게 그 낮은 금리를 그대로 유지했습니다. 돈을 빌리는 비용이 거의 공짜에 가까워지자, 시중에는 갈 곳 없는 돈이 넘쳐흘렀습니다. 그 돈은 공장이나 기술이 아니라, 두 곳으로 몰렸습니다. 주식, 그리고 땅이었습니다. 여기서 일본 특유의 믿음 하나가 불을 키웁니다. 좁은 섬나라, 쓸 수 있는 땅은 한정돼 있다. 그러니 일본의 땅값은 길게 보면 절대 떨어지지 않는다. 이른바 토지신화였습니다. 심지어 멀쩡한 제조업체들마저, 물건을 만들어 파는 것보다 그 돈으로 주식과 땅에 투자해 버는 게 더 짭짤하다는 걸 깨달았습니다. 본업은 뒷전이 되고, 회사가 거대한 투자 펀드처럼 굴러가기 시작했죠. 은행은 땅을 담보로 잡으면 무조건 안전하다며 대출을 쏟아부었습니다. 땅값이 오르면 더 큰 대출이 나오고, 그 돈이 다시 땅값을 밀어 올렸습니다. 오를수록 더 빌릴 수 있고, 빌릴수록 더 오르는 구조. 멈출 이유가 어디에도 없어 보였습니다. 모두가 같은 방향으로 달릴 때, 이 길이 절벽은 아니냐고 묻는 사람은 바보 취급을 받습니다.
+**[고증]** 단정표현 · 수치확인  ·  모두 factlog 검증완료
+**[이미지 프롬프트]** a shattered glass and a collapsing house of cards on a dark table, dramatic chiaroscuro, sense of sudden ruin, wide cinematic 16:9 composition, cinematic documentary still, moody dramatic lighting, muted desaturated color grade, fine film grain, shallow depth of field, painterly historical atmosphere, no text, no watermark, no on-screen captions, no recognizable real person, no celebrity likeness, faces hidden or turned away or silhouetted
+
+## s4  (564자, era=20c)
+**[화면 자막]** 도쿄 땅 한 평 / = 맨해튼 350배
+**[내레이션]** 그래서 가격은 대체 어디까지 갔을까요. 숫자를 들으면 헛웃음이 나올 겁니다. 1950년대 중반부터 1980년대 중반까지, 삼십 년 사이 일본의 땅값은 최대 오십 배 가까이 뛰었습니다. 도쿄 도심의 노른자 땅은, 같은 넓이의 뉴욕 맨해튼보다 수백 배 비싸게 거래됐습니다. 어떤 계산으로는 약 삼백오십 배에 달했죠. 땅만이 아니었습니다. 골프장 회원권은 그 자체로 사고파는 금융 상품이 됐습니다. 인기 있는 골프장 회원권 하나가 수억 엔을 호가했고, 최고급은 백만 달러를 우습게 넘겼습니다. 사람들은 골프를 치려고 회원권을 산 게 아니라, 더 비싸게 되팔려고 샀습니다. 도시의 밤은 돈으로 흥청거렸고, 택시조차 잡기 어려웠습니다. 누구나 어렴풋이 알고 있었습니다. 이건 비정상이라는 걸. 하지만 아무도 멈추지 않았습니다. 멈추는 사람만 바보가 되는 세상이었으니까요. 땅의 가치는 이제 그 땅으로 무엇을 할 수 있느냐가 아니라, 내일 누가 얼마에 사주느냐로만 매겨졌습니다. 가격은 현실이 아니라, 믿음 위에서 움직이고 있었습니다. 그리고 믿음으로 떠받친 가격은, 그 믿음이 흔들리는 순간 받쳐 줄 바닥이 없습니다.
+**[고증]** 단정표현 · 수치확인  ·  모두 factlog 검증완료
+**[이미지 프롬프트]** a crowded 17th-century Dutch tavern marketplace, blurred crowd, tense speculative atmosphere, lantern light, wide cinematic 16:9 composition, cinematic documentary still, moody dramatic lighting, muted desaturated color grade, fine film grain, shallow depth of field, painterly historical atmosphere, no text, no watermark, no on-screen captions, no recognizable real person, no celebrity likeness, faces hidden or turned away or silhouetted
+
+## s5  (577자, era=20c)
+**[화면 자막]** 도박꾼이 아니라 / '가장 신중한 사람들'이 무너졌다
+**[내레이션]** 여기서 꼭 짚어야 할 게 있습니다. 이 광풍에 올라탄 사람들은, 우리가 흔히 상상하는 무모한 도박꾼이 아니었습니다. 오히려 정반대였죠. 세계에서 가장 성실하고, 가장 저축을 많이 하고, 가장 신중하다고 평가받던 사람들이었습니다. 바로 그 점이 무서운 대목입니다. 평생 빚을 죄악처럼 여기던 평범한 회사원이, 토지신화 앞에서는 기꺼이 거액의 대출을 받아 집과 땅을 샀습니다. 심지어 은행들은 한 사람의 평생으로도 다 갚지 못할 만큼 큰돈을, 자식과 손주에게까지 빚을 물려주는 백 년짜리, 삼대에 걸친 주택담보대출로 만들어 팔았습니다. 그런데도 아무도 이상하게 여기지 않았습니다. 땅값은 그 빚보다 더 빨리 오를 테니까요. 떨어질 리 없는 자산에 빚을 내는 건 도박이 아니라 합리적인 선택처럼 보였습니다. 은행도, 기업도, 정부도 같은 믿음을 공유했습니다. 모두가 똑같이 믿으니, 그 믿음은 어느새 사실처럼 단단해졌습니다. 기억해 두십시오. 거품의 가장 위험한 순간은, 미친 사람들이 뛰어들 때가 아닙니다. 가장 신중한 사람들조차 이건 안전하다고 확신하기 시작할 때입니다. 1980년대 후반의 일본은, 정확히 그 지점에 서 있었습니다.
+**[고증]** 단정표현 · 수치확인  ·  모두 factlog 검증완료
+**[이미지 프롬프트]** a shattered glass and a collapsing house of cards on a dark table, dramatic chiaroscuro, sense of sudden ruin, wide cinematic 16:9 composition, cinematic documentary still, moody dramatic lighting, muted desaturated color grade, fine film grain, shallow depth of field, painterly historical atmosphere, no text, no watermark, no on-screen captions, no recognizable real person, no celebrity likeness, faces hidden or turned away or silhouetted
+
+## s6  (487자, era=20c)
+**[화면 자막]** 1989.12.29 닛케이 38,915 / 일본 땅값 = 미국의 4배
+**[내레이션]** 그리고 정점이 찾아옵니다. 1989년 12월 29일, 그해 마지막 거래일. 일본의 대표 주가지수인 닛케이는 38,915라는 사상 최고치를 찍습니다. 단 한 해에만 9천 포인트 가까이 오른 뒤였습니다. 비슷한 시기, 일본 전체 땅의 가치가 미국 전체 땅값의 약 네 배에 이른다는 추산까지 나왔습니다. 국토 면적은 미국의 이십오 분의 일에 불과한 나라가 말입니다. 자신감은 국경을 넘었습니다. 같은 해, 일본의 한 기업은 뉴욕의 상징과도 같던 록펠러 센터의 지분 80퍼센트를 약 14억 달러에 사들였습니다. 머지않아 미국이 일본에 추월당할 거라는 책들이 베스트셀러가 됐죠. 일본은 다르다. 일본은 예외다. 이 말은 더 이상 희망 섞인 구호가 아니라, 모두가 공유하는 상식이 됐습니다. 바로 그 순간, 끝이 시작되고 있었습니다. 다만 그 누구도, 그것을 끝이라고 부르지 않았을 뿐입니다. 정점은 늘 가장 환할 때 찾아옵니다. 그래서 아무도 그 순간을 정점이라 부르지 못합니다.
+**[고증]** 단정표현 · 수치확인 · 실명위험  ·  모두 factlog 검증완료
+**[이미지 프롬프트]** a crowded 17th-century Dutch tavern marketplace, blurred crowd, tense speculative atmosphere, lantern light, wide cinematic 16:9 composition, cinematic documentary still, moody dramatic lighting, muted desaturated color grade, fine film grain, shallow depth of field, painterly historical atmosphere, no text, no watermark, no on-screen captions, no recognizable real person, no celebrity likeness, faces hidden or turned away or silhouetted
+
+## s7  (506자, era=20c)
+**[화면 자막]** 금리 2.5% → 6% / 파티를 끝낸 한 잔
+**[내레이션]** 파티를 끝낸 건 거창한 사건이 아니었습니다. 누군가 슬그머니 술잔을 치운 것뿐이었죠. 치솟는 자산 가격이 위험하다고 판단한 일본은행은, 1989년 봄부터 금리를 올리기 시작합니다. 2.5퍼센트였던 금리는 약 일 년 사이 다섯 차례에 걸쳐 6퍼센트까지 뛰었습니다. 동시에 정부는 부동산으로 흘러가는 대출을 강하게 틀어막았습니다. 거품을 떠받치던 두 기둥, 싼 돈과 무한정 나오던 대출이 동시에 사라진 겁니다. 효과는 무서웠습니다. 빚으로 쌓아 올린 자산은, 빚이 비싸지는 순간 가장 먼저 무너집니다. 더 비싸게 사줄 다음 사람을 기다리던 구조는, 돈줄이 마르자 그대로 작동을 멈췄습니다. 튤립도, 남해회사도 똑같았죠. 방아쇠는 늘 사소해 보입니다. 정작 무너지는 건 방아쇠 때문이 아니라, 그 위에 위태롭게 쌓아 올린 믿음의 무게 때문입니다. 거품은 부풀 때는 모두를 천재로 만들지만, 터질 때는 똑같이 모두를 바보로 만듭니다. 다른 점이 있다면, 천재인 시간은 짧고 바보인 시간은 아주 길다는 것뿐입니다.
+**[고증]** 단정표현 · 수치확인  ·  모두 factlog 검증완료
+**[이미지 프롬프트]** antique parchment contracts and a quill on a wooden merchant's desk, candlelight, 17th-century Amsterdam, wide cinematic 16:9 composition, cinematic documentary still, moody dramatic lighting, muted desaturated color grade, fine film grain, shallow depth of field, painterly historical atmosphere, no text, no watermark, no on-screen captions, no recognizable real person, no celebrity likeness, faces hidden or turned away or silhouetted
+
+## s8  (500자, era=20c)
+**[화면 자막]** 새해 첫날부터 / 시장은 무너지기 시작했다
+**[내레이션]** 1990년, 새해 첫 거래일부터 주가는 방향을 틀었습니다. 처음엔 그저 잠깐의 조정이라고들 했습니다. 곧 다시 오를 거라고. 하지만 그해가 저물 무렵, 주가지수는 정점에서 삼분의 일 넘게 사라졌습니다. 그리고 멈추지 않았습니다. 1992년이 되자 닛케이는 만 칠천 선까지 주저앉았습니다. 불과 삼 년 만에 시장의 절반 이상이 증발한 겁니다. 땅값은 더 천천히, 그러나 더 깊이 무너졌습니다. 1990년대 초부터 십여 년에 걸쳐, 주요 도시의 땅값은 정점 대비 80퍼센트 넘게 빠졌습니다. 떨어질 리 없다던 바로 그 땅이 말입니다. 어제까지 자산이라 불리던 것들이, 하루아침에 갚아야 할 빚으로 바뀌었습니다. 세계를 호령하던 자신감도 함께 식었습니다. 불과 몇 년 뒤, 그토록 자랑스레 사들였던 록펠러 센터마저 막대한 손실을 안긴 채 다시 미국인의 손으로 넘어갔습니다. 토지신화는 신화가 아니라, 그저 비싼 착각이었음이 드러나는 순간이었습니다. 그러나 진짜 고통은, 아직 시작도 하지 않았습니다.
+**[고증]** 수치확인  ·  모두 factlog 검증완료
+**[이미지 프롬프트]** a shattered glass and a collapsing house of cards on a dark table, dramatic chiaroscuro, sense of sudden ruin, wide cinematic 16:9 composition, cinematic documentary still, moody dramatic lighting, muted desaturated color grade, fine film grain, shallow depth of field, painterly historical atmosphere, no text, no watermark, no on-screen captions, no recognizable real person, no celebrity likeness, faces hidden or turned away or silhouetted
+
+## s9  (521자, era=20c)
+**[화면 자막]** 은행은 100조 엔을 잃었고 / 기업은 좀비가 됐다
+**[내레이션]** 진짜 문제는 그다음이었습니다. 땅과 주식을 담보로 돈을 빌려준 은행들은, 담보 가치가 무너지자 천문학적인 부실 채권을 떠안았습니다. 그 규모는 백조 엔 단위에 이르렀습니다. 빚을 갚지 못하는 기업이 속출했지만, 은행은 이들을 정리하지도, 살리지도 못한 채 억지로 연명시켰습니다. 망해야 할 회사가 빚으로 간신히 숨만 붙어 있는, 이른바 좀비 기업이 경제 곳곳에 퍼졌습니다. 새로운 투자도, 새로운 채용도 얼어붙었습니다. 사람들은 미래가 불안하니 지갑을 닫았고, 소비가 줄자 물가가 떨어지기 시작했습니다. 물가가 내리면 좋을 것 같지만, 끝없는 하락은 오히려 모두가 소비를 더 미루게 만드는 함정입니다. 오늘보다 내일이 더 싸다면, 누가 지금 돈을 쓰겠습니까. 한 번 시작된 이 악순환은, 일본 경제 전체를 천천히 수렁 속으로 끌고 들어갔습니다. 터지는 건 한순간이지만, 그 뒷정리에는 한 세대가 걸린다는 걸, 일본은 온몸으로 보여 주고 있었습니다. 무너진 자산은 숫자로 사라지지만, 잃어버린 신뢰와 의욕은 숫자로 돌아오지 않습니다.
+**[고증]** 단정표현  ·  모두 factlog 검증완료
+**[이미지 프롬프트]** an old leather-bound history book half-open in dim candlelight, dust motes in a single shaft of light, wide cinematic 16:9 composition, cinematic documentary still, moody dramatic lighting, muted desaturated color grade, fine film grain, shallow depth of field, painterly historical atmosphere, no text, no watermark, no on-screen captions, no recognizable real person, no celebrity likeness, faces hidden or turned away or silhouetted
+
+## s10  (482자, era=20c)
+**[화면 자막]** 38,915 회복까지 / 34년이 걸렸다
+**[내레이션]** 여기서 이 이야기의 진짜 무서운 지점이 나옵니다. 보통 거품은 요란하게 터지고, 몇 년 안에 바닥을 친 뒤 다시 일어섭니다. 그런데 일본은 달랐습니다. 무너진 자리에서 좀처럼 일어나지 못한 채, 십 년, 이십 년, 결국 삼십 년을 흘려보냈습니다. 그래서 붙은 이름이 바로 잃어버린 삼십 년입니다. 가장 상징적인 숫자가 하나 있습니다. 1989년 마지막 날 찍었던 그 고점, 38,915. 일본 증시가 이 숫자를 다시 넘어선 건, 무려 삼십사 년이 지난 2024년 2월의 일이었습니다. 그사이 지수는 한때 7천 아래까지 곤두박질치기도 했습니다. 한 세대가 사회에 나와 일하고 은퇴하는 시간 내내, 시장은 출발점으로 돌아오지 못한 겁니다. 그 시간 동안 일본의 젊은이들은 일자리가 사라진 취업 빙하기를 겪었고, 한 나라의 활력 자체가 통째로 식어 버렸습니다. 거품의 진짜 대가는 한순간의 폭락이 아니었습니다. 돌려받지 못한 삼십 년이라는, 한 세대의 시간이었습니다.
+**[고증]** 수치확인  ·  모두 factlog 검증완료
+**[이미지 프롬프트]** an old leather-bound history book half-open in dim candlelight, dust motes in a single shaft of light, wide cinematic 16:9 composition, cinematic documentary still, moody dramatic lighting, muted desaturated color grade, fine film grain, shallow depth of field, painterly historical atmosphere, no text, no watermark, no on-screen captions, no recognizable real person, no celebrity likeness, faces hidden or turned away or silhouetted
+
+## s11  (541자, era=modern) ★관점(본인 말투로)
+**[화면 자막]** '이번엔 다르다'가 / 가장 비싼 말이었다
+**[내레이션]** 자, 그럼 가장 중요한 질문입니다. 세상에서 가장 신중하다던 사람들이, 왜 다 함께 무너졌을까요. 답은 탐욕이 아닙니다. 확신이었습니다. 일본은 다르다, 일본 땅은 예외다. 이 한마디가 모든 경고를 덮어 버렸습니다. 여기서 제가 정말 소름 끼치는 건, 이 말이 처음 나온 대사가 아니라는 점입니다. 튤립 앞의 네덜란드도, 남해회사 앞의 뉴턴도, 똑같이 말했습니다. 이번엔 다르다고. 투자 역사에서 가장 비싼 말이 바로 이번엔 다르다입니다. 솔직히 우리도 다르지 않습니다. 우리 동네 집값은 안 떨어져. 이 종목은, 이 코인은 다른 것들과는 달라. 그 확신은 대체 어디서 왔습니까. 냉정한 데이터입니까, 아니면 나는, 우리는 예외라는 느낌입니까. 일본 사람들도 그 느낌에 신화라는 그럴듯한 이름을 붙였습니다. 그리고 그 신화의 청구서는, 삼십 년 뒤에 날아왔습니다. 가장 무서운 거짓말은 남이 하는 게 아닙니다. 내가 나에게 속삭이는, 나만은 예외라는 그 한마디입니다. 남이 하는 거짓말은 그래도 의심이라도 하지만, 내가 나에게 거는 거짓말은 의심조차 하지 않으니까요.
+**[고증]** —  ·  모두 factlog 검증완료
+**[이미지 프롬프트]** a lone figure silhouetted before a vast dark sky, small against towering clouds, contemplative and ominous, wide cinematic 16:9 composition, cinematic documentary still, moody dramatic lighting, muted desaturated color grade, fine film grain, shallow depth of field, painterly historical atmosphere, no text, no watermark, no on-screen captions, no recognizable real person, no celebrity likeness, faces hidden or turned away or silhouetted
+
+## s12  (492자, era=modern) ★관점(본인 말투로)
+**[화면 자막]** '절대 안 떨어진다'는 말이 / 위험 신호다
+**[내레이션]** 모든 거품은 놀랍도록 똑같은 문장을 남깁니다. 이건 새로운 시대야. 그러니 옛날 규칙은 안 통해. 17세기의 튤립이든, 18세기의 남해회사든, 20세기 일본의 땅이든, 뼈대는 소름 끼치도록 같습니다. 무대와 배우만 바뀔 뿐, 각본은 늘 똑같습니다. 그래서 진짜 위험 신호는 자산의 종류가 아닙니다. 당신이 이게 얼마짜리인지, 왜 이 값인지 묻기를 멈추고, 그저 절대 안 떨어진다는 말에 기대기 시작하는 바로 그 순간입니다. 절대라는 단어가 가격표에 붙는 순간, 그건 자신감이 아니라 위험 신호입니다. 일본은 그 단어의 값을 삼십 년으로 치렀습니다. 마지막으로 하나만 기억해 주세요. 거품은 늘 끝나고 나서야 거품이라 불립니다. 그 안에 있을 때, 그것은 언제나 합리적인 선택처럼 보입니다. 다음 이야기는 시계를 우리 쪽으로 더 바짝 당겨 오겠습니다. 모두가 천재였던 시절, 닷컴 버블에서 만나겠습니다. 사람이 무너지는 방식을 기록하는 이 채널, 놓치고 싶지 않다면 구독해 두세요.
+**[고증]** 단정표현 · 수치확인 · 실명위험  ·  모두 factlog 검증완료
+**[이미지 프롬프트]** a shattered glass and a collapsing house of cards on a dark table, dramatic chiaroscuro, sense of sudden ruin, wide cinematic 16:9 composition, cinematic documentary still, moody dramatic lighting, muted desaturated color grade, fine film grain, shallow depth of field, painterly historical atmosphere, no text, no watermark, no on-screen captions, no recognizable real person, no celebrity likeness, faces hidden or turned away or silhouetted
+
+---
+## 🎬 OSMU 클립
+- **01_hook** ← ['s1'] · 훅: "황궁 땅으로 캘리포니아 전체를 산다"
+- **02_fact** ← ['s6'] · 훅: "일본 땅값이 미국의 4배였던 시절"
+- **03_insight** ← ['s11'] · 훅: "'이번엔 다르다'가 가장 비싼 말이다"
+
+## ★관점 주입 지점: s11, s12  ← 발행 전 본인 말투/경험으로 승인
