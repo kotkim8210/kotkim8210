@@ -6,10 +6,8 @@ GlobalFonts.registerFromPath(`${D}/NanumMyeongjo-Bold.ttf`, 'NMB');
 GlobalFonts.registerFromPath(`${D}/NanumMyeongjo-ExtraBold.ttf`, 'NMX');
 
 const S = 1000;
-const CREAM = '#F4EEDE', PANEL = '#EFE8D6', INK = '#4C5A3C';   // ink a touch deeper for contrast
-const DARK = '#2E3A32';                                        // deep premium forest green (was khaki olive)
-const CTXT = '#F3EEDE';
-const STRONG = '#3D4630';                                      // strong dark for secondary text (no more faint)
+const CREAM = '#F4EEDE', PANEL = '#EFE8D6', INK = '#4C5A3C';
+const DARK = '#2E3A32', CTXT = '#F3EEDE', STRONG = '#3D4630';
 
 function P(bg) { const c = createCanvas(S, S); const x = c.getContext('2d'); x.fillStyle = bg; x.fillRect(0, 0, S, S); return { c, x }; }
 function frame(x, i, col, lw) { x.strokeStyle = col; x.lineWidth = lw || 2.5; x.strokeRect(i, i, S - i * 2, S - i * 2); }
@@ -17,21 +15,30 @@ function multi(x, text, cx, topY, size, fam, color, lh) {
   x.fillStyle = color; x.textAlign = 'center'; x.textBaseline = 'top';
   text.split('\n').forEach((ln, i) => { x.font = `${size}px "${fam}"`; x.fillText(ln, cx, topY + i * lh + (lh - size) / 2); });
 }
-function caps(x, text, cx, topY, size, color, fam) {
-  x.font = `${size}px "${fam || 'NMB'}"`; x.fillStyle = color; x.textBaseline = 'top'; x.textAlign = 'left';
+function caps(x, text, cx, topY, size, color) {
+  x.font = `${size}px "NMB"`; x.fillStyle = color; x.textBaseline = 'top'; x.textAlign = 'left';
   const sp = size * 0.34, ch = [...text]; let t = 0; for (const c of ch) t += x.measureText(c).width + sp; t -= sp;
   let px = cx - t / 2; for (const c of ch) { x.fillText(c, px, topY); px += x.measureText(c).width + sp; }
 }
+function bullets(x, items, cx, topY, size, lh, color) {
+  x.textBaseline = 'top';
+  items.forEach((it, i) => {
+    const y = topY + i * lh; x.font = `${size}px "NMB"`;
+    const tw = x.measureText(it).width;
+    x.fillStyle = color; x.beginPath(); x.arc(cx - tw / 2 - 28, y + size / 2 + 4, 7, 0, 7); x.fill();
+    x.textAlign = 'center'; x.fillText(it, cx, y);
+  });
+}
 function pill(x, text, cx, topY, size, bg, fg) {
-  x.font = `${size}px "NMB"`; const w = x.measureText(text).width, padX = 34, padY = 16, h = size + padY * 2, rx = (h) / 2;
-  const bx = cx - (w + padX * 2) / 2, by = topY, bw = w + padX * 2;
-  x.fillStyle = bg; x.beginPath(); x.roundRect(bx, by, bw, h, rx); x.fill();
-  x.fillStyle = fg; x.textAlign = 'center'; x.textBaseline = 'top'; x.fillText(text, cx, by + padY);
+  x.font = `${size}px "NMB"`; const w = x.measureText(text).width, padX = 36, padY = 16, h = size + padY * 2;
+  const bx = cx - (w + padX * 2) / 2, bw = w + padX * 2;
+  x.fillStyle = bg; x.beginPath(); x.roundRect(bx, topY, bw, h, h / 2); x.fill();
+  x.fillStyle = fg; x.textAlign = 'center'; x.textBaseline = 'top'; x.fillText(text, cx, topY + padY);
   return h;
 }
 function shot(x, img, cx, topY, w, border) {
   const ix = cx - w / 2, h = w * img.height / img.width;
-  x.save(); x.shadowColor = 'rgba(40,50,40,0.28)'; x.shadowBlur = 28; x.shadowOffsetY = 14; x.drawImage(img, ix, topY, w, h); x.restore();
+  x.save(); x.shadowColor = 'rgba(40,50,40,0.28)'; x.shadowBlur = 26; x.shadowOffsetY = 13; x.drawImage(img, ix, topY, w, h); x.restore();
   x.strokeStyle = border || 'rgba(76,90,60,0.45)'; x.lineWidth = 2; x.strokeRect(ix, topY, w, h); return h;
 }
 function leaf(x, len, wid, color) { x.beginPath(); x.moveTo(0, 0); x.quadraticCurveTo(wid, -len * .45, 0, -len); x.quadraticCurveTo(-wid, -len * .45, 0, 0); x.fillStyle = color; x.fill(); }
@@ -48,38 +55,44 @@ function sprig(x, cx, topY, scale, color) {
   const log = await loadImage(`${D}/05_log.png`);
   const reading = await loadImage(`${D}/p_reading_ot.png`);
 
-  // T1 — 대표 (clean product hero)
-  { const { c, x } = P(CREAM); frame(x, 38, 'rgba(76,90,60,0.45)', 3); sprig(x, S / 2, 66, .66, INK);
-    shot(x, cover, S / 2, 210, 470);
-    multi(x, '자녀를 위해, 매일 한 장', S / 2, 895, 50, 'NMX', INK, 60);
+  // T1 — 대표 (product hero; title readable on cover)
+  { const { c, x } = P(CREAM); frame(x, 38, 'rgba(76,90,60,0.45)', 3); sprig(x, S / 2, 58, .6, INK);
+    shot(x, cover, S / 2, 188, 452);
+    multi(x, '자녀를 위해, 매일 한 장', S / 2, 868, 50, 'NMX', INK, 60);
     fs.writeFileSync(`${D}/thumb_1_main.png`, c.toBuffer('image/png')); }
 
-  // T2 — 후킹 (deep premium green band)
-  { const { c, x } = P(DARK); frame(x, 34, 'rgba(243,238,222,0.28)', 2);
-    sprig(x, S / 2, 78, .66, CTXT);
-    multi(x, '엄마의 기도는\n아이의 평생을\n바꿉니다', S / 2, 232, 84, 'NMX', CTXT, 110);
-    shot(x, cover, S / 2, 632, 248, 'rgba(243,238,222,0.6)');
+  // T2 — 후킹 (deep green, all fresh text, no small cover)
+  { const { c, x } = P(DARK); frame(x, 34, 'rgba(243,238,222,0.30)', 2);
+    sprig(x, S / 2, 92, .66, CTXT);
+    multi(x, '엄마의 기도는\n아이의 평생을\n바꿉니다', S / 2, 258, 86, 'NMX', CTXT, 112);
+    multi(x, '엄마의 기도 노트', S / 2, 712, 52, 'NMX', CTXT, 64);
+    multi(x, '자녀를 위한 기도 저널', S / 2, 800, 30, 'NMB', 'rgba(243,238,222,0.82)', 42);
     fs.writeFileSync(`${D}/thumb_2_hook.png`, c.toBuffer('image/png')); }
 
-  // T3 — 기능(기록)
-  { const { c, x } = P(CREAM); caps(x, 'HOW IT WORKS', S / 2, 88, 28, INK);
-    multi(x, '기도제목부터 응답까지\n기록하는 1년', S / 2, 150, 56, 'NMX', INK, 78);
-    shot(x, daily, S / 2, 350, 380);
+  // T3 — 기능: 큰 리스트로 칸 이름 직접 노출 (읽힘)
+  { const { c, x } = P(CREAM); frame(x, 38, 'rgba(76,90,60,0.45)', 3); caps(x, 'HOW IT WORKS', S / 2, 96, 26, INK);
+    multi(x, '기도제목부터 응답까지\n기록하는 1년', S / 2, 160, 54, 'NMX', INK, 78);
+    bullets(x, ['오늘의 말씀', '자녀를 위한 기도제목', '기도 응답 기록', '오늘의 감사'], S / 2, 430, 42, 90, INK);
+    sprig(x, S / 2, 820, .55, INK);
     fs.writeFileSync(`${D}/thumb_3_feature.png`, c.toBuffer('image/png')); }
 
-  // T4 — 구성 (collage)
-  { const { c, x } = P(PANEL); multi(x, '이 한 권에 담긴 것', S / 2, 92, 56, 'NMX', INK, 70);
-    multi(x, '자녀를 위한 기도 92편  ·  기도 응답 기록\n성경 통독표 66권  ·  약 110페이지', S / 2, 240, 35, 'NMB', STRONG, 60);
-    const w = 250, gap = 34, total = w * 3 + gap * 2, x0 = (S - total) / 2, ty = 460;
-    [daily, log, reading].forEach((im, i) => shot(x, im, x0 + w / 2 + i * (w + gap), ty, w));
+  // T4 — 구성: 페이지 컷 + 각 컷 아래 큰 캡션
+  { const { c, x } = P(PANEL); multi(x, '이 한 권에 담긴 것', S / 2, 86, 56, 'NMX', INK, 70);
+    multi(x, '기도 92편 · 응답 기록 · 통독표 · 약 110p', S / 2, 232, 35, 'NMB', STRONG, 56);
+    const w = 232, gap = 44, total = w * 3 + gap * 2, x0 = (S - total) / 2, ty = 410;
+    const labels = ['자녀를 위한 기도', '기도 응답 기록', '성경 통독표'];
+    [daily, log, reading].forEach((im, i) => {
+      const cx = x0 + w / 2 + i * (w + gap); const h = shot(x, im, cx, ty, w);
+      multi(x, labels[i], cx, ty + h + 26, 28, 'NMB', INK, 36);
+    });
     fs.writeFileSync(`${D}/thumb_4_inside.png`, c.toBuffer('image/png')); }
 
-  // T5 — 선물
-  { const { c, x } = P(CREAM); frame(x, 38, 'rgba(76,90,60,0.4)', 3); sprig(x, S / 2, 78, .62, INK);
-    multi(x, '믿음의 엄마에게\n드리는 선물', S / 2, 218, 60, 'NMX', INK, 82);
-    pill(x, '권사님께 · 며느리에게 · 나에게', S / 2, 410, 30, INK, CTXT);
-    shot(x, cover, S / 2, 502, 358);
+  // T5 — 선물 (cover sized within frame)
+  { const { c, x } = P(CREAM); frame(x, 38, 'rgba(76,90,60,0.4)', 3); sprig(x, S / 2, 70, .56, INK);
+    multi(x, '믿음의 엄마에게\n드리는 선물', S / 2, 188, 58, 'NMX', INK, 80);
+    pill(x, '권사님께 · 며느리에게 · 나에게', S / 2, 372, 30, INK, CTXT);
+    shot(x, cover, S / 2, 470, 300);
     fs.writeFileSync(`${D}/thumb_5_gift.png`, c.toBuffer('image/png')); }
 
-  console.log('DONE thumbnails 5 (v2)');
+  console.log('DONE thumbnails 5 (v3)');
 })();
