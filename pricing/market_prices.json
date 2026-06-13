@@ -1,0 +1,26 @@
+{
+  "_meta": {
+    "currency": "KRW",
+    "note": "당근 시세(경쟁사 판매가) 참고 원장. 라이브 수집은 시세추적기(Google Apps Script + 구글시트)가 담당하고, 여기에는 마진계산에 쓸 대표 시세를 캐싱한다.",
+    "live_source": "당근_시세추적기_v3 (Google Sheet)",
+    "live_sheet_url": "https://docs.google.com/spreadsheets/d/1g0Bxmz773DqPjCfYgBNyBtlYKxYuLJYY2zasqiC5u7Y/edit?gid=1683225896",
+    "disclaimer": "sample=true 항목은 추적기 가동 전 임시 참고치(코드 기본 예시값). 추적기에서 실측 시세가 모이면 sample=false 항목으로 교체/추가할 것.",
+    "how_to_update": "추적기 대시보드의 '검색어×단위 최저/평균 단위당단가' 또는 옵션별 최저가를 보고 references 배열에 갱신. 이후 python3 pricing/build_report.py 실행."
+  },
+  "references": [
+    {
+      "date": "2026-06-13",
+      "keyword": "초당옥수수",
+      "competitor": "오늘팜365",
+      "grade_hint": "일반/중품급",
+      "applies_to": ["corn-mid"],
+      "sample": true,
+      "options": [
+        { "qty": 5,  "price": 9820 },
+        { "qty": 10, "price": 14820 },
+        { "qty": 15, "price": 20820 },
+        { "qty": 20, "price": 25820 }
+      ]
+    }
+  ]
+}

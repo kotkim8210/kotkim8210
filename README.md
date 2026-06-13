@@ -37,11 +37,11 @@
 | `bookmarklet/store_filler.js` | 자동채움 북마클릿 풀 소스. |
 | `bookmarklet/store_filler.min.js` | 압축본 (`javascript:` 프리픽스 포함). |
 | `bookmarklet/store_filler_install.html` | 북마클릿 드래그&드롭 설치 페이지. |
-| `listings/negotiation_drafts.md` | 공급가 협상 메시지 초안 (제주다팜·쥬얼리프룻용). |
 
-> ⚠️ **옥수수 마진 박함 (0~2%, 일부 적자)** — 공급가 협상 + 시세 데이터 수집 권장.
-> 1. `listings/negotiation_drafts.md`의 메시지로 공급처에 단가 인하 요청
-> 2. [`시세추적기_설치가이드_v3.md`](./시세추적기_설치가이드_v3.md) A섹션으로 추적기 가동 → 1~2주 시장가 수집 후 가격/옵션 조정
+> ✅ **옥수수 마진 회복 (2026-06-13)** — 시즌 종료로 공급가가 자연 하락(중품 −18~29%)해
+> 시세 기준 마진이 ~0%대 → ~30%대로 올라왔습니다. **협상은 보류**하고 추적으로 운영합니다.
+> 마진 현황 → [`pricing/MARGIN_REPORT.md`](./pricing/MARGIN_REPORT.md)
+> (보류된 협상 초안은 [`legacy/negotiation_drafts.md`](./legacy/negotiation_drafts.md))
 
 ### 임베드된 상품
 1. 성주 가정용 참외 (혼합과) — 1/2/3/5kg
@@ -58,6 +58,28 @@
 1. `bookmarklet/store_filler_install.html` 을 브라우저로 열고 주황 버튼을 북마크 바로 드래그
 2. 당근스토어 상품등록 페이지 열기
 3. 북마클릿 클릭 → 상품/옵션 선택 → [⚡ 자동채움] 또는 [복사]
+
+---
+
+## 💰 공급단가 + 시세 마진 추적 (`pricing/`)
+
+손익은 **두 숫자**로 결정됩니다 — **시세**(손님이 내는 시장가)와 **공급단가**(내 매입가).
+`마진 = 시세 − 공급가 − 수수료`. 등록 판매가가 아니라 시세 기준으로 봐야 현실적이라,
+두 추적을 함께 돌리고 마진표를 자동 생성합니다.
+
+| 파일 | 용도 |
+|---|---|
+| `pricing/supply_prices.json` | 공급가(매입가) 스냅샷 원장 — PBF 어드민 캡처마다 추가. **비공개** |
+| `pricing/market_prices.json` | 시세(경쟁사 판매가) 참고 원장 — 라이브 소스는 시세추적기 구글시트 |
+| `pricing/build_report.py` | 공급가·시세·판매가 조인 → 마진표 생성 (무설치, stdlib만) |
+| `pricing/MARGIN_REPORT.md` | 자동 생성 마진 리포트 (직접 편집 금지) |
+| `pricing/README.md` | 추적 모델·갱신 루틴 설명 |
+
+```bash
+python3 pricing/build_report.py    # JSON 갱신 후 재실행하면 MARGIN_REPORT.md 갱신
+```
+
+> ⚠️ 공급가는 **도매 매입가(비공개)**. `products.json`·북마클릿 등 고객 노출 산출물에는 절대 넣지 마세요.
 
 ---
 
