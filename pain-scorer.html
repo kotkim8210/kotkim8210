@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tool 01 · 페인포인트 점수화 시트</title>
+<link rel="stylesheet" href="assets/app.css" />
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <span class="kicker">Tool 01 — Pain Point Scorer</span>
+    <a class="home" href="index.html">← 툴킷 홈</a>
+  </div>
+  <h1>페인포인트 점수화 시트</h1>
+  <p>레딧·커뮤니티에서 모은 고객 불편을 네 축으로 점수화(1~5)해 우선순위를 정합니다.
+  점수만으로 정하지 말고 <b>지불 의향의 증거(인용/링크)</b>를 반드시 남기세요.</p>
+
+  <div class="note">
+    <strong>채점 기준 (1=약함 · 5=강함)</strong><br>
+    · <b>빈도(Frequency)</b> 얼마나 자주/많은 사람이 겪는가 — 검색량·중복 글 수<br>
+    · <b>강도(Intensity)</b> 얼마나 아픈가 — 시간/돈 손실, 분노·절박함의 톤<br>
+    · <b>지불가능성(Monetizability)</b> 돈을 낼 사람·예산이 있는가 (B2B·업무용일수록↑, "무료 원함"이면↓)<br>
+    · <b>경쟁공백(Competition Gap)</b> 5=아무도 제대로 못 풂 / 1=이미 좋은 솔루션 많음(레드오션)
+  </div>
+
+  <!-- weight controls -->
+  <div class="card">
+    <div class="flex spread">
+      <h3 style="margin:0">가중치 (합계 자동 정규화)</h3>
+      <button class="btn ghost" id="resetWeights" type="button">기본값</button>
+    </div>
+    <div class="grid cols-2" style="margin-top:10px">
+      <div class="range-row"><label style="margin:0">빈도</label><input type="range" id="w_freq" min="0" max="3" step="0.5" value="1"><output id="o_freq">1</output></div>
+      <div class="range-row"><label style="margin:0">강도</label><input type="range" id="w_int" min="0" max="3" step="0.5" value="1.5"><output id="o_int">1.5</output></div>
+      <div class="range-row"><label style="margin:0">지불가능성</label><input type="range" id="w_mon" min="0" max="3" step="0.5" value="2"><output id="o_mon">2</output></div>
+      <div class="range-row"><label style="margin:0">경쟁공백</label><input type="range" id="w_gap" min="0" max="3" step="0.5" value="1.5"><output id="o_gap">1.5</output></div>
+    </div>
+    <small>기본값은 "돈 내는가(지불가능성)"와 "남이 안 풀었는가(경쟁공백)"에 더 무게를 둡니다.</small>
+  </div>
+
+  <!-- add form -->
+  <div class="card">
+    <h3 style="margin-top:0">후보 추가</h3>
+    <div class="grid cols-2">
+      <div>
+        <label>문제 이름 / 한 줄 요약 *</label>
+        <input type="text" id="f_name" placeholder="예: 프리랜서가 인보이스 세금계산을 매번 손으로 한다">
+      </div>
+      <div>
+        <label>출처 (서브레딧 / 커뮤니티 / 링크)</label>
+        <input type="text" id="f_src" placeholder="예: r/freelance">
+      </div>
+    </div>
+    <label>지불 의향의 증거 (실제 인용·링크) — 비워두면 점수에 신뢰 페널티</label>
+    <textarea id="f_evidence" placeholder='예: "I would gladly pay $20/mo for something that just does this" — 추천 300, 댓글 80'></textarea>
+    <div class="grid cols-2" style="margin-top:4px">
+      <div class="range-row"><label style="margin:0">빈도</label><input type="range" id="s_freq" min="1" max="5" step="1" value="3"><output id="so_freq">3</output></div>
+      <div class="range-row"><label style="margin:0">강도</label><input type="range" id="s_int" min="1" max="5" step="1" value="3"><output id="so_int">3</output></div>
+      <div class="range-row"><label style="margin:0">지불가능성</label><input type="range" id="s_mon" min="1" max="5" step="1" value="3"><output id="so_mon">3</output></div>
+      <div class="range-row"><label style="margin:0">경쟁공백</label><input type="range" id="s_gap" min="1" max="5" step="1" value="3"><output id="so_gap">3</output></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="addBtn" type="button">+ 후보 추가</button>
+      <button class="btn ghost" id="seedBtn" type="button">예시 채우기</button>
+    </div>
+  </div>
+
+  <!-- table -->
+  <div class="flex spread" style="margin-top:8px">
+    <h2 style="margin:0">우선순위 랭킹 <small id="count" class="tag"></small></h2>
+    <div class="btn-row" style="margin:0">
+      <button class="btn secondary" id="exportBtn" type="button">CSV 내보내기</button>
+      <button class="btn ghost" id="clearBtn" type="button">전체 삭제</button>
+    </div>
+  </div>
+  <div class="card" style="overflow-x:auto">
+    <table id="tbl">
+      <thead>
+        <tr>
+          <th>#</th><th>문제</th><th>출처</th>
+          <th title="빈도">빈</th><th title="강도">강</th><th title="지불가능성">지</th><th title="경쟁공백">공</th>
+          <th>가중점수</th><th>판정</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <p id="empty" class="muted-foot" style="border:none;text-align:center">아직 후보가 없습니다. 위에서 추가하거나 "예시 채우기"를 눌러보세요.</p>
+  </div>
+
+  <div class="note warn">
+    <strong>판정 기준:</strong> 가중점수를 5점 만점으로 환산 →
+    <span class="pill go">GO ≥ 3.8</span>　<span class="pill watch">WATCH 3.0~3.8</span>　<span class="pill kill">KILL &lt; 3.0</span>.
+    증거가 비어 있으면 −0.3 페널티가 적용됩니다(추측 방지). 상위 GO 2~3개만 Tool 02로 가져가세요.
+  </div>
+
+  <p class="muted-foot">데이터는 이 브라우저(localStorage)에만 저장됩니다.</p>
+</div>
+
+<script>
+const LS = "vtk_pain_v1";
+const WKEY = "vtk_pain_weights_v1";
+const $ = id => document.getElementById(id);
+const DEFAULT_W = { freq:1, int:1.5, mon:2, gap:1.5 };
+
+let items = load(LS, []);
+let W = load(WKEY, {...DEFAULT_W});
+
+function load(k, fb){ try { return JSON.parse(localStorage.getItem(k)) ?? fb; } catch(e){ return fb; } }
+function save(){ localStorage.setItem(LS, JSON.stringify(items)); localStorage.setItem(WKEY, JSON.stringify(W)); }
+
+// live outputs for sliders
+["freq","int","mon","gap"].forEach(k=>{
+  const w=$("w_"+k); w.value=W[k]; $("o_"+k).textContent=W[k];
+  w.addEventListener("input",()=>{ W[k]=parseFloat(w.value); $("o_"+k).textContent=w.value; save(); render(); });
+});
+["freq","int","mon","gap"].forEach(k=>{
+  const s=$("s_"+k); s.addEventListener("input",()=>$("so_"+k).textContent=s.value);
+});
+$("resetWeights").onclick=()=>{ W={...DEFAULT_W}; ["freq","int","mon","gap"].forEach(k=>{$("w_"+k).value=W[k];$("o_"+k).textContent=W[k];}); save(); render(); };
+
+function weightedScore(it){
+  const wsum = W.freq+W.int+W.mon+W.gap || 1;
+  let s = (it.freq*W.freq + it.int*W.int + it.mon*W.mon + it.gap*W.gap)/wsum; // 1..5
+  if(!it.evidence || !it.evidence.trim()) s -= 0.3;
+  return Math.max(0, s);
+}
+function verdict(s){ return s>=3.8 ? ["GO","go"] : s>=3.0 ? ["WATCH","watch"] : ["KILL","kill"]; }
+
+function render(){
+  const sorted=[...items].sort((a,b)=>weightedScore(b)-weightedScore(a));
+  const rows=$("rows"); rows.innerHTML="";
+  $("count").textContent = items.length ? `(${items.length}개)` : "";
+  $("empty").style.display = items.length ? "none" : "block";
+  sorted.forEach((it,i)=>{
+    const s=weightedScore(it); const [v,cls]=verdict(s);
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${i+1}</td>
+      <td><b>${esc(it.name)}</b>${it.evidence?`<br><small>"${esc(it.evidence).slice(0,90)}${it.evidence.length>90?'…':''}"</small>`:`<br><small style="color:var(--kill)">⚠ 증거 없음</small>`}</td>
+      <td><small>${esc(it.src||'-')}</small></td>
+      <td>${it.freq}</td><td>${it.int}</td><td>${it.mon}</td><td>${it.gap}</td>
+      <td class="metric ${cls}" style="font-size:16px">${s.toFixed(2)}</td>
+      <td><span class="pill ${cls}">${v}</span></td>
+      <td><button class="btn ghost" data-id="${it.id}" style="padding:4px 10px">✕</button></td>`;
+    rows.appendChild(tr);
+  });
+  rows.querySelectorAll("button[data-id]").forEach(b=>b.onclick=()=>{ items=items.filter(x=>x.id!=b.dataset.id); save(); render(); });
+}
+function esc(s){ return (s??"").replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+$("addBtn").onclick=()=>{
+  const name=$("f_name").value.trim();
+  if(!name){ $("f_name").focus(); return; }
+  items.push({
+    id:Date.now()+""+Math.random().toString(36).slice(2,6),
+    name, src:$("f_src").value.trim(), evidence:$("f_evidence").value.trim(),
+    freq:+$("s_freq").value, int:+$("s_int").value, mon:+$("s_mon").value, gap:+$("s_gap").value
+  });
+  save(); render();
+  $("f_name").value=$("f_src").value=$("f_evidence").value="";
+  ["freq","int","mon","gap"].forEach(k=>{$("s_"+k).value=3;$("so_"+k).textContent=3;});
+  $("f_name").focus();
+};
+
+$("seedBtn").onclick=()=>{
+  const seed=[
+    {name:"프리랜서가 매달 인보이스 세금계산을 손으로 함", src:"r/freelance", evidence:"I'd pay $15/mo to never touch a spreadsheet again (↑420)", freq:4,int:4,mon:4,gap:4},
+    {name:"소규모 쇼핑몰 운영자가 리뷰 답변에 매일 1시간 씀", src:"r/ecommerce", evidence:"replying to reviews eats my morning every day (↑180)", freq:4,int:3,mon:4,gap:3},
+    {name:"학생이 PDF 강의자료를 요약 못 해 시험준비 힘듦", src:"r/college", evidence:"wish something just summarized my lecture pdfs (↑90)", freq:5,int:2,mon:2,gap:1},
+  ];
+  seed.forEach(s=>items.push({id:Date.now()+""+Math.random().toString(36).slice(2,6),...s}));
+  save(); render();
+};
+
+$("clearBtn").onclick=()=>{ if(confirm("모든 후보를 삭제할까요?")){ items=[]; save(); render(); } };
+
+$("exportBtn").onclick=()=>{
+  const head=["문제","출처","빈도","강도","지불가능성","경쟁공백","가중점수","판정","증거"];
+  const sorted=[...items].sort((a,b)=>weightedScore(b)-weightedScore(a));
+  const rows=sorted.map(it=>{ const s=weightedScore(it); return [it.name,it.src,it.freq,it.int,it.mon,it.gap,s.toFixed(2),verdict(s)[0],it.evidence]; });
+  const csv=[head,...rows].map(r=>r.map(c=>`"${String(c??"").replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob=new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="painpoints_"+new Date().toISOString().slice(0,10)+".csv"; a.click();
+};
+
+render();
+</script>
+</body>
+</html>
