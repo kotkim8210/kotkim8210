@@ -20,6 +20,7 @@ function caps(x, text, cx, topY, size, color) {
   const sp = size * 0.34, ch = [...text]; let t = 0; for (const c of ch) t += x.measureText(c).width + sp; t -= sp;
   let px = cx - t / 2; for (const c of ch) { x.fillText(c, px, topY); px += x.measureText(c).width + sp; }
 }
+function brandMark(x, cx, y, size, color) { caps(x, '씨앗과 기도', cx, y, size, color); }
 function bullets(x, items, cx, topY, size, lh, color) {
   x.textBaseline = 'top';
   items.forEach((it, i) => {
@@ -58,7 +59,8 @@ function sprig(x, cx, topY, scale, color) {
   // T1 — 대표 (product hero; title readable on cover)
   { const { c, x } = P(CREAM); frame(x, 38, 'rgba(76,90,60,0.45)', 3); sprig(x, S / 2, 52, .54, INK);
     shot(x, cover, S / 2, 168, 432);
-    multi(x, '자녀를 위해, 매일 한 장', S / 2, 828, 62, 'NMX', INK, 74);
+    multi(x, '자녀를 위해, 매일 한 장', S / 2, 820, 58, 'NMX', INK, 70);
+    brandMark(x, S / 2, 922, 24, 'rgba(76,90,60,0.72)');
     fs.writeFileSync(`${D}/thumb_1_main.png`, c.toBuffer('image/png')); }
 
   // T2 — 후킹 (deep green, all fresh text, no small cover)
@@ -67,13 +69,14 @@ function sprig(x, cx, topY, scale, color) {
     multi(x, '엄마의 기도는\n아이의 평생을\n바꿉니다', S / 2, 258, 86, 'NMX', CTXT, 112);
     multi(x, '엄마의 기도 노트', S / 2, 712, 52, 'NMX', CTXT, 64);
     multi(x, '자녀를 위한 기도 저널', S / 2, 800, 30, 'NMB', 'rgba(243,238,222,0.82)', 42);
+    brandMark(x, S / 2, 898, 26, 'rgba(243,238,222,0.66)');
     fs.writeFileSync(`${D}/thumb_2_hook.png`, c.toBuffer('image/png')); }
 
   // T3 — 기능: 큰 리스트로 칸 이름 직접 노출 (읽힘)
   { const { c, x } = P(CREAM); frame(x, 38, 'rgba(76,90,60,0.45)', 3); caps(x, 'HOW IT WORKS', S / 2, 96, 26, INK);
     multi(x, '기도제목부터 응답까지\n기록하는 1년', S / 2, 160, 54, 'NMX', INK, 78);
-    bullets(x, ['오늘의 말씀', '자녀를 위한 기도제목', '기도 응답 기록', '오늘의 감사'], S / 2, 430, 42, 90, INK);
-    sprig(x, S / 2, 820, .55, INK);
+    bullets(x, ['오늘의 말씀', '자녀를 위한 기도제목', '기도 응답 기록', '오늘의 감사'], S / 2, 430, 42, 88, INK);
+    brandMark(x, S / 2, 882, 28, 'rgba(76,90,60,0.72)');
     fs.writeFileSync(`${D}/thumb_3_feature.png`, c.toBuffer('image/png')); }
 
   // T4 — 구성: 페이지 컷 + 각 컷 아래 큰 캡션
@@ -85,13 +88,15 @@ function sprig(x, cx, topY, scale, color) {
       const cx = x0 + w / 2 + i * (w + gap); const h = shot(x, im, cx, ty, w);
       multi(x, labels[i], cx, ty + h + 28, 38, 'NMB', INK, 46);
     });
+    brandMark(x, S / 2, 858, 28, 'rgba(76,90,60,0.72)');
     fs.writeFileSync(`${D}/thumb_4_inside.png`, c.toBuffer('image/png')); }
 
   // T5 — 선물 (cover sized within frame)
   { const { c, x } = P(CREAM); frame(x, 38, 'rgba(76,90,60,0.4)', 3); sprig(x, S / 2, 70, .56, INK);
     multi(x, '믿음의 엄마에게\n드리는 선물', S / 2, 178, 60, 'NMX', INK, 82);
     pill(x, '권사님께 · 며느리에게 · 나에게', S / 2, 358, 36, INK, CTXT);
-    shot(x, cover, S / 2, 482, 300);
+    shot(x, cover, S / 2, 470, 300);
+    brandMark(x, S / 2, 922, 24, 'rgba(76,90,60,0.72)');
     fs.writeFileSync(`${D}/thumb_5_gift.png`, c.toBuffer('image/png')); }
 
   console.log('DONE thumbnails 5 (v3)');

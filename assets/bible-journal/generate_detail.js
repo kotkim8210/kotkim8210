@@ -190,6 +190,8 @@ function section(bg, els, padTop = 95, padBottom = 95) {
     { t: 'body', text: '쉬지 말고 기도하라 — 데살로니가전서 5 : 17', size: 27, lh: 44, color: 'rgba(243,238,224,0.72)' },
     { t: 'gap', h: 34 },
     { t: 'body', text: '첫 제작은 한정 수량으로 준비됩니다.', size: 30, lh: 48 },
+    { t: 'gap', h: 44 },
+    { t: 'body', text: '씨앗과 기도', size: 36, lh: 50, color: CTXT },
   ], 100, 110);
 
   // trim

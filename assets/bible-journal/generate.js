@@ -84,6 +84,7 @@ const pages = [];
   center(x, '자녀를 위한 기도 저널', W / 2, 1335, 84, 'NMB', 'rgba(84,96,63,0.92)');
   center(x, '쉬지 말고 기도하라', W / 2, 2025, 70, 'NMB', INK);
   center(x, '데살로니가전서 5 : 17', W / 2, 2120, 48, 'NMR', INK_SOFT);
+  center(x, '씨앗과 기도', W / 2, 2330, 50, 'NMB', INK_SOFT);
   pages.push(c);
 }
 
