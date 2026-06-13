@@ -2,6 +2,9 @@
   "_help": "lean config. id/text/caption 만 적으면 image=assets/<id>.jpg, audio=assets/<id>.mp3 가 자동 유도됩니다. 20분이면 text 합계 6,400~7,000자 목표. ★관점 들어가는 세그먼트엔 \"pov\": true 를 넣으면 human_tasks.md 체크리스트 1번에 자동 표시됩니다(심리/교훈 블록).",
   "voice": { "backend": "files" },
   "images": { "backend": "prompts" },
+  "_images_per_segment_help": "롱폼 화면 전환용. 세그먼트당 이미지 장수(권장 5~6). 파일명 s{id}_1.jpg…s{id}_N.jpg 자동. 각 장에 켄번즈 줌/팬 모션 적용(motion:false로 끔).",
+  "images_per_segment": 6,
+  "motion": true,
   "captions": { "mode": "whisper" },
   "_image_style_help": "주제별 이미지 톤. suffix=모든 컷에 붙는 시대·장소 앵커, motifs=[{kw:정규식,scene:영문장면}]. 생략하면 내장(역사·유럽) 모티프 사용.",
   "image_style": {

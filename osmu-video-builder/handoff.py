@@ -16,7 +16,7 @@ import os
 import re
 import sys
 
-from osmu_common import config_root, load_config, resolve
+from osmu_common import config_root, load_config, resolve, segment_images
 import ttsfix
 
 
@@ -97,14 +97,24 @@ def gen_human_tasks(cfg, root):
             L.append(f"  - [{box(ap)}] `{ap}`  ({s['id']})")
     L.append("")
 
-    L.append("## 3) 🖼️ 이미지 생성 → `assets/` 저장")
+    total_img = sum(len(segment_images(s, cfg)) for s in cfg["segments"])
+    L.append(f"## 3) 🖼️ 이미지 생성 → `assets/` 저장  (총 {total_img}장)")
     if backend_i != "prompts":
         L.append(f"- images.backend=`{backend_i}` → 자동 생성됨(작업 불필요).")
     else:
-        L.append("- 프롬프트: **`image_prompts.16x9.md`** (붙여넣기) / 매핑: `image_manifest.json`")
+        L.append("- 프롬프트: **`image_prompts.16x9.md`** / 한 줄씩 묶음: **`image_prompts_batch.txt`**")
+        L.append("- 💡 무료 제작 파이프라인 (2026 기준):")
+        L.append("  1. **이미지: Flow(gemini.google.com/flow) = Nano Banana Pro** — 무료, 프롬프트 1개당 4장, **워터마크 없음**.")
+        L.append("     (Gemini 앱·일반 Nano Banana 무료판은 로고 워터마크가 박힘 → 반드시 Flow에서.)")
+        L.append("  2. 브라우저 **탭 5~6개**에 `image_prompts_batch.txt`를 나눠 넣어 배치 생성 → 4장씩 나오니 컷이 금방 참.")
+        L.append("  3. (선택) **영상화: Kling AI** — 정지컷을 3~5초 영상으로. 무료 66크레딧/일 = 5초 ×6컷/일.")
+        L.append("     → 전 컷은 무리(약 12일). '훅·정점·심리' 핵심 컷만 Kling, 나머지는 이 도구의 켄번즈로.")
+        L.append("  4. **편집/자막: CapCut**(16:9·9:16 무료) 또는 이 도구의 build.py(켄번즈 자동 조립).")
         for s in cfg["segments"]:
-            ip = s.get("image", f"assets/{s['id']}.jpg")
-            L.append(f"  - [{box(ip)}] `{ip}`  ({s['id']})")
+            imgs = segment_images(s, cfg)
+            have = sum(1 for p in imgs if os.path.exists(resolve(root, p)))
+            mark = "x" if have == len(imgs) else " "
+            L.append(f"  - [{mark}] {s['id']}: {have}/{len(imgs)}장  ({imgs[0]} … {imgs[-1].split('/')[-1]})")
     L.append("")
 
     L.append("## (참고) 고증 검증")

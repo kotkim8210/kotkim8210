@@ -20,6 +20,8 @@ DEFAULTS = {
     "fps": 30,
     "longform_resolution": [1920, 1080],
     "clip_resolution": [1080, 1920],
+    "images_per_segment": 1,   # 롱폼 화면 전환용. config에서 5~6 권장.
+    "motion": True,            # 켄번즈(느린 줌/팬) on/off
 }
 DEFAULT_VOICE = {"backend": "files"}
 DEFAULT_CAPTIONS = {
@@ -48,6 +50,19 @@ def load_config(path):
         s.setdefault("image", f"assets/{sid}.jpg")
         s.setdefault("audio", f"assets/{sid}.mp3")
     return cfg
+
+
+def segment_images(seg, cfg):
+    """세그먼트가 쓸 이미지 파일 목록(롱폼 화면 전환용).
+    우선순위: segment.images(직접 목록) > n장 규칙(s{id}_1..N) > 단일 image.
+    promptgen·build·auto·handoff 가 모두 이걸 써서 파일명이 일치한다.
+    """
+    if seg.get("images"):
+        return seg["images"]
+    n = seg.get("n_images") or cfg.get("images_per_segment", 1) or 1
+    if n > 1:
+        return [f"assets/{seg['id']}_{i}.jpg" for i in range(1, n + 1)]
+    return [seg.get("image", f"assets/{seg['id']}.jpg")]
 
 
 def resolve(root, p):

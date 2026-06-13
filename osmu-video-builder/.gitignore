@@ -15,3 +15,4 @@ human_tasks.md
 # factlog.json 은 검증 기록이라 보존(커밋) — 무시하지 않음
 __pycache__/
 *.pyc
+image_prompts_batch.txt

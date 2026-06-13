@@ -24,7 +24,19 @@ import os
 import re
 import sys
 
-from osmu_common import config_root, load_config
+from osmu_common import config_root, load_config, segment_images
+
+# 한 세그먼트의 여러 장을 서로 다른 구도로 — 같은 장면이 반복돼 보이지 않게
+VARIANTS = [
+    "wide establishing shot",
+    "tight close-up on a key detail",
+    "low angle, dramatic perspective",
+    "high overhead angle",
+    "atmospheric shot with deep negative space",
+    "medium shot, shallow focus",
+    "dynamic diagonal composition",
+    "extreme wide, tiny subject in vast space",
+]
 
 DEFAULT_STYLE = ("cinematic documentary still, moody dramatic lighting, muted desaturated "
                  "color grade, fine film grain, shallow depth of field, painterly historical "
@@ -98,29 +110,33 @@ def main():
     motifs = get_motifs(style)
     default_motif = style.get("default_motif", DEFAULT_MOTIF)
 
-    out_json, manifest = {}, []
+    out_json, manifest, batch = {}, [], []
+    total = 0
     md = ["# 이미지 생성 프롬프트 (자동 생성)\n",
           f"> 비율: {ar}" + (f" · 시대/장소 앵커: {SUFFIX}" if SUFFIX else "") + " · 사람 얼굴 없음(초상권 회피)\n",
-          "> ChatGPT/미드저니/ImageFX에 prompt_en 또는 midjourney 줄을 붙여넣고,\n",
-          "> 나온 이미지를 각 항목의 파일명 그대로 저장하세요.\n"]
+          "> 무료 팁: ImageFX·Bing·Leonardo는 프롬프트 1개당 4장씩 나옵니다 → 한 프롬프트로 여러 컷 채우기.\n",
+          "> 나온 이미지를 각 항목의 파일명 그대로 저장하세요. 전체 묶음: image_prompts_batch.txt\n"]
     for seg in cfg["segments"]:
         sid = seg["id"]
-        target = seg.get("image", f"assets/{sid}.jpg")
+        files = segment_images(seg, cfg)
         scene, src = scene_for(seg, style, motifs, default_motif)
-        parts = [scene]
-        if SUFFIX:
-            parts.append(SUFFIX)
-        parts += [AR_WORD[ar], STYLE, GUARD]
-        en = ", ".join(parts)
-        p = {"prompt_en": en, "negative": NEG,
-             "midjourney": f"{en} {AR[ar]} --style raw --v 6",
-             "note_ko": f"장면 출처: {src}"}
-        out_json[sid] = p
-        manifest.append({"id": sid, "save_as": target, "prompt": en})
-        md += [f"\n## {sid}  → 저장 파일명: `{target}`  ({src})",
-               f"- **EN**: {en}",
-               f"- **MJ**: `{p['midjourney']}`",
-               f"- **negative**: {NEG}"]
+        md.append(f"\n## {sid}  ({len(files)}장, 장면 출처: {src})")
+        for idx, target in enumerate(files):
+            variant = VARIANTS[idx % len(VARIANTS)] if len(files) > 1 else None
+            parts = [scene] + ([variant] if variant else [])
+            if SUFFIX:
+                parts.append(SUFFIX)
+            parts += [AR_WORD[ar], STYLE, GUARD]
+            en = ", ".join(parts)
+            key = f"{sid}#{idx+1}"
+            out_json[key] = {"prompt_en": en, "negative": NEG,
+                             "midjourney": f"{en} {AR[ar]} --style raw --v 6",
+                             "save_as": target}
+            manifest.append({"id": sid, "save_as": target, "prompt": en})
+            batch.append(en)
+            total += 1
+            md += [f"- `{target}`" + (f"  ({variant})" if variant else ""),
+                   f"  - {en}"]
 
     json.dump(out_json, open(os.path.join(root, f"image_prompts.{ar}.json"), "w",
               encoding="utf-8"), ensure_ascii=False, indent=2)
@@ -129,7 +145,9 @@ def main():
     if ar == "16x9":
         json.dump(manifest, open(os.path.join(root, "image_manifest.json"), "w",
                   encoding="utf-8"), ensure_ascii=False, indent=2)
-    print(f"promptgen: {len(out_json)} prompts (ar={ar}) -> image_prompts.{ar}.md")
+        open(os.path.join(root, "image_prompts_batch.txt"), "w",
+             encoding="utf-8").write("\n".join(batch))
+    print(f"promptgen: {total} prompts (ar={ar}, {len(cfg['segments'])}세그먼트) -> image_prompts.{ar}.md")
 
 
 if __name__ == "__main__":

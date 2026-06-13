@@ -146,5 +146,7 @@
       }
     ],
     "negative": "text, letters, watermark, logo, cartoon, anime, deformed hands, extra fingers, lowres, jpeg artifacts"
-  }
+  },
+  "images_per_segment": 6,
+  "motion": true
 }

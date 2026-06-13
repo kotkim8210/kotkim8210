@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
-build.py (v3) — OSMU 영상 조립 + Whisper 동기화 자막.
+build.py (v4) — OSMU 영상 조립 + Whisper 동기화 자막 + 다중 이미지/켄번즈.
 
 흐름: 대본(config.json) → 세그먼트별 음성(voice.py) → [선택] Whisper 단어 타임스탬프
   → 음성 길이에 맞춰 조립 → 본편(16:9) + OSMU 클립(9:16), 자막 번인.
 
-v3 변경(자동화):
-  - osmu_common.load_config 사용 → image/audio 경로 자동 유도(lean config).
-  - 음성 합성에 tts_text(있으면) 우선 사용 → ttsfix 결과가 자동 반영.
+v4 변경(롱폼 화면 죽음 방지):
+  - 세그먼트당 이미지 N장(osmu_common.segment_images) → 음성 길이를 N장에 균등 분배.
+  - 켄번즈(느린 줌/팬) 모션 — 정지 이미지도 살아 움직임. config.motion=false면 끔.
+  - 음성 합성에 tts_text(있으면) 우선.
 
 자막 모드(config.captions.mode): "whisper" / "static"
 사용:  python build.py config.json
@@ -21,7 +22,7 @@ from moviepy import (ImageClip, AudioFileClip, CompositeVideoClip,
                      concatenate_videoclips)
 
 import voice as voicemod
-from osmu_common import config_root, load_config, resolve, narration
+from osmu_common import config_root, load_config, resolve, narration, segment_images
 
 
 def cover_fit(img_path, size):
@@ -33,6 +34,17 @@ def cover_fit(img_path, size):
     im = im.resize((nw, nh), Image.LANCZOS)
     l, t = (nw - W) // 2, (nh - H) // 2
     return np.array(im.crop((l, t, l + W, t + H)))
+
+
+def ken_burns(arr, size, dur, idx=0, zoom=0.10, motion=True):
+    """정지 이미지에 느린 줌(켄번즈). idx 짝/홀로 줌인/줌아웃 번갈아 → 단조로움 방지."""
+    base = ImageClip(arr).with_duration(dur)
+    if not motion or dur <= 0.05:
+        return base
+    z0, z1 = (1.0, 1.0 + zoom) if idx % 2 == 0 else (1.0 + zoom, 1.0)
+    moving = base.resized(lambda t: z0 + (z1 - z0) * (min(t, dur) / dur))
+    return CompositeVideoClip([moving.with_position("center")],
+                              size=size).with_duration(dur)
 
 
 def _wrap(text, font, max_w):
@@ -95,9 +107,14 @@ def _rgba_clip(arr, dur, start=0.0):
 
 
 def build_segment(A, size, font, margin, cap_size, cap_mode,
-                  cap_cfg, hook=None, hook_size=None):
-    base = ImageClip(cover_fit(A["image"], size)).with_duration(A["dur"])
-    layers = [base]
+                  cap_cfg, hook=None, hook_size=None, motion=True):
+    # 배경: 세그먼트 음성 길이를 이미지 N장에 균등 분배 + 켄번즈
+    imgs = A["images"]
+    per = A["dur"] / len(imgs)
+    bg_parts = [ken_burns(cover_fit(img, size), size, per, i, motion=motion)
+                for i, img in enumerate(imgs)]
+    bg = concatenate_videoclips(bg_parts, method="compose").with_duration(A["dur"])
+    layers = [bg]
     if hook:
         h = render_caption(hook, size[0] - 2 * margin, font, hook_size,
                            box=(0, 0, 0, 170))
@@ -113,8 +130,8 @@ def build_segment(A, size, font, margin, cap_size, cap_mode,
         arr = render_caption(A["caption"], size[0] - 2 * margin, font, cap_size)
         layers.append(_rgba_clip(arr, A["dur"]).with_position(
             ("center", size[1] - arr.shape[0] - margin)))
-    return CompositeVideoClip(layers, size=size).with_audio(
-        AudioFileClip(A["audio"]))
+    return CompositeVideoClip(layers, size=size).with_duration(
+        A["dur"]).with_audio(AudioFileClip(A["audio"]))
 
 
 def main(cfg_path):
@@ -125,6 +142,7 @@ def main(cfg_path):
     os.makedirs(work, exist_ok=True)
     font = cfg.get("font", os.path.join(root, "NanumGothic.ttf"))
     fps = cfg.get("fps", 30)
+    motion = cfg.get("motion", True)
     vcfg = cfg["voice"]
     cap_conf = cfg.get("captions", {"mode": "static"})
     cap_mode = cap_conf.get("mode", "static")
@@ -138,18 +156,20 @@ def main(cfg_path):
         voicemod.synth(narration(seg), ap, vcfg, segment_audio=seg_audio)
         dur = AudioFileClip(ap).duration
         chunks = None
+        imgs = [resolve(root, p) for p in segment_images(seg, cfg)]
         if cap_mode == "whisper":
             chunks = capmod.whisper_chunks(ap, cap_conf)
-            print(f"  - {seg['id']}: {dur:.1f}s, captions {len(chunks)} chunks")
+            print(f"  - {seg['id']}: {dur:.1f}s, imgs {len(imgs)}, captions {len(chunks)} chunks")
         else:
-            print(f"  - {seg['id']}: {dur:.1f}s")
+            print(f"  - {seg['id']}: {dur:.1f}s, imgs {len(imgs)}")
         seg_assets[seg["id"]] = dict(
-            audio=ap, dur=dur, image=resolve(root, seg["image"]),
+            audio=ap, dur=dur, images=imgs,
             caption=seg.get("caption", ""), chunks=chunks)
 
     LF = tuple(cfg.get("longform_resolution", [1920, 1080]))
     lf = concatenate_videoclips(
-        [build_segment(seg_assets[s["id"]], LF, font, 60, 48, cap_mode, cap_conf)
+        [build_segment(seg_assets[s["id"]], LF, font, 60, 48, cap_mode, cap_conf,
+                       motion=motion)
          for s in cfg["segments"]], method="compose")
     lf_path = os.path.join(out_dir, "longform.mp4")
     lf.write_videofile(lf_path, fps=fps, codec="libx264", audio_codec="aac",
@@ -162,7 +182,8 @@ def main(cfg_path):
     CL = tuple(cfg.get("clip_resolution", [1080, 1920]))
     for clip in cfg.get("clips", []):
         parts = [build_segment(seg_assets[sid], CL, font, 70, 50, cap_mode,
-                               cap_conf, hook=clip.get("hook"), hook_size=66)
+                               cap_conf, hook=clip.get("hook"), hook_size=66,
+                               motion=motion)
                  for sid in clip["from_segments"]]
         cv = concatenate_videoclips(parts, method="compose")
         cp = os.path.join(out_dir, f"clip_{clip['name']}.mp4")

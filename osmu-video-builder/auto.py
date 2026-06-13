@@ -27,7 +27,7 @@ import os
 import subprocess
 import sys
 
-from osmu_common import config_root, load_config, resolve
+from osmu_common import config_root, load_config, resolve, segment_images
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 GREEN, RED, DIM, BOLD, END = "\033[92m", "\033[91m", "\033[2m", "\033[1m", "\033[0m"
@@ -58,11 +58,13 @@ def asset_status(cfg, root):
     backend = cfg.get("voice", {}).get("backend", "files")
     rows = []
     for s in cfg["segments"]:
-        img = resolve(root, s["image"])
+        imgs = segment_images(s, cfg)
+        have = [p for p in imgs if os.path.exists(resolve(root, p))]
         aud = resolve(root, s["audio"])
         rows.append({
             "id": s["id"],
-            "image": s["image"], "image_ok": os.path.exists(img),
+            "images": imgs, "img_have": len(have), "img_total": len(imgs),
+            "miss_img": [p for p in imgs if not os.path.exists(resolve(root, p))],
             "audio": s["audio"],
             "audio_ok": (backend != "files") or os.path.exists(aud),
             "audio_needed": backend == "files",
@@ -76,14 +78,14 @@ def print_board(cfg, root):
     print(f"\n{BOLD}{'─'*56}\n 제작 현황판\n{'─'*56}{END}")
     miss_img, miss_aud = [], []
     for r in rows:
-        ic = f"{GREEN}✅{END}" if r["image_ok"] else f"{RED}❌{END}"
+        ok = r["img_have"] == r["img_total"]
+        ic = f"{GREEN}✅{END}" if ok else f"{RED}❌{END}"
         if r["audio_needed"]:
             ac = f"{GREEN}✅{END}" if r["audio_ok"] else f"{RED}❌{END}"
         else:
             ac = f"{DIM}auto{END}"
-        print(f"  {r['id']:<5} 이미지 {ic} {r['image']:<22} 음성 {ac} {r['audio'] if r['audio_needed'] else ''}")
-        if not r["image_ok"]:
-            miss_img.append(r["image"])
+        print(f"  {r['id']:<5} 이미지 {ic} {r['img_have']}/{r['img_total']}장   음성 {ac} {r['audio'] if r['audio_needed'] else ''}")
+        miss_img += r["miss_img"]
         if r["audio_needed"] and not r["audio_ok"]:
             miss_aud.append(r["audio"])
 
