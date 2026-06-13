@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>당근 시세 추적기 — 북마클릿 설치</title>
+<style>
+  :root { color-scheme: light; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; max-width: 760px; margin: 0 auto; padding: 32px 20px 80px; line-height: 1.6; color: #222; background: #fafafa; }
+  h1 { font-size: 26px; margin: 0 0 8px; }
+  h2 { font-size: 18px; margin: 32px 0 8px; padding-top: 12px; border-top: 1px solid #eee; }
+  p { margin: 8px 0; }
+  ol li { margin: 6px 0; }
+  code, pre { font-family: ui-monospace, Menlo, Consolas, monospace; background: #f3f3f3; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+  pre { padding: 12px; overflow-x: auto; }
+  .bm { display: inline-block; background: #FF6F0F; color: #fff !important; text-decoration: none; padding: 12px 22px; border-radius: 10px; font-weight: 700; font-size: 16px; box-shadow: 0 4px 12px rgba(255,111,15,.35); }
+  .bm:hover { background: #e55f00; }
+  .hint { background: #FFF8EC; border: 1px solid #FFE4B5; border-radius: 8px; padding: 12px 16px; margin: 16px 0; font-size: 14px; }
+  kbd { background: #fff; border: 1px solid #ccc; border-bottom-width: 2px; border-radius: 4px; padding: 1px 6px; font: 12px ui-monospace, monospace; }
+  .small { color: #666; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<h1>📊 당근 시세 추적기 — 북마클릿 설치</h1>
+<p class="small">당근마켓 상품 페이지에서 클릭 한 번으로 데이터를 추출해 Google Sheet에 자동 기록합니다.</p>
+
+<div class="hint">
+  ⚠️ <b>먼저 Apps Script Web App을 배포</b>하고 URL/토큰을 받아두세요. (아래 설정 가이드 참고)
+</div>
+
+<h2>1. 북마클릿 설치</h2>
+<p>아래 주황색 버튼을 <b>북마크 바로 드래그</b>하세요. (브라우저에 북마크 바가 보이지 않으면 <kbd>Ctrl/⌘ + Shift + B</kbd>로 켜기)</p>
+<p>
+  <a class="bm"
+     href="javascript:(function(){'use strict';var KU='karrotTracker.url',KT='karrotTracker.token';function $(i){return document.getElementById(i)}function e(v){return String(v==null?'':v).replace(/[&amp;&lt;&gt;&quot;']/g,function(c){return{'&amp;':'&amp;amp;','&lt;':'&amp;lt;','&gt;':'&amp;gt;','&quot;':'&amp;quot;',&quot;'&quot;:'&amp;#39;'}[c]})}function x(){var t=(document.body&amp;&amp;document.body.innerText)||'',d={keyword:'',name:'',seller:'',rating:'',reviews:'',likes:'',optionsText:'',url:location.href};var og=document.querySelector('meta[property=&quot;og:title&quot;]');if(og&amp;&amp;og.content)d.name=og.content.replace(/\s*[|\-–·•].*$/,'').trim();if(!d.name){var h1=document.querySelector('h1');if(h1)d.name=h1.innerText.trim()}if(!d.name)d.name=document.title.replace(/\s*[|\-–·•].*$/,'').trim();var m=t.match(/별점\s*([0-9]\.[0-9])/)||t.match(/(?:★|⭐)\s*([0-9]\.[0-9])/)||t.match(/([0-9]\.[0-9])\s*점/);if(m)d.rating=parseFloat(m[1]);m=t.match(/(?:후기|리뷰)\s*[\(\s]?\s*([\d,]+)/);if(m)d.reviews=parseInt(m[1].replace(/,/g,''),10);m=t.match(/(?:찜|관심)\s*[\(\s]?\s*([\d,]+)/);if(m)d.likes=parseInt(m[1].replace(/,/g,''),10);m=t.match(/(?:판매자|스토어|상점)\s*[:|\n]\s*([^\n]+)/);if(m)d.seller=m[1].trim().slice(0,40);if(d.name){var tk=d.name.split(/\s+/).filter(function(s){return s.length&gt;=2})[0];if(tk)d.keyword=tk}var sel=(window.getSelection&amp;&amp;window.getSelection().toString().trim())||'';if(sel)d.optionsText=sel;else{var L=t.split(/\n/).map(function(s){return s.trim()}).filter(Boolean).filter(function(l){return/(\d+(?:\.\d+)?\s*(?:kg|킬로|키로|박스|상자|개|알|입|구|마리|통|팩|세트))/i.test(l)&amp;&amp;/[\d,]+\s*원/.test(l)}).slice(0,12);d.optionsText=L.join('\n')}return d}function M(d){var o=$('karrot-tracker-modal');if(o)o.remove();var m=document.createElement('div');m.id='karrot-tracker-modal';m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2147483647;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,&quot;Apple SD Gothic Neo&quot;,&quot;Malgun Gothic&quot;,sans-serif;';function L(t){return'&lt;div style=&quot;font-size:12px;color:#555;margin:8px 0 4px;font-weight:600;&quot;&gt;'+t+'&lt;/div&gt;'}function I(id,v){return'&lt;input id=&quot;'+id+'&quot; value=&quot;'+e(v)+'&quot; style=&quot;width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;box-sizing:border-box;font-size:14px;&quot;&gt;'}function C(t,id,v){return'&lt;div style=&quot;flex:1;&quot;&gt;'+L(t)+I(id,v)+'&lt;/div&gt;'}m.innerHTML='&lt;div style=&quot;background:#fff;padding:20px 22px;border-radius:14px;max-width:520px;width:92%;max-height:88vh;overflow:auto;box-shadow:0 16px 40px rgba(0,0,0,.25);color:#222;&quot;&gt;&lt;div style=&quot;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;&quot;&gt;&lt;div style=&quot;font-size:17px;font-weight:700;&quot;&gt;📊 당근 시세 추적기&lt;/div&gt;&lt;button id=&quot;kt-x&quot; style=&quot;border:none;background:transparent;font-size:22px;cursor:pointer;color:#999;&quot;&gt;×&lt;/button&gt;&lt;/div&gt;&lt;div style=&quot;font-size:12px;color:#666;margin-bottom:14px;line-height:1.45;&quot;&gt;자동 추출 값을 확인/수정 후 &lt;b&gt;전송&lt;/b&gt;. &lt;b&gt;옵션&lt;/b&gt;은 한 줄=한 옵션 (예: &lt;code&gt;10개 14,820원&lt;/code&gt;, &lt;code&gt;4.5kg 30000&lt;/code&gt;).&lt;/div&gt;'+L('검색어 (분류 키워드)')+I('kt-keyword',d.keyword)+L('상품명')+I('kt-name',d.name)+L('판매자')+I('kt-seller',d.seller)+'&lt;div style=&quot;display:flex;gap:8px;&quot;&gt;'+C('평점','kt-rating',d.rating)+C('후기수','kt-reviews',d.reviews)+C('찜수','kt-likes',d.likes)+'&lt;/div&gt;'+L('옵션 (한 줄=한 옵션)')+'&lt;textarea id=&quot;kt-options&quot; rows=&quot;6&quot; style=&quot;width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;box-sizing:border-box;font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;&quot;&gt;'+e(d.optionsText)+'&lt;/textarea&gt;&lt;div style=&quot;display:flex;gap:8px;margin-top:16px;justify-content:flex-end;align-items:center;&quot;&gt;&lt;div id=&quot;kt-status&quot; style=&quot;flex:1;font-size:12px;color:#666;&quot;&gt;&lt;/div&gt;&lt;button id=&quot;kt-settings&quot; style=&quot;padding:8px 12px;border:1px solid #ddd;background:#fafafa;border-radius:8px;cursor:pointer;font-size:12px;&quot;&gt;설정&lt;/button&gt;&lt;button id=&quot;kt-cancel&quot; style=&quot;padding:8px 14px;border:1px solid #ddd;background:#fff;border-radius:8px;cursor:pointer;&quot;&gt;취소&lt;/button&gt;&lt;button id=&quot;kt-send&quot; style=&quot;padding:8px 18px;border:none;background:#FF6F0F;color:#fff;border-radius:8px;cursor:pointer;font-weight:700;&quot;&gt;전송 →&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;';document.body.appendChild(m);$('kt-x').onclick=$('kt-cancel').onclick=function(){m.remove()};$('kt-settings').onclick=function(){localStorage.removeItem(KU);localStorage.removeItem(KT);m.remove();alert('설정 초기화됨. 북마클릿을 다시 눌러주세요.')};$('kt-send').onclick=function(){var u=localStorage.getItem(KU),tk=localStorage.getItem(KT),s=$('kt-status'),p={token:tk,keyword:$('kt-keyword').value.trim(),name:$('kt-name').value.trim(),seller:$('kt-seller').value.trim(),rating:parseFloat($('kt-rating').value)||'',reviews:parseInt($('kt-reviews').value,10)||'',likes:parseInt($('kt-likes').value,10)||'',optionsText:$('kt-options').value};if(!p.keyword||!p.name){s.textContent='⚠️ 검색어/상품명 필수';s.style.color='#d33';return}if(!p.optionsText.trim()){s.textContent='⚠️ 옵션 1줄 이상 필요';s.style.color='#d33';return}s.textContent='전송 중…';s.style.color='#666';fetch(u,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(p)}).then(function(){s.innerHTML='✓ 전송됨 — 시트에서 확인하세요.';s.style.color='#080';setTimeout(function(){m.remove()},1200)}).catch(function(er){s.textContent='✗ 전송 실패: '+(er&amp;&amp;er.message||er);s.style.color='#d33'})}}var u=localStorage.getItem(KU),t=localStorage.getItem(KT);if(!u){u=prompt('Apps Script Web App URL을 붙여넣으세요\n(시트 메뉴 → 🔐 Web App URL/토큰 보기)','');if(!u)return;u=u.trim();localStorage.setItem(KU,u)}if(!t){t=prompt('토큰을 붙여넣으세요','');if(!t)return;t=t.trim();localStorage.setItem(KT,t)}M(x())})();"
+  >📊 당근 시세 추적기</a>
+</p>
+<p class="small">위 버튼을 클릭하면 동작하지 않습니다 — 반드시 <b>북마크 바로 드래그</b> 하세요. (또는 우클릭 → "북마크에 추가")</p>
+
+<h2>2. 사용법</h2>
+<ol>
+  <li>당근마켓 상품 페이지를 연다.</li>
+  <li><b>(선택)</b> 옵션 영역(수량/가격 적힌 부분)을 마우스로 드래그해 선택. 더 정확하게 추출됨.</li>
+  <li>북마크 바의 <b>📊 당근 시세 추적기</b> 클릭.</li>
+  <li><b>최초 1회만</b>: Apps Script Web App URL과 토큰을 묻는 프롬프트가 뜸 — 시트 메뉴 <code>🔐 Web App URL/토큰 보기</code>에서 복사해 붙여넣기.</li>
+  <li>자동 추출된 값을 모달에서 확인/수정 → <b>[전송]</b>.</li>
+  <li>시트의 <b>[시세기록]</b>에 자동 기록되고 <b>[대시보드]</b>가 자동 갱신됨.</li>
+</ol>
+
+<h2>3. Apps Script Web App 배포 (최초 1회)</h2>
+<ol>
+  <li>구글 시트에 <code>당근_시세추적기_v3.gs</code> 코드를 붙여넣고 저장.</li>
+  <li>함수 <code>setup</code> 실행 → 권한 승인.</li>
+  <li>우측 상단 <b>[배포] → [새 배포]</b> 클릭 → 유형 <b>"웹 앱"</b> 선택.</li>
+  <li><b>액세스 권한: "모든 사용자(Anyone)"</b>, <b>실행: "나"</b> 선택 → 배포.</li>
+  <li>표시된 URL을 복사 → 시트 메뉴 <code>🔐 Web App URL/토큰 보기</code>로 토큰도 함께 확인.</li>
+  <li>처음 북마클릿을 누를 때 그 두 값을 입력하면 끝.</li>
+</ol>
+<div class="hint">
+  토큰이 노출되면 메뉴의 <b>🔁 토큰 새로 발급</b>으로 무효화하세요. 북마클릿은 자동으로 다시 토큰을 물어봅니다.
+</div>
+
+<h2>4. 옵션 텍스트 형식</h2>
+<p>한 줄=한 옵션. 다음 모든 형태를 인식합니다.</p>
+<pre>10개 14,820원
+20개 25,820원
+4.5kg 30000
+5박스 / 25,000원</pre>
+
+<h2>5. 문제 해결</h2>
+<ul>
+  <li><b>"전송 실패"</b> — Web App URL이 올바른지, "모든 사용자" 액세스로 배포됐는지 확인.</li>
+  <li><b>토큰 불일치</b> — 메뉴 <code>🔐 Web App URL/토큰 보기</code>의 토큰과 일치해야 함. 모달의 <b>[설정]</b> 버튼으로 다시 입력.</li>
+  <li><b>상품명/평점이 잘못 추출됨</b> — 모달에서 직접 수정 후 전송 (페이지 구조가 자주 바뀜).</li>
+  <li><b>옵션이 비어있음</b> — 옵션 영역을 마우스로 드래그한 뒤 다시 북마클릿 클릭.</li>
+</ul>
+
+</body>
+</html>

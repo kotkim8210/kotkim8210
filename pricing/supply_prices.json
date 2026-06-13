@@ -1,0 +1,60 @@
+{
+  "_meta": {
+    "currency": "KRW",
+    "confidential": true,
+    "note": "공급가(도매 매입가) 추적 원장 — 비공개. listings/products.json·북마클릿 등 고객 노출 산출물에는 절대 넣지 말 것.",
+    "source_admin": "PBF Company 파트너 어드민",
+    "source_admin_url": "https://pbfcompany.adminplus.co.kr/partner/?mod=product&actpage=prt.list",
+    "courier": "CJ대한통운",
+    "fields": {
+      "product_id": "listings/products.json 의 상품 id 매핑",
+      "qty": "구성 수량(개)",
+      "supply": "공급가(매입 단가, 무료배송·비과세 포함)"
+    },
+    "how_to_update": "새 PBF 캡처를 받으면 snapshots 배열 끝에 같은 형식으로 한 블록 추가(seq+1, date 갱신) 후 python3 pricing/build_report.py 실행."
+  },
+  "snapshots": [
+    {
+      "seq": 1,
+      "date": "2026-06-13",
+      "label": "직전 기준(피크시즌 추정)",
+      "source": "이전 마진분석 기록(negotiation_drafts.md) — 정확 캡처 일자 미상",
+      "approx": true,
+      "items": [
+        { "product_id": "corn-mid",     "line": "초당옥수수 중품",      "grade": "중품", "qty": 5,  "supply": 9000 },
+        { "product_id": "corn-mid",     "line": "초당옥수수 중품",      "grade": "중품", "qty": 10, "supply": 12900 },
+        { "product_id": "corn-mid",     "line": "초당옥수수 중품",      "grade": "중품", "qty": 15, "supply": 19700 },
+        { "product_id": "corn-mid",     "line": "초당옥수수 중품",      "grade": "중품", "qty": 20, "supply": 23500 },
+        { "product_id": "corn-premium", "line": "초당옥수수 특품",      "grade": "특품", "qty": 5,  "supply": 11800 },
+        { "product_id": "corn-premium", "line": "초당옥수수 특품",      "grade": "특품", "qty": 10, "supply": 18200 },
+        { "product_id": "corn-premium", "line": "초당옥수수 특품",      "grade": "특품", "qty": 15, "supply": 25500 },
+        { "product_id": "corn-premium", "line": "초당옥수수 특품",      "grade": "특품", "qty": 20, "supply": 34000 },
+        { "product_id": "corn-apple",   "line": "애플초당옥수수 특품",  "grade": "특품", "qty": 5,  "supply": 12000 },
+        { "product_id": "corn-apple",   "line": "애플초당옥수수 특품",  "grade": "특품", "qty": 10, "supply": 18700 },
+        { "product_id": "corn-apple",   "line": "애플초당옥수수 특품",  "grade": "특품", "qty": 15, "supply": 26750 },
+        { "product_id": "corn-apple",   "line": "애플초당옥수수 특품",  "grade": "특품", "qty": 20, "supply": 35800 }
+      ]
+    },
+    {
+      "seq": 2,
+      "date": "2026-06-13",
+      "label": "PBF 어드민 캡처(시즌 후 하락 반영)",
+      "source": "PBF Company 파트너 어드민 상품목록 스크린샷",
+      "approx": false,
+      "items": [
+        { "product_id": "corn-mid",     "line": "★특가★ 초당옥수수 중품",        "brand": "★특가★",   "grade": "중품", "qty": 5,  "supply": 6800,  "tax": "비과세", "shipping": "무료" },
+        { "product_id": "corn-mid",     "line": "★특가★ 초당옥수수 중품",        "brand": "★특가★",   "grade": "중품", "qty": 10, "supply": 10500, "tax": "비과세", "shipping": "무료" },
+        { "product_id": "corn-mid",     "line": "★특가★ 초당옥수수 중품",        "brand": "★특가★",   "grade": "중품", "qty": 15, "supply": 14000, "tax": "비과세", "shipping": "무료" },
+        { "product_id": "corn-mid",     "line": "★특가★ 초당옥수수 중품",        "brand": "★특가★",   "grade": "중품", "qty": 20, "supply": 17000, "tax": "비과세", "shipping": "무료" },
+        { "product_id": "corn-premium", "line": "★특가★ 초당옥수수 특품",        "brand": "★특가★",   "grade": "특품", "qty": 5,  "supply": 11300, "tax": "비과세", "shipping": "무료" },
+        { "product_id": "corn-premium", "line": "★특가★ 초당옥수수 특품",        "brand": "★특가★",   "grade": "특품", "qty": 10, "supply": 17800, "tax": "비과세", "shipping": "무료" },
+        { "product_id": "corn-premium", "line": "★특가★ 초당옥수수 특품",        "brand": "★특가★",   "grade": "특품", "qty": 15, "supply": 26000, "tax": "비과세", "shipping": "무료" },
+        { "product_id": "corn-premium", "line": "★특가★ 초당옥수수 특품",        "brand": "★특가★",   "grade": "특품", "qty": 20, "supply": 34800, "tax": "비과세", "shipping": "무료" },
+        { "product_id": "corn-apple",   "line": "콧털삼촌 애플초당옥수수 특품",   "brand": "콧털삼촌", "grade": "특품", "qty": 5,  "supply": 12000, "tax": "비과세", "shipping": "무료" },
+        { "product_id": "corn-apple",   "line": "콧털삼촌 애플초당옥수수 특품",   "brand": "콧털삼촌", "grade": "특품", "qty": 10, "supply": 18700, "tax": "비과세", "shipping": "무료" },
+        { "product_id": "corn-apple",   "line": "콧털삼촌 애플초당옥수수 특품",   "brand": "콧털삼촌", "grade": "특품", "qty": 15, "supply": 26750, "tax": "비과세", "shipping": "무료" },
+        { "product_id": "corn-apple",   "line": "콧털삼촌 애플초당옥수수 특품",   "brand": "콧털삼촌", "grade": "특품", "qty": 20, "supply": 35800, "tax": "비과세", "shipping": "무료" }
+      ]
+    }
+  ]
+}
