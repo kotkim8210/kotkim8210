@@ -1,0 +1,10 @@
+node_modules/
+output/*
+!output/.gitkeep
+.env
+.env.local
+*.log
+.DS_Store
+credentials.json
+credentials/
+service-account*.json

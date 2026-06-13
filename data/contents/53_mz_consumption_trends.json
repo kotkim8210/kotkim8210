@@ -1,0 +1,39 @@
+{
+  "topic_id": "53_mz_consumption_trends",
+  "category": "생활꿀팁",
+  "card_type": "checklist",
+  "season": "상시",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#트렌드 🌊",
+      "headline_line1": "2026 MZ 소비",
+      "headline_line2": "트렌드 키워드 7",
+      "subheadline": "요노·제철코어·필코노미… 너도 이러고 있다"
+    },
+    {
+      "slide_number": 2,
+      "type": "checklist",
+      "section_title": "2026 소비 트렌드 7",
+      "items": [
+        {"icon": "🙅", "name": "요노 (YONO)", "detail": "You Only Need One · 꼭 필요한 것만", "badge": "대세"},
+        {"icon": "🍂", "name": "제철코어", "detail": "지금 아니면 못 누리는 계절 경험"},
+        {"icon": "💖", "name": "필코노미", "detail": "기분 좋아서 사는 감정 소비"},
+        {"icon": "🎁", "name": "트리토노믹스", "detail": "나에게 주는 작은 선물 소비"},
+        {"icon": "👥", "name": "나노 커뮤니티", "detail": "취향 단위 초소형 모임"},
+        {"icon": "🦎", "name": "옴니보어", "detail": "명품+다이소, 경계 없는 소비"},
+        {"icon": "🧱", "name": "근본이즘", "detail": "투명·신뢰 있는 브랜드 선호"}
+      ],
+      "footnote": "[2026 소비 트렌드 리포트 종합] 용어·정의는 출처별 차이 · 마케팅 관점 해석 포함 · 참고용"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "🌊 2026 MZ 소비 트렌드 키워드 7",
+    "body": "꼭 필요한 것만 사는 '요노', 계절 경험 '제철코어', 기분으로 사는 '필코노미'.\n명품+다이소 동시에 사는 '옴니보어'까지. 너는 몇 개 해당돼?",
+    "cta": "해당되면 친구 태그 ⭐",
+    "hashtags": "#소비트렌드 #요노 #YONO #제철코어 #필코노미 #MZ세대 #트렌드 #2026트렌드 #라이프스타일 #돈관리 #알쓸지잡10",
+    "source": "[2026 소비 트렌드 리포트 종합] 출처별 정의 차이 · 참고용"
+  }
+}

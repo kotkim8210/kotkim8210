@@ -1,0 +1,38 @@
+{
+  "topic_id": "27_highschool_essential_sites",
+  "category": "생활꿀팁",
+  "card_type": "checklist",
+  "season": "상시",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#꿀팁모음 💡",
+      "headline_line1": "고등학생 모르면",
+      "headline_line2": "후회하는 사이트 6",
+      "subheadline": "내신 + 수능 + 입시 전략 필수"
+    },
+    {
+      "slide_number": 2,
+      "type": "checklist",
+      "section_title": "고등학생 필수 사이트 6개",
+      "items": [
+        {"icon": "📘", "name": "EBSi", "detail": "수능특강·완성·인강 무료", "badge": "필수"},
+        {"icon": "🎯", "name": "어디가 (대입정보포털)", "detail": "공식 입시 정보 + 대학별 점수"},
+        {"icon": "📊", "name": "수능 모의고사 기출백서", "detail": "역대 평가원 모의 정리"},
+        {"icon": "📚", "name": "학교알리미", "detail": "전국 고교 정보 공시"},
+        {"icon": "🏆", "name": "한국교육과정평가원", "detail": "수능 출제기관 공지·교재"},
+        {"icon": "🎬", "name": "K-MOOC / 학생용 인강", "detail": "EBS 외 무료 강의 다수"}
+      ],
+      "footnote": "2026년 기준 · 사교육 보조용으로만 활용 권장 · 인터넷 강의는 본인 페이스 맞춰서"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "💡 고등학생 필수 사이트 6",
+    "body": "EBSi · 어디가 · 학교알리미 · 평가원.\n사교육 안 해도 이 4개만 활용해도 등급 1~2 올릴 수 있음.",
+    "cta": "동생/후배한테 ⭐",
+    "hashtags": "#고등학생 #수능 #내신 #EBSi #어디가 #학교알리미 #평가원 #공부법 #학생꿀팁 #알쓸지잡10",
+    "source": "각 사이트 공식 (2026 기준) · 무료 서비스만"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "topic_id": "17_wealth_zodiac_2026",
+  "category": "심리/관계",
+  "card_type": "ranking",
+  "season": "2026 3월",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#재미로보기 🔮",
+      "headline_line1": "2026 재물운",
+      "headline_line2": "좋은 띠 TOP 5",
+      "subheadline": "재미로 보는 12지신 운세 / 사실 확인 X"
+    },
+    {
+      "slide_number": 2,
+      "type": "ranking",
+      "section_title": "2026 재물운 좋은 띠 TOP 5 (재미용)",
+      "items": [
+        {"rank": 1, "name": "원숭이띠", "detail": "투자운 + 부수입 기회", "value": "★★★★★", "badge": "🥇"},
+        {"rank": 2, "name": "용띠", "detail": "본업 성과로 재산 증가", "value": "★★★★★", "badge": "🥈"},
+        {"rank": 3, "name": "호랑이띠", "detail": "변동성 크지만 큰 기회", "value": "★★★★", "badge": "🥉"},
+        {"rank": 4, "name": "쥐띠", "detail": "꾸준한 저축이 빛 발함", "value": "★★★★"},
+        {"rank": 5, "name": "닭띠", "detail": "예상 외의 보너스", "value": "★★★★"}
+      ],
+      "footnote": "★ 재미로 보는 결과 · 과학적 근거 없음 · 사주/운세는 참고만 · 본업 + 저축이 진짜 재물운"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "🔮 2026 재물운 띠 TOP 5",
+    "body": "재미로 보는 결과 — 본인 띠가 있다면 가볍게 응원받기!\n진짜 재물운은 본업 + 저축 입니다.",
+    "cta": "본인 띠 댓글 + 친구 태그 ⭐",
+    "hashtags": "#운세 #2026운세 #띠별운세 #재물운 #재미로보기 #원숭이띠 #용띠 #호랑이띠 #쥐띠 #닭띠 #알쓸지잡10",
+    "source": "★ 재미로 보는 결과 — 사실 아님"
+  }
+}

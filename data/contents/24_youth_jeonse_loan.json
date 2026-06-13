@@ -1,0 +1,39 @@
+{
+  "topic_id": "24_youth_jeonse_loan",
+  "category": "재테크/돈",
+  "card_type": "checklist",
+  "season": "2026 3월",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#돈되는정보 💰",
+      "headline_line1": "2026 청년",
+      "headline_line2": "전세자금 대출 조건",
+      "subheadline": "조건만 맞으면 1.2~2.7% 저금리"
+    },
+    {
+      "slide_number": 2,
+      "type": "checklist",
+      "section_title": "청년 전세대출 핵심 조건 (2026 3월 기준)",
+      "items": [
+        {"icon": "👤", "name": "나이 조건", "detail": "만 19~34세 (병역기간 +α)", "badge": "필수"},
+        {"icon": "💰", "name": "연소득", "detail": "본인 5천만↓ / 부부합산 7,500만↓"},
+        {"icon": "🏠", "name": "보증금 한도", "detail": "수도권 3억 / 지방 2억"},
+        {"icon": "💳", "name": "대출 한도", "detail": "최대 2억 (보증금 90%)"},
+        {"icon": "📉", "name": "금리", "detail": "약 1.2~2.7% (소득 구간별)", "badge": "꿀"},
+        {"icon": "📅", "name": "만기 / 연장", "detail": "2년 + 2회 연장 가능 (최대 6년)"},
+        {"icon": "🏦", "name": "취급은행", "detail": "5대 시중은행 전부"}
+      ],
+      "footnote": "2026년 3월 기준 · 정부정책 매년 변동 · HUG·HF 보증한도 별도 · 본인 소득증빙 후 은행상담 필수"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "💰 청년 전세대출 정리",
+    "body": "만 34세까지 / 연소득 5천만↓ / 1.2~2.7%.\n자취·결혼 준비하는 청년한테 가장 강력한 무기!",
+    "cta": "친구 태그해서 같이 알아보기 ⭐",
+    "hashtags": "#청년 #전세대출 #저금리 #자취 #신혼 #주택 #청년정책 #돈되는정보 #2026 #알쓸지잡10",
+    "source": "[2026 3월 주택도시기금 청년전용 보증부월세] 정책 변동 가능"
+  }
+}

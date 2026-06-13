@@ -1,0 +1,39 @@
+{
+  "topic_id": "42_corp_bonus_ranking",
+  "category": "취업/연봉",
+  "card_type": "ranking",
+  "season": "상시",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#취업정보 💼",
+      "headline_line1": "월급보다 큰 성과급?",
+      "headline_line2": "성과급 강한 업종 TOP 7",
+      "subheadline": "초봉 순위엔 안 잡히는 진짜 연봉의 비밀"
+    },
+    {
+      "slide_number": 2,
+      "type": "ranking",
+      "section_title": "성과급 세진 업종 (실연봉 역전)",
+      "items": [
+        {"rank": 1, "name": "반도체", "detail": "실적 좋으면 연봉 수준 성과급", "value": "매우 큼", "badge": "🔥"},
+        {"rank": 2, "name": "정유·화학", "detail": "호황기 성과급 폭발", "value": "큼", "badge": "🔥"},
+        {"rank": 3, "name": "방산", "detail": "최근 수주 호조로 부상", "value": "큼"},
+        {"rank": 4, "name": "자동차·부품", "detail": "판매 실적 연동", "value": "양호"},
+        {"rank": 5, "name": "배터리", "detail": "업황 따라 변동 큼", "value": "변동"},
+        {"rank": 6, "name": "IT 플랫폼", "detail": "스톡·인센티브 형태 많음", "value": "변동"},
+        {"rank": 7, "name": "금융", "detail": "전통적 고성과급 업종", "value": "안정적"}
+      ],
+      "footnote": "[업계 통념 기준 추정] 성과급은 실적·해마다 변동 큼 · 계약연봉과 별개 · 정확한 수치 아님 · 참고용"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "💼 월급보다 큰 성과급, 업종 TOP 7",
+    "body": "초봉 순위엔 성과급이 안 잡혀요.\n반도체·정유·방산은 실적 좋으면 성과급이 연봉만큼 붙어서 실연봉이 확 뒤집힘.",
+    "cta": "취준이면 저장 ⭐",
+    "hashtags": "#성과급 #연봉 #대기업 #반도체 #정유 #방산 #취업 #초봉 #직장인 #취업정보 #알쓸지잡10",
+    "source": "[업계 통념 추정] 실적·연도별 변동 큼 · 참고용"
+  }
+}

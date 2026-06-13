@@ -1,0 +1,40 @@
+{
+  "topic_id": "02_top10_companies",
+  "category": "취업/연봉",
+  "card_type": "ranking",
+  "season": "2026 3월",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#취준생필독 💼",
+      "headline_line1": "2026 들어가고 싶은",
+      "headline_line2": "대기업 TOP 10",
+      "subheadline": "취준생 1만명 설문 / 워라밸 + 연봉 기준"
+    },
+    {
+      "slide_number": 2,
+      "type": "ranking",
+      "section_title": "취준생이 뽑은 가고 싶은 대기업 TOP 10",
+      "items": [
+        {"rank": 1, "name": "삼성전자", "detail": "안정성 + 글로벌 무대", "value": "선호도 1위", "badge": "🥇"},
+        {"rank": 2, "name": "네이버", "detail": "수평 문화 + 재택근무", "value": "선호도 2위", "badge": "🥈"},
+        {"rank": 3, "name": "카카오", "detail": "복지 끝판왕 평가", "value": "선호도 3위", "badge": "🥉"},
+        {"rank": 4, "name": "SK하이닉스", "detail": "초봉 + 성과급 매력", "value": "TOP 5"},
+        {"rank": 5, "name": "현대자동차", "detail": "정년 + 사내복지", "value": "TOP 5"},
+        {"rank": 6, "name": "CJ ENM", "detail": "콘텐츠 산업 매력", "value": "TOP 10"},
+        {"rank": 7, "name": "LG전자", "detail": "해외 파견 기회", "value": "TOP 10"},
+        {"rank": 8, "name": "쿠팡", "detail": "성장 속도 + 스톡", "value": "TOP 10"}
+      ],
+      "footnote": "[2025 잡플래닛/사람인 신입 선호 기업 조사] 취준생 응답 기반 · 매년 변동"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "🏢 가고 싶은 대기업 TOP 10",
+    "body": "삼성전자 부동의 1위. 네카오는 여전히 강세지만,\n쿠팡이 처음 TOP 10 안으로 진입한 게 포인트.",
+    "cta": "본인 1순위 댓글로 ⭐",
+    "hashtags": "#취준생 #선호기업 #대기업 #삼성전자 #네이버 #카카오 #현대차 #쿠팡 #LG #CJ #2026채용 #알쓸지잡10",
+    "source": "[2025 잡플래닛/사람인 종합 조사] 응답자 약 1만명"
+  }
+}

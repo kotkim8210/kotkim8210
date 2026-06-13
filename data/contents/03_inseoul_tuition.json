@@ -1,0 +1,42 @@
+{
+  "topic_id": "03_inseoul_tuition",
+  "category": "대학/입시",
+  "card_type": "ranking",
+  "season": "2026 3월",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#학생필독 📚",
+      "headline_line1": "인서울 대학교",
+      "headline_line2": "등록금 TOP 10",
+      "subheadline": "2025학년도 공시 기준 · 1학기 평균"
+    },
+    {
+      "slide_number": 2,
+      "type": "ranking",
+      "section_title": "인서울 등록금 비싼 대학 TOP 10 (1학기)",
+      "items": [
+        {"rank": 1, "name": "연세대", "detail": "공학·예체능 평균", "value": "약 469만", "badge": "🥇"},
+        {"rank": 2, "name": "성균관대", "detail": "공학 계열 기준", "value": "약 458만", "badge": "🥈"},
+        {"rank": 3, "name": "한양대", "detail": "공학 계열 기준", "value": "약 449만", "badge": "🥉"},
+        {"rank": 4, "name": "고려대", "detail": "공학 계열 기준", "value": "약 446만"},
+        {"rank": 5, "name": "이화여대", "detail": "예체능 계열 기준", "value": "약 442만"},
+        {"rank": 6, "name": "건국대", "detail": "공학 계열 기준", "value": "약 440만"},
+        {"rank": 7, "name": "중앙대", "detail": "공학 계열 기준", "value": "약 437만"},
+        {"rank": 8, "name": "경희대", "detail": "공학 계열 기준", "value": "약 433만"},
+        {"rank": 9, "name": "홍익대", "detail": "예체능 계열 기준", "value": "약 432만"},
+        {"rank": 10, "name": "동국대", "detail": "공학 계열 기준", "value": "약 425만"}
+      ],
+      "footnote": "[2025학년도 대학알리미 공시] 공학·예체능 등 비싼 계열 기준 · 인문사회는 약 50만 더 저렴"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "🎓 인서울 등록금 TOP 10",
+    "body": "공학·예체능 기준 연세대가 1학기 469만으로 1위.\n인문사회 계열은 평균 50만원 정도 더 쌈.",
+    "cta": "친구 학교 댓글로 ⭐",
+    "hashtags": "#대학생 #등록금 #인서울 #연세대 #고려대 #성균관대 #한양대 #이화여대 #중앙대 #2026입시 #학생필독 #알쓸지잡10",
+    "source": "[2025학년도 대학알리미 공시] 1학기 등록금 평균"
+  }
+}

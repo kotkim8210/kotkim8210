@@ -1,0 +1,39 @@
+{
+  "topic_id": "26_scholarship_universities",
+  "category": "대학/입시",
+  "card_type": "ranking",
+  "season": "2026 3월",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#학생필독 📚",
+      "headline_line1": "장학금 잘 주는",
+      "headline_line2": "대학교 TOP 7",
+      "subheadline": "교내 장학금 수혜율 + 평균 액수 기준"
+    },
+    {
+      "slide_number": 2,
+      "type": "ranking",
+      "section_title": "장학금 잘 주는 대학교 TOP 7",
+      "items": [
+        {"rank": 1, "name": "POSTECH / KAIST", "detail": "전원 등록금 면제 수준", "value": "수혜율 ~100%", "badge": "🥇"},
+        {"rank": 2, "name": "한동대", "detail": "교내 장학금 강함", "value": "수혜율 ~75%", "badge": "🥈"},
+        {"rank": 3, "name": "고려대 (안암)", "detail": "교내 + 동문 장학", "value": "수혜율 ~65%", "badge": "🥉"},
+        {"rank": 4, "name": "성균관대", "detail": "삼성 그룹 장학 연계", "value": "수혜율 ~63%"},
+        {"rank": 5, "name": "한양대", "detail": "공학·예체능 강함", "value": "수혜율 ~60%"},
+        {"rank": 6, "name": "건국대", "detail": "성적·특기 다수", "value": "수혜율 ~55%"},
+        {"rank": 7, "name": "지방거점국립대", "detail": "국가장학금 + 교내", "value": "수혜율 ~70%"}
+      ],
+      "footnote": "[2025학년도 대학알리미 추정] 교내 + 외부 + 국가장학금 수혜율 합산 · 학교/학기별 변동"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "🎓 장학금 잘 주는 대학 TOP 7",
+    "body": "포스텍·카이스트는 사실상 등록금 0원.\n인서울도 60% 이상이 장학금 한 번 이상 받음 — 신청 안 하면 손해!",
+    "cta": "재학생 친구한테 ⭐",
+    "hashtags": "#대학생 #장학금 #국가장학금 #포스텍 #카이스트 #한동대 #고려대 #성균관대 #학생필독 #알쓸지잡10",
+    "source": "[2025학년도 대학알리미 공시 추정] 변동 가능"
+  }
+}

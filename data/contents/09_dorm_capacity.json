@@ -1,0 +1,39 @@
+{
+  "topic_id": "09_dorm_capacity",
+  "category": "대학/입시",
+  "card_type": "ranking",
+  "season": "2026 3월",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#학생필독 📚",
+      "headline_line1": "대학교 기숙사",
+      "headline_line2": "수용률 TOP 7",
+      "subheadline": "수용률 높은 = 들어가기 쉬운 학교"
+    },
+    {
+      "slide_number": 2,
+      "type": "ranking",
+      "section_title": "기숙사 수용률 TOP 7 (재학생 대비)",
+      "items": [
+        {"rank": 1, "name": "포항공과대(POSTECH)", "detail": "전원 입사 가능", "value": "약 100%", "badge": "🥇"},
+        {"rank": 2, "name": "한국과학기술원(KAIST)", "detail": "신입생 전원 + 재학생 다수", "value": "약 88%", "badge": "🥈"},
+        {"rank": 3, "name": "GIST/UNIST", "detail": "이공계 특성화", "value": "약 80%", "badge": "🥉"},
+        {"rank": 4, "name": "포항대 / 지역 거점국립대 일부", "detail": "비수도권 강세", "value": "약 60~70%"},
+        {"rank": 5, "name": "성균관대(자연과학)", "detail": "수원 캠퍼스 기준", "value": "약 35%"},
+        {"rank": 6, "name": "한양대(서울)", "detail": "본관 + 게스트하우스", "value": "약 22%"},
+        {"rank": 7, "name": "고려대(서울)", "detail": "안암 + 정릉 합산", "value": "약 19%"}
+      ],
+      "footnote": "[2025학년도 대학알리미 공시] 신입생/재학생 합산 수용률 · 학기별 추첨 변동 있음"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "🏠 기숙사 수용률 TOP 7",
+    "body": "포스텍·카이스트·지스트·유니스트는 사실상 전원 입사.\n인서울 학교는 20% 이하라 추첨이 빡셈.",
+    "cta": "재학생 친구한테 ⭐",
+    "hashtags": "#대학생 #기숙사 #포스텍 #카이스트 #지스트 #유니스트 #자취 #2026입시 #학생필독 #알쓸지잡10",
+    "source": "[2025학년도 대학알리미 공시] 수용률 · 변동 가능"
+  }
+}

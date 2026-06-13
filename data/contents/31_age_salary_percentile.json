@@ -1,0 +1,38 @@
+{
+  "topic_id": "31_age_salary_percentile",
+  "category": "재테크/돈",
+  "card_type": "ranking",
+  "season": "상시",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#돈되는정보 💰",
+      "headline_line1": "내 연봉은 또래 중",
+      "headline_line2": "상위 몇 %일까",
+      "subheadline": "나이대별 평균 연봉 / 댓글로 본인 확인"
+    },
+    {
+      "slide_number": 2,
+      "type": "ranking",
+      "section_title": "나이대별 평균 연봉 (세전 · 정규직)",
+      "items": [
+        {"rank": 1, "name": "20대 초반 (20~24)", "detail": "사회초년생 / 인턴·신입", "value": "약 2,600만", "badge": "📍"},
+        {"rank": 2, "name": "20대 후반 (25~29)", "detail": "본격 커리어 시작", "value": "약 3,400만", "badge": "📍"},
+        {"rank": 3, "name": "30대 초반 (30~34)", "detail": "대리·과장급 진입", "value": "약 4,300만", "badge": "📍"},
+        {"rank": 4, "name": "30대 후반 (35~39)", "detail": "연봉 상승 피크 구간", "value": "약 5,100만"},
+        {"rank": 5, "name": "40대 (40~49)", "detail": "관리자급 / 정점", "value": "약 5,800만"},
+        {"rank": 6, "name": "상위 10% 컷 (전 연령)", "detail": "이 위면 또래 최상위", "value": "약 8,000만+", "badge": "🔥"}
+      ],
+      "footnote": "[2024 국세청/통계청 임금근로자 평균 추정] 정규직 세전 · 지역/업종별 차이 큼 · 참고용"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "💰 내 연봉, 또래 중 상위 몇%?",
+    "body": "20대 후반 평균 3,400만 / 30대 초반 4,300만.\n평균보다 위면 잘 가고 있는 거예요. 8천 넘으면 또래 상위 10%!",
+    "cta": "본인 나이 + 느낌 댓글로 ⭐",
+    "hashtags": "#연봉 #평균연봉 #20대 #30대 #직장인 #월급 #재테크 #돈관리 #사회초년생 #또래비교 #돈되는정보 #알쓸지잡10",
+    "source": "[2024 국세청/통계청 추정] 평균 임금 · 참고용"
+  }
+}

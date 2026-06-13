@@ -1,0 +1,38 @@
+{
+  "topic_id": "51_top_certs_2026",
+  "category": "취업/연봉",
+  "card_type": "ranking",
+  "season": "상시",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#취업정보 💼",
+      "headline_line1": "2026 취업 잘되는",
+      "headline_line2": "자격증 TOP 5",
+      "subheadline": "산업 트렌드+수험 빅데이터로 뽑은 유망 5선"
+    },
+    {
+      "slide_number": 2,
+      "type": "ranking",
+      "section_title": "2026 주목 자격증 TOP 5",
+      "items": [
+        {"rank": 1, "name": "SQLD·ADsP", "detail": "전 직무 데이터 역량 필수화", "value": "응시 급증", "badge": "🔥"},
+        {"rank": 2, "name": "전기기사·기능사", "detail": "데이터센터·반도체 인프라 수요", "value": "재조명", "badge": "🔥"},
+        {"rank": 3, "name": "한국사능력검정", "detail": "공기업·공무원 필수 가산", "value": "스테디"},
+        {"rank": 4, "name": "산업·건설안전기사", "detail": "중대재해법으로 수요 ↑", "value": "안정"},
+        {"rank": 5, "name": "재경관리사", "detail": "회계·재무 직무 기본기", "value": "꾸준"},
+        {"rank": 6, "name": "+ AI 활용 인증", "detail": "올해 키워드는 AI 활용능력", "value": "신흥 🚀"}
+      ],
+      "footnote": "[2026 자격증 전망 추정] 교육기관 선정 기준 · 직무·시점별 가치 다름 · 정확한 순위 아님 · 참고용"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "💼 2026 취업 잘되는 자격증 TOP 5",
+    "body": "데이터(SQLD), 전기기사, 한국사, 안전기사, 재경관리사.\n올해 키워드는 'AI 활용 능력'. 데이터 자격증 응시자는 1년새 20%+ 급증!",
+    "cta": "취준이면 저장 필수 ⭐",
+    "hashtags": "#자격증 #SQLD #전기기사 #한국사 #취업자격증 #스펙 #취준생 #자기계발 #취업 #취업정보 #알쓸지잡10",
+    "source": "[2026 자격증 전망 추정] 교육기관 선정 기준 · 참고용"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "topic_id": "23_major_employment_rate",
+  "category": "대학/입시",
+  "card_type": "ranking",
+  "season": "2026 3월",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#학생필독 📚",
+      "headline_line1": "전공별",
+      "headline_line2": "취업률 TOP 7",
+      "subheadline": "대학 졸업 1년 내 취업 기준"
+    },
+    {
+      "slide_number": 2,
+      "type": "ranking",
+      "section_title": "졸업 후 취업률 좋은 전공 TOP 7",
+      "items": [
+        {"rank": 1, "name": "의약/간호 계열", "detail": "면허 + 자격증 진로 보장", "value": "약 82%", "badge": "🥇"},
+        {"rank": 2, "name": "공학 (전기·기계·SW)", "detail": "산업 수요 꾸준", "value": "약 72%", "badge": "🥈"},
+        {"rank": 3, "name": "교육 (사범/교직)", "detail": "임용/사교육 진출", "value": "약 70%", "badge": "🥉"},
+        {"rank": 4, "name": "경영/경제", "detail": "대기업·금융권", "value": "약 65%"},
+        {"rank": 5, "name": "자연과학 (화학·생명)", "detail": "제약·바이오 채용", "value": "약 60%"},
+        {"rank": 6, "name": "사회과학", "detail": "공기업·언론사", "value": "약 58%"},
+        {"rank": 7, "name": "예체능", "detail": "프리랜서 + 상시 채용", "value": "약 55%"}
+      ],
+      "footnote": "[2024 대학 졸업자 취업률 통계 추정] 학교/계열 세부 분류 다름 · 정규직/프리랜서 합산 · 참고용"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "🎓 전공별 취업률 TOP 7",
+    "body": "의약/간호 80%대, 공학 70%대.\n취업률만 보면 선택 X — 본인 적성과 산업 전망 같이!",
+    "cta": "고3 동생한테 ⭐",
+    "hashtags": "#대학생 #취업률 #전공 #의대 #간호 #공대 #사범대 #경영 #2026입시 #진로 #학생필독 #알쓸지잡10",
+    "source": "[2024 대학 졸업자 취업률 통계 추정] 변동 가능"
+  }
+}

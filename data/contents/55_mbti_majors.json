@@ -1,0 +1,39 @@
+{
+  "topic_id": "55_mbti_majors",
+  "category": "심리/관계",
+  "card_type": "checklist",
+  "season": "상시",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#MBTI 🧬",
+      "headline_line1": "MBTI별 찰떡인",
+      "headline_line2": "전공·직무",
+      "subheadline": "내 유형엔 어떤 전공이 맞을까? (재미로)"
+    },
+    {
+      "slide_number": 2,
+      "type": "checklist",
+      "section_title": "MBTI별 어울리는 전공·직무",
+      "items": [
+        {"icon": "🧪", "name": "INTJ·INTP", "detail": "데이터·AI·연구개발·통계", "badge": "전략가"},
+        {"icon": "📊", "name": "ENTJ·ESTJ", "detail": "경영·산업공학·컨설팅·PM"},
+        {"icon": "🎨", "name": "INFP·ISFP", "detail": "콘텐츠·디자인·심리·예술"},
+        {"icon": "🤝", "name": "ENFJ·ENFP", "detail": "마케팅·교육·HR·기획"},
+        {"icon": "⚙️", "name": "ISTP·ISTJ", "detail": "기계·전기·반도체·회계"},
+        {"icon": "💬", "name": "ESFP·ESFJ", "detail": "영업·서비스·간호·홍보"},
+        {"icon": "🔍", "name": "공통", "detail": "MBTI는 참고만 · 적성·흥미가 우선"}
+      ],
+      "footnote": "재미로 보는 분류입니다 🧬 · MBTI는 과학적 진단 아님 · 같은 유형도 천차만별 · 적성·흥미 우선 · 참고용"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "🧬 MBTI별 찰떡인 전공·직무",
+    "body": "INTJ는 데이터·연구, ENFP는 마케팅·기획, ISTP는 기계·전기…\n어디까지나 재미로! 결국 전공은 본인 적성·흥미가 1순위예요.",
+    "cta": "본인 MBTI 댓글로 ⭐",
+    "hashtags": "#MBTI #전공 #직무 #진로 #MBTI별 #대학전공 #적성 #취업 #성격유형 #재미로보는 #알쓸지잡10",
+    "source": "재미로 보는 분류 · MBTI는 과학적 진단 아님 · 참고용"
+  }
+}

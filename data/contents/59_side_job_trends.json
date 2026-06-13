@@ -1,0 +1,38 @@
+{
+  "topic_id": "59_side_job_trends",
+  "category": "취업/연봉",
+  "card_type": "ranking",
+  "season": "상시",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#돈되는정보 💰",
+      "headline_line1": "직장인 36%가 한다는",
+      "headline_line2": "N잡 부업 TOP 6",
+      "subheadline": "요즘 다들 뭐로 부수입 벌까"
+    },
+    {
+      "slide_number": 2,
+      "type": "ranking",
+      "section_title": "직장인이 경험한 부업 (복수응답)",
+      "items": [
+        {"rank": 1, "name": "행사·이벤트 요원", "detail": "단기·주말 중심", "value": "37%", "badge": "🔥"},
+        {"rank": 2, "name": "재능 기반(디자인·번역·강의)", "detail": "전문성 살린 부업", "value": "28%", "badge": "🔥"},
+        {"rank": 3, "name": "당일 급구 알바", "detail": "즉시 현금화", "value": "27%"},
+        {"rank": 4, "name": "블로그·SNS 운영", "detail": "광고·제휴 수익", "value": "21%"},
+        {"rank": 5, "name": "배달", "detail": "원하는 시간에", "value": "12%"},
+        {"rank": 6, "name": "이커머스(스마트스토어)", "detail": "재고·운영 부담", "value": "6%"}
+      ],
+      "footnote": "[2026 직장인 부업 설문 추정] 복수응답이라 합이 100% 초과 · 직장인 약 36% 부업 중 · 이유 1위 '추가 수입' · 참고용"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "💰 직장인 N잡 부업 TOP 6",
+    "body": "이제 직장인 3명 중 1명 이상이 부업 중!\n행사요원·재능판매·당일알바·블로그… 추가 수입이 1순위 이유예요.",
+    "cta": "부업 고민이면 저장 ⭐",
+    "hashtags": "#N잡 #부업 #투잡 #직장인 #부수입 #재능판매 #스마트스토어 #사이드잡 #재테크 #돈되는정보 #알쓸지잡10",
+    "source": "[2026 직장인 부업 설문 추정] 복수응답 · 참고용"
+  }
+}

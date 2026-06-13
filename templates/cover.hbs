@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 1080px;
+    height: 1920px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0a0a0f;
+    color: #ffffff;
+    -webkit-font-smoothing: antialiased;
+  }
+  .stage {
+    position: relative;
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 80% 12%, rgba(249,115,22,0.28), transparent 45%),
+      radial-gradient(circle at 15% 88%, rgba(180,83,9,0.32), transparent 50%),
+      #0a0a0f;
+  }
+  .dots {
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48'><circle cx='1.5' cy='1.5' r='1.5' fill='%23f97316' opacity='0.13'/></svg>");
+    background-size: 48px 48px;
+  }
+  .card {
+    position: absolute;
+    top: 70px;
+    left: 50px;
+    right: 50px;
+    bottom: 70px;
+    padding: 90px 70px;
+    background: rgba(30,15,8,0.85);
+    border: 1px solid rgba(249,115,22,0.22);
+    border-radius: 36px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    backdrop-filter: blur(8px);
+  }
+  .tag {
+    display: inline-block;
+    align-self: flex-start;
+    padding: 18px 32px;
+    background: rgba(249,115,22,0.12);
+    border: 2px solid #f97316;
+    border-radius: 999px;
+    color: #fdba74;
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .headline {
+    font-size: 116px;
+    font-weight: 900;
+    line-height: 1.18;
+    letter-spacing: -3px;
+    margin-top: 80px;
+    word-break: keep-all;
+  }
+  .headline .accent { color: #fdba74; }
+  .subheadline {
+    font-size: 38px;
+    font-weight: 500;
+    color: #cbd5e1;
+    line-height: 1.5;
+  }
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 40px;
+    border-top: 1px solid rgba(249,115,22,0.18);
+  }
+  .handle {
+    font-size: 36px;
+    font-weight: 700;
+    color: #f97316;
+    letter-spacing: -0.5px;
+  }
+  .swipe {
+    font-size: 28px;
+    color: #94a3b8;
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="dots"></div>
+    <div class="card">
+      <div>
+        <div class="tag">{{tag}}</div>
+        <div class="headline" data-autofit data-autofit-lines="2" data-autofit-min="60">
+          {{headline_line1}}<br>
+          <span class="accent">{{headline_line2}}</span>
+        </div>
+      </div>
+      <div>
+        <div class="subheadline">{{subheadline}}</div>
+        <div class="footer">
+          <div class="handle">{{handle}}</div>
+          <div class="swipe">SWIPE →</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

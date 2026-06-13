@@ -1,0 +1,39 @@
+{
+  "topic_id": "11_major_laptop_specs",
+  "category": "생활꿀팁",
+  "card_type": "comparison",
+  "season": "상시",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#꿀팁모음 💡",
+      "headline_line1": "전공별 노트북",
+      "headline_line2": "추천 스펙 가이드",
+      "subheadline": "오버스펙 사면 손해 / 딱 맞는 사양"
+    },
+    {
+      "slide_number": 2,
+      "type": "comparison",
+      "section_title": "전공별 노트북 추천 사양",
+      "headers": ["전공", "필수 스펙", "예산"],
+      "rows": [
+        ["인문/사회", "i5 / 16GB / SSD 256GB", "70~100만"],
+        ["경영/회계", "i5 / 16GB / SSD 512GB", "90~120만"],
+        ["디자인/미디어", "M2/M3 또는 i7+iGPU", "180~250만"],
+        ["공대 (CAD/시뮬)", "i7 / 16~32GB / dGPU", "200~300만"],
+        ["컴퓨터/AI", "RAM 32GB+ / GPU 8GB+", "200~400만"],
+        ["의/약/간호", "i5 / 16GB / 가벼운 무게", "100~150만"]
+      ],
+      "footnote": "2025년 기준 · 학교 강의계획서·과제툴 확인 후 결정 권장 · 인텔/AMD/애플 무관"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "💻 전공별 노트북 가이드",
+    "body": "인문계 70만이면 충분. 영상편집 빼면 거의 다 16GB 면 OK.\n오버스펙으로 100만 더 쓰지 마세요.",
+    "cta": "동생 신입생 한테 ⭐",
+    "hashtags": "#대학생 #노트북 #신입생 #맥북 #그램 #삼성 #LG #공대 #디자인 #컴공 #예산 #알쓸지잡10",
+    "source": "각 학과 강의계획서/현직자 후기 종합 (2025)"
+  }
+}

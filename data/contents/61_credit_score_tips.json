@@ -1,0 +1,39 @@
+{
+  "topic_id": "61_credit_score_tips",
+  "category": "재테크/돈",
+  "card_type": "checklist",
+  "season": "상시",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#돈되는정보 💰",
+      "headline_line1": "사회초년생",
+      "headline_line2": "신용점수 올리는 법",
+      "subheadline": "지금 관리해야 대출·카드 때 손해 안 본다"
+    },
+    {
+      "slide_number": 2,
+      "type": "checklist",
+      "section_title": "신용점수 올리는 꿀팁 7",
+      "items": [
+        {"icon": "💳", "name": "체크카드 꾸준히", "detail": "6개월 월 30만↑ 쓰면 점수 ↑", "badge": "기본"},
+        {"icon": "📊", "name": "한도 30~50%만", "detail": "신용카드 너무 꽉 쓰면 마이너스"},
+        {"icon": "⏰", "name": "연체 절대 금지", "detail": "10만·5영업일↑ 연체 = 치명타", "badge": "주의"},
+        {"icon": "📡", "name": "비금융정보 제출", "detail": "통신·건보·국민연금 납부 → +점수"},
+        {"icon": "📅", "name": "결제일 전 납부", "detail": "미리 갚는 습관이 신뢰도 ↑"},
+        {"icon": "🏦", "name": "1금융권 이용", "detail": "대출은 가급적 1금융권부터"},
+        {"icon": "📲", "name": "점수 무료 조회", "detail": "토스·카카오·NICE로 수시 확인"}
+      ],
+      "footnote": "[신용 관리 일반 정보] 점수 상승폭은 개인 신용이력별 상이 · KCB·NICE 평가 기준 다름 · 참고용"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "💰 사회초년생 신용점수 올리는 법",
+    "body": "체크카드 꾸준히, 카드 한도 30~50%만, 연체는 절대 금지!\n통신·건보 납부내역만 제출해도 점수가 올라요.",
+    "cta": "미래의 나를 위해 저장 ⭐",
+    "hashtags": "#신용점수 #신용관리 #체크카드 #신용카드 #사회초년생 #재테크 #대출 #돈관리 #금융꿀팁 #돈되는정보 #알쓸지잡10",
+    "source": "[신용 관리 일반 정보] 개인 이력별 상이 · 참고용"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "topic_id": "40_first_100m_roadmap",
+  "category": "재테크/돈",
+  "card_type": "ranking",
+  "season": "상시",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#돈되는정보 💰",
+      "headline_line1": "사회초년생",
+      "headline_line2": "첫 1억 모으기",
+      "subheadline": "월 저축액별 1억 도달 기간 현실 계산"
+    },
+    {
+      "slide_number": 2,
+      "type": "ranking",
+      "section_title": "월 저축액별 1억 도달 기간",
+      "items": [
+        {"rank": 1, "name": "월 170만원 저축", "detail": "독하게 모으면", "value": "약 5년", "badge": "🔥"},
+        {"rank": 2, "name": "월 130만원 저축", "detail": "공격적 저축", "value": "약 6.5년"},
+        {"rank": 3, "name": "월 100만원 저축", "detail": "현실 목표선", "value": "약 8년", "badge": "📍"},
+        {"rank": 4, "name": "월 70만원 저축", "detail": "도약계좌 수준", "value": "약 12년"},
+        {"rank": 5, "name": "월 50만원 저축", "detail": "최소 루틴", "value": "약 17년"},
+        {"rank": 6, "name": "+ 비과세 적금·ISA", "detail": "이자까지 굴리면 기간 단축", "value": "가속 🚀"}
+      ],
+      "footnote": "[단순 계산 추정] 원금 기준·이자/투자수익 제외 · 비과세 적금·ISA 활용 시 더 빨라짐 · 참고용"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "💰 사회초년생 첫 1억 모으기 로드맵",
+    "body": "월 100만원이면 약 8년, 170만원이면 약 5년.\n(원금 기준) 청년적금·ISA로 이자까지 굴리면 기간이 더 줄어요.",
+    "cta": "목표 세우게 저장 ⭐",
+    "hashtags": "#1억모으기 #종잣돈 #목돈 #저축 #재테크 #사회초년생 #20대 #30대 #돈관리 #돈되는정보 #알쓸지잡10",
+    "source": "[단순 계산 추정] 이자/투자수익 제외 · 참고용"
+  }
+}

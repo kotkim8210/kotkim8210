@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 1080px;
+    height: 1920px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0a0a0f;
+    color: #ffffff;
+    -webkit-font-smoothing: antialiased;
+  }
+  .stage {
+    position: relative;
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 80% 12%, rgba(249,115,22,0.22), transparent 45%),
+      radial-gradient(circle at 15% 88%, rgba(180,83,9,0.28), transparent 50%),
+      #0a0a0f;
+  }
+  .dots {
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48'><circle cx='1.5' cy='1.5' r='1.5' fill='%23f97316' opacity='0.13'/></svg>");
+    background-size: 48px 48px;
+  }
+  .card {
+    position: absolute;
+    top: 70px;
+    left: 50px;
+    right: 50px;
+    bottom: 70px;
+    padding: 70px 60px;
+    background: rgba(30,15,8,0.85);
+    border: 1px solid rgba(249,115,22,0.22);
+    border-radius: 36px;
+    display: flex;
+    flex-direction: column;
+  }
+  .section-title {
+    font-size: 56px;
+    font-weight: 900;
+    letter-spacing: -1.5px;
+    line-height: 1.25;
+    margin-bottom: 50px;
+    color: #ffffff;
+    word-break: keep-all;
+  }
+  .section-title .accent { color: #fdba74; }
+  .items {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+  .item {
+    display: grid;
+    grid-template-columns: 100px 1fr auto;
+    gap: 28px;
+    align-items: center;
+    padding: 26px 32px;
+    background: rgba(255,255,255,0.04);
+    border-left: 4px solid rgba(249,115,22,0.25);
+    border-radius: 20px;
+  }
+  .item.top3 {
+    background: rgba(249,115,22,0.10);
+    border: 2px solid #f97316;
+    padding: 32px 38px;
+  }
+  .badge {
+    font-size: 56px;
+    font-weight: 900;
+    color: #94a3b8;
+    text-align: center;
+    line-height: 1;
+  }
+  .item.top3 .badge { font-size: 64px; }
+  .item-body { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .name {
+    font-size: 38px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -1px;
+    color: #ffffff;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+  .item.top3 .name { font-size: 44px; }
+  .detail {
+    font-size: 27px;
+    color: #cbd5e1;
+    line-height: 1.4;
+    font-weight: 500;
+    word-break: keep-all;
+  }
+  .value {
+    font-size: 44px;
+    font-weight: 900;
+    color: #fdba74;
+    text-align: right;
+    letter-spacing: -1px;
+    white-space: nowrap;
+  }
+  .item.top3 .value { font-size: 48px; color: #f97316; }
+  .footer {
+    margin-top: 30px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(249,115,22,0.18);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footnote { font-size: 24px; color: #94a3b8; line-height: 1.4; max-width: 70%; }
+  .handle { font-size: 28px; font-weight: 700; color: #f97316; }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="dots"></div>
+    <div class="card">
+      <div class="section-title" data-autofit data-autofit-lines="2" data-autofit-min="34">{{section_title}}</div>
+      <div class="items">
+        {{#each items}}
+        <div class="item{{#if top3}} top3{{/if}}">
+          <div class="badge">{{#if badge}}{{badge}}{{else}}{{rank}}{{/if}}</div>
+          <div class="item-body">
+            <div class="name" data-autofit data-autofit-lines="1" data-autofit-min="26">{{name}}</div>
+            {{#if detail}}<div class="detail">{{detail}}</div>{{/if}}
+          </div>
+          {{#if value}}<div class="value">{{value}}</div>{{/if}}
+        </div>
+        {{/each}}
+      </div>
+      <div class="footer">
+        <div class="footnote">{{footnote}}</div>
+        <div class="handle">{{handle}}</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

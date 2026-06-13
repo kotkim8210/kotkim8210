@@ -1,0 +1,39 @@
+{
+  "topic_id": "38_youth_isa_benefits",
+  "category": "재테크/돈",
+  "card_type": "checklist",
+  "season": "상시",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#돈되는정보 💰",
+      "headline_line1": "2026 새로 생긴",
+      "headline_line2": "청년형 ISA 혜택",
+      "subheadline": "투자하는 청년이면 모르면 손해인 절세 계좌"
+    },
+    {
+      "slide_number": 2,
+      "type": "checklist",
+      "section_title": "청년형 ISA 핵심 체크 7",
+      "items": [
+        {"icon": "🆕", "name": "2026 신설", "detail": "청년 전용으로 새로 생긴 ISA", "badge": "신상"},
+        {"icon": "🎂", "name": "대상", "detail": "만 19~34세 청년"},
+        {"icon": "💼", "name": "소득 조건", "detail": "총급여 약 7,500만원 이하"},
+        {"icon": "🧾", "name": "비과세", "detail": "이자·배당소득 과세 특례", "badge": "핵심"},
+        {"icon": "📉", "name": "소득공제", "detail": "납입금에 공제 혜택까지"},
+        {"icon": "📈", "name": "투자 가능", "detail": "주식·ETF·펀드 한 계좌서 운용"},
+        {"icon": "⏳", "name": "장기 유리", "detail": "오래 굴릴수록 세제 혜택 커짐"}
+      ],
+      "footnote": "[2026 경제성장전략 발표 기준] 세부 한도·요건 확정 전 변동 가능 · 금융사·정부 공식 안내 확인"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "💰 2026 청년형 ISA 절세 혜택",
+    "body": "투자하는 청년이면 무조건 봐야 할 신상 계좌.\n이자·배당 비과세 + 납입금 소득공제까지. 오래 굴릴수록 이득!",
+    "cta": "투자 시작 전 저장 필수 ⭐",
+    "hashtags": "#청년형ISA #ISA #절세 #비과세 #투자 #재테크 #주식 #ETF #20대 #30대 #돈되는정보 #알쓸지잡10",
+    "source": "[2026 경제성장전략] 세부 요건 확정 전 변동 가능 · 참고용"
+  }
+}

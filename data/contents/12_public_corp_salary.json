@@ -1,0 +1,39 @@
+{
+  "topic_id": "12_public_corp_salary",
+  "category": "취업/연봉",
+  "card_type": "ranking",
+  "season": "상시",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#취준생필독 💼",
+      "headline_line1": "공기업 평균연봉",
+      "headline_line2": "TOP 7",
+      "subheadline": "공공기관 경영정보공개시스템(알리오) 기준"
+    },
+    {
+      "slide_number": 2,
+      "type": "ranking",
+      "section_title": "공기업 평균연봉 TOP 7 (2024 결산)",
+      "items": [
+        {"rank": 1, "name": "한국전력기술", "detail": "원자력·전력 엔지니어링", "value": "약 1.0억", "badge": "🥇"},
+        {"rank": 2, "name": "한국마사회", "detail": "공기업 분류 변경 가능", "value": "약 9,400만", "badge": "🥈"},
+        {"rank": 3, "name": "한국가스공사", "detail": "에너지 공기업", "value": "약 9,200만", "badge": "🥉"},
+        {"rank": 4, "name": "한국수력원자력", "detail": "한수원 본사", "value": "약 9,000만"},
+        {"rank": 5, "name": "한국공항공사", "detail": "전국 공항 운영", "value": "약 8,700만"},
+        {"rank": 6, "name": "인천국제공항공사", "detail": "ICN 운영", "value": "약 8,600만"},
+        {"rank": 7, "name": "한국전력공사", "detail": "한전 본사", "value": "약 8,400만"}
+      ],
+      "footnote": "[2024년 알리오 공시] 평균연봉(전체 직원) · 신입은 5,500~6,500만 수준 · 직군별 차이 있음"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "🏛 공기업 평균연봉 TOP 7",
+    "body": "한전기술·마사회·가스공사가 1억 근처. 신입은 평균보다 훨 적지만,\n근속 + 호봉상승 빠른 게 공기업 매력.",
+    "cta": "공시생 친구한테 ⭐",
+    "hashtags": "#취준생 #공기업 #알리오 #한전 #한수원 #가스공사 #인천공항 #공시생 #2026채용 #알쓸지잡10",
+    "source": "[알리오 공시 2024 결산] 공공기관 평균연봉"
+  }
+}

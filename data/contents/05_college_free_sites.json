@@ -1,0 +1,40 @@
+{
+  "topic_id": "05_college_free_sites",
+  "category": "생활꿀팁",
+  "card_type": "checklist",
+  "season": "상시",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#꿀팁모음 💡",
+      "headline_line1": "대학생 모르면 손해",
+      "headline_line2": "필수 무료 사이트 8",
+      "subheadline": "재학증명서만 있으면 평생 무료"
+    },
+    {
+      "slide_number": 2,
+      "type": "checklist",
+      "section_title": "대학생 필수 무료 사이트 TOP 8",
+      "items": [
+        {"icon": "🎬", "name": "RISS 학술연구정보", "detail": "논문/학위논문 무제한 다운로드", "badge": "필수"},
+        {"icon": "📊", "name": "DBpia / KISS", "detail": "한국 학술 DB · 학교 인증 시 무료"},
+        {"icon": "💻", "name": "GitHub Student Pack", "detail": "JetBrains·Copilot·도메인 등 100+ 무료", "badge": "꿀"},
+        {"icon": "🎨", "name": "Notion Plus 학생플랜", "detail": "edu 메일로 무료 업그레이드"},
+        {"icon": "📚", "name": "국립중앙도서관 디지털열람실", "detail": "절판도서·고문헌 원문 열람"},
+        {"icon": "🎓", "name": "K-MOOC", "detail": "국내 대학 강의 무료 + 이수증"},
+        {"icon": "🌐", "name": "Coursera Financial Aid", "detail": "신청 시 유료 강의 무료 수강"},
+        {"icon": "📰", "name": "한국언론진흥재단 BIGKINDS", "detail": "뉴스 빅데이터 분석 도구 무료"}
+      ],
+      "footnote": "대부분 학교 메일(@xxx.ac.kr) 인증 필수 · 졸업 후엔 일부만 유지"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "💡 대학생 모르면 진짜 손해",
+    "body": "Github Student Pack 하나만 활용해도 연 100만원 절약.\nedu 메일 살아있을 때 다 받아두세요.",
+    "cta": "재학생 친구 태그 ⭐",
+    "hashtags": "#대학생 #꿀팁 #필수사이트 #GitHub #Notion #RISS #DBpia #학생할인 #생산성 #알쓸지잡10",
+    "source": "각 서비스 공식 학생 정책 (2025 기준)"
+  }
+}

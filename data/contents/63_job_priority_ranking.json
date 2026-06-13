@@ -1,0 +1,39 @@
+{
+  "topic_id": "63_job_priority_ranking",
+  "category": "취업/연봉",
+  "card_type": "ranking",
+  "season": "상시",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#취업정보 💼",
+      "headline_line1": "회사 고를 때",
+      "headline_line2": "가장 중요한 것 TOP 7",
+      "subheadline": "취준생이 실제로 1순위로 꼽은 기준"
+    },
+    {
+      "slide_number": 2,
+      "type": "ranking",
+      "section_title": "취준생이 회사 고르는 기준",
+      "items": [
+        {"rank": 1, "name": "연봉", "detail": "역시 돈이 1순위", "value": "53%", "badge": "🔥"},
+        {"rank": 2, "name": "워라밸", "detail": "저녁 있는 삶", "value": "16%", "badge": "🔥"},
+        {"rank": 3, "name": "복지", "detail": "복지포인트·휴가 등", "value": "12%"},
+        {"rank": 4, "name": "성장 기회", "detail": "커리어 발전", "value": "8%"},
+        {"rank": 5, "name": "동료·분위기", "detail": "함께 일하는 사람", "value": "6%"},
+        {"rank": 6, "name": "근무 환경", "detail": "사무실·시설", "value": "4%"},
+        {"rank": 7, "name": "위치", "detail": "출퇴근 거리", "value": "1%"}
+      ],
+      "footnote": "[2026 취준생 선호 조사 추정] 단일 1순위 기준 · 조사·표본별 차이 · 정확한 수치 아님 · 참고용"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "💼 회사 고를 때 1순위는?",
+    "body": "역시 연봉(53%)이 압도적 1위, 그다음이 워라밸(16%)·복지(12%).\n너의 1순위는 뭐야?",
+    "cta": "본인 1순위 댓글로 ⭐",
+    "hashtags": "#취업 #연봉 #워라밸 #복지 #취준생 #회사선택 #신입 #직장 #취업기준 #취업정보 #알쓸지잡10",
+    "source": "[2026 취준생 선호 조사 추정] 조사별 차이 · 참고용"
+  }
+}

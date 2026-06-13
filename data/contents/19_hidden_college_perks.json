@@ -1,0 +1,39 @@
+{
+  "topic_id": "19_hidden_college_perks",
+  "category": "대학/입시",
+  "card_type": "checklist",
+  "season": "상시",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#학생필독 📚",
+      "headline_line1": "대학 복지",
+      "headline_line2": "숨은 혜택 7",
+      "subheadline": "졸업까지 모르면 후회하는 학교 복지"
+    },
+    {
+      "slide_number": 2,
+      "type": "checklist",
+      "section_title": "대학생 모르면 손해보는 학교 복지",
+      "items": [
+        {"icon": "💰", "name": "교내 근로장학금", "detail": "주 15시간 / 시급 + 학점 면제 가능", "badge": "꿀"},
+        {"icon": "🏥", "name": "교내 보건소", "detail": "감기·예방접종 무료 / 거의 무료"},
+        {"icon": "💪", "name": "체육시설 무료", "detail": "헬스·수영 학기당 0~2만원"},
+        {"icon": "📖", "name": "교환학생 자격", "detail": "4학기 등록금만 내고 1년 해외"},
+        {"icon": "💡", "name": "학생 라운지·스터디룸", "detail": "24시간 운영 / 무료 예약"},
+        {"icon": "🎁", "name": "Microsoft / Adobe 학생 무료", "detail": "edu 메일 인증 시 정품 무료"},
+        {"icon": "🚌", "name": "셔틀버스 / 통학버스", "detail": "자취생도 거의 무료"}
+      ],
+      "footnote": "학교마다 운영 다름 · 학생지원처/학생포털에서 본인 학교 사항 확인 필수"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "🎓 대학 복지 숨은 혜택",
+    "body": "졸업하고 나서 '왜 안 썼지' 후회하는 게 7개.\n근로장학금 + 교환학생 + 학생 라이센스 = 연 수백만원 가치.",
+    "cta": "후배한테 공유 ⭐",
+    "hashtags": "#대학생 #학교복지 #근로장학금 #교환학생 #학생할인 #microsoft #adobe #학생필독 #알쓸지잡10",
+    "source": "전국 주요 대학 학생지원처 정책 종합 (2025)"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "topic_id": "16_credit_bank_certs",
+  "category": "대학/입시",
+  "card_type": "ranking",
+  "season": "상시",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#학생필독 📚",
+      "headline_line1": "학점은행제",
+      "headline_line2": "학점 잘 주는 자격증 5",
+      "subheadline": "조기졸업·복수전공 위해 필수"
+    },
+    {
+      "slide_number": 2,
+      "type": "ranking",
+      "section_title": "학점은행제 학점 인정 자격증 TOP 5",
+      "items": [
+        {"rank": 1, "name": "정보처리기사", "detail": "공학사 분야 인기", "value": "20학점", "badge": "🥇"},
+        {"rank": 2, "name": "사회복지사 2급", "detail": "사회복지학 학점", "value": "16~18학점", "badge": "🥈"},
+        {"rank": 3, "name": "건축기사", "detail": "공학 학점 인정", "value": "20학점", "badge": "🥉"},
+        {"rank": 4, "name": "전기기사", "detail": "공학 학점 인정", "value": "20학점"},
+        {"rank": 5, "name": "한국사능력검정 1급", "detail": "교양 학점", "value": "5학점"}
+      ],
+      "footnote": "[국가평생교육진흥원 학점은행제] 자격증별 학점 변동 가능 · 평가인정 자격 확인 필수"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "📚 학점은행 자격증 TOP 5",
+    "body": "정보처리기사 1개 = 20학점. 학기 1개 절약.\n조기졸업 / 복수전공 노릴 때 학점은행 활용은 필수.",
+    "cta": "후배한테 알려주기 ⭐",
+    "hashtags": "#대학생 #학점은행제 #정보처리기사 #사회복지사 #자격증 #조기졸업 #복수전공 #학생필독 #알쓸지잡10",
+    "source": "국가평생교육진흥원 학점은행제 (cb.or.kr) · 변동 가능"
+  }
+}

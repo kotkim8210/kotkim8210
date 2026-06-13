@@ -1,0 +1,39 @@
+{
+  "topic_id": "41_fall_recruitment_2026",
+  "category": "취업/연봉",
+  "card_type": "checklist",
+  "season": "하반기",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "cover",
+      "tag": "#취업정보 💼",
+      "headline_line1": "2026 하반기",
+      "headline_line2": "대기업 공채 일정",
+      "subheadline": "9~10월 시즌 · 미리 준비 안 하면 놓친다"
+    },
+    {
+      "slide_number": 2,
+      "type": "checklist",
+      "section_title": "하반기 공채 준비 체크 7",
+      "items": [
+        {"icon": "📅", "name": "공채 피크", "detail": "9~10월 집중 · 8월부터 공고", "badge": "핵심"},
+        {"icon": "⏰", "name": "준비 시점", "detail": "최소 3개월 전 = 6~7월 시작"},
+        {"icon": "📝", "name": "자소서", "detail": "직무 경험·AI 활용 사례 미리 정리"},
+        {"icon": "🧪", "name": "인적성", "detail": "기업별 유형 다름 · 기출 반복"},
+        {"icon": "🤖", "name": "AI 역량", "detail": "실무 즉시투입·AI 활용이 키워드"},
+        {"icon": "🗓", "name": "일정 관리", "detail": "잡코리아·사람인 채용달력 활용"},
+        {"icon": "🎤", "name": "면접", "detail": "10~11월 집중 · 직무 중심 질문"}
+      ],
+      "footnote": "[2026 채용 일정 추정] 기업별 상이 · 수시채용 병행 · 각 사 채용 공고 직접 확인 필수"
+    },
+    {"slide_number": 3, "type": "cta"}
+  ],
+  "caption": {
+    "title": "💼 2026 하반기 대기업 공채 일정",
+    "body": "공채 피크는 9~10월. 즉 6~7월엔 자소서·인적성 준비 시작해야 안전해요.\n올해 키워드는 '실무 즉시 투입'과 'AI 활용 역량'!",
+    "cta": "취준이면 저장 필수 ⭐",
+    "hashtags": "#취업 #공채 #하반기공채 #대기업 #취준생 #자소서 #인적성 #신입채용 #취업준비 #취업정보 #알쓸지잡10",
+    "source": "[2026 채용 일정 추정] 기업별 상이 · 공식 공고 확인 · 참고용"
+  }
+}
