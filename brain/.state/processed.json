@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "description": "이미 수집(ingest)된 inbox 파일 추적. /ingest가 자동으로 append 한다.",
+  "processed": [
+    {
+      "file": "brain/inbox/2026-06-13-claude-second-brain.md",
+      "ingested_at": "2026-06-13T09:00Z",
+      "topics": [
+        "second-brain",
+        "data-dumping",
+        "self-evolving-wiki",
+        "dream-sequence",
+        "claude-knowledge-system"
+      ]
+    },
+    {
+      "file": "brain/inbox/2026-06-13-zettelkasten.md",
+      "ingested_at": "2026-06-13T12:05Z",
+      "topics": [
+        "zettelkasten"
+      ]
+    },
+    {
+      "file": "brain/inbox/2026-06-13-session-log-제2의뇌-구축.md",
+      "ingested_at": "2026-06-13T12:25Z",
+      "topics": [
+        "session-independence"
+      ]
+    },
+    {
+      "file": "brain/inbox/2026-06-13-skill-install-session.md",
+      "ingested_at": "2026-06-13T12:40Z",
+      "topics": [
+        "claude-code-skills"
+      ]
+    }
+  ]
+}
