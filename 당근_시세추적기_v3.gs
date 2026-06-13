@@ -20,7 +20,7 @@ const SHEET_DASH  = '대시보드';
 const UNITS = ['개', '박스', 'kg'];
 
 // ★ 변동 알림 받을 이메일 — 채우는 것을 권장(비우면 트리거에서 발신이 안 될 수 있음)
-const ALERT_EMAIL = '';
+const ALERT_EMAIL = 'kke318@gmail.com';
 
 /* ---------- 헬퍼 ---------- */
 function toNum(v){ const n = parseFloat(String(v).replace(/[^0-9.]/g, '')); return isNaN(n) ? 0 : n; }
