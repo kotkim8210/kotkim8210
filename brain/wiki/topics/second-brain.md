@@ -5,7 +5,7 @@ tags: [방법론, 지식관리, 핵심개념]
 created: 2026-06-13
 updated: 2026-06-13
 sources: [2026-06-13-claude-second-brain.md]
-related: [[data-dumping]], [[self-evolving-wiki]], [[dream-sequence]], [[claude-knowledge-system]]
+related: [[data-dumping]], [[self-evolving-wiki]], [[dream-sequence]], [[claude-knowledge-system]], [[zettelkasten]]
 confidence: high
 status: active
 ---
@@ -24,6 +24,7 @@ status: active
 - [[self-evolving-wiki]] — 2단계(구조화): 입력을 연결·요약해 지식 지도로 진화.
 - [[dream-sequence]] — 3단계(정제): 유휴 시간에 자가 정제로 품질 유지.
 - [[claude-knowledge-system]] — 위 3단계를 컴포넌트로 구현한 전체 아키텍처.
+- [[zettelkasten]] — 제2의 뇌의 지적 선조. "분류 말고 연결" 철학의 원류.
 
 ## 미해결/모순 (Open Questions)
 - 없음.

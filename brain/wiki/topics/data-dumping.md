@@ -5,7 +5,7 @@ tags: [수집기, 워크플로, 1단계]
 created: 2026-06-13
 updated: 2026-06-13
 sources: [2026-06-13-claude-second-brain.md]
-related: [[second-brain]], [[self-evolving-wiki]], [[claude-knowledge-system]]
+related: [[second-brain]], [[self-evolving-wiki]], [[claude-knowledge-system]], [[zettelkasten]]
 confidence: high
 status: active
 ---
@@ -23,6 +23,7 @@ status: active
 - [[claude-knowledge-system]] — 이 단계의 구현 컴포넌트가 "데이터 수집기(Collector)".
 - [[self-evolving-wiki]] — 수집된 무가공 데이터가 이 단계로 흘러가 구조화된다.
 - [[second-brain]] — 제2의 뇌 방법론의 입력(1단계).
+- [[zettelkasten]] — "분류 부담 제거, 연결에 집중" 철학이 무가공 투입 설계와 일치.
 
 ## 미해결/모순 (Open Questions)
 - [확인필요] "5분"은 데이터 규모에 따라 달라질 수 있는 예시 수치로 보임.

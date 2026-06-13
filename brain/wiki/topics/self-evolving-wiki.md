@@ -5,7 +5,7 @@ tags: [연결엔진, 지식지도, 검색, 2단계]
 created: 2026-06-13
 updated: 2026-06-13
 sources: [2026-06-13-claude-second-brain.md]
-related: [[second-brain]], [[data-dumping]], [[dream-sequence]], [[claude-knowledge-system]]
+related: [[second-brain]], [[data-dumping]], [[dream-sequence]], [[claude-knowledge-system]], [[zettelkasten]]
 confidence: high
 status: active
 ---
@@ -25,6 +25,7 @@ status: active
 - [[claude-knowledge-system]] — 구현 컴포넌트가 "지식 연결 엔진(Connector)".
 - [[dream-sequence]] — 정제 단계가 이 위키의 연결과 지식 지도를 지속적으로 개선한다.
 - [[second-brain]] — 제2의 뇌의 구조화(2단계).
+- [[zettelkasten]] — 링크 기반 창발이라는 동일한 메커니즘. 이 위키 연결 방식의 이론적 뿌리.
 
 ## 미해결/모순 (Open Questions)
 - 없음.

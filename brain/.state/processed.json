@@ -12,6 +12,13 @@
         "dream-sequence",
         "claude-knowledge-system"
       ]
+    },
+    {
+      "file": "brain/inbox/2026-06-13-zettelkasten.md",
+      "ingested_at": "2026-06-13T12:05Z",
+      "topics": [
+        "zettelkasten"
+      ]
     }
   ]
 }
