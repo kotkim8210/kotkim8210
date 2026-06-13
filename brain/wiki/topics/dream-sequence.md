@@ -5,7 +5,7 @@ tags: [정제기, 자동화, 백그라운드, 3단계, 핵심]
 created: 2026-06-13
 updated: 2026-06-13
 sources: [2026-06-13-claude-second-brain.md]
-related: [[second-brain]], [[self-evolving-wiki]], [[claude-knowledge-system]]
+related: [[second-brain]], [[self-evolving-wiki]], [[claude-knowledge-system]], [[session-independence]]
 confidence: high
 status: active
 ---
@@ -24,6 +24,7 @@ AI가 백그라운드 유휴 상태(예: 잠자는 시간)에 스스로 지식�
 - [[self-evolving-wiki]] — 드림 시퀀스가 정제·개선하는 대상(위키와 지식 지도).
 - [[claude-knowledge-system]] — 구현 컴포넌트가 "백그라운드 정제기(Refiner)".
 - [[second-brain]] — 제2의 뇌의 품질 유지(3단계).
+- [[session-independence]] — 자동화(주 1회 Action) 없이도 아무 세션의 `/dream`으로 실행 가능.
 
 ## 미해결/모순 (Open Questions)
 - 없음.

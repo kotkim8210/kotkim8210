@@ -5,7 +5,7 @@ tags: [아키텍처, 시스템구조, 메타]
 created: 2026-06-13
 updated: 2026-06-13
 sources: [2026-06-13-claude-second-brain.md]
-related: [[second-brain]], [[data-dumping]], [[self-evolving-wiki]], [[dream-sequence]]
+related: [[second-brain]], [[data-dumping]], [[self-evolving-wiki]], [[dream-sequence]], [[session-independence]]
 confidence: high
 status: active
 ---
@@ -27,6 +27,7 @@ status: active
 - [[self-evolving-wiki]] — Connector 컴포넌트의 동작.
 - [[dream-sequence]] — Refiner 컴포넌트의 동작.
 - [[second-brain]] — 이 3-컴포넌트가 구현하는 상위 방법론.
+- [[session-independence]] — 이 컴포넌트들이 GitHub 아닌 '세션'에서 실행된다는 운영 원칙.
 
 ## 미해결/모순 (Open Questions)
 - 없음.
