@@ -4,10 +4,10 @@
 > 클로드는 이 인덱스로 위치를 좁힌 뒤 관련 주제 문서 1~3개만 펼쳐 몇 초 만에 답한다.
 
 ## 📊 통계
-- 주제 문서: **8**
+- 주제 문서: **10**
 - 누적 통찰(insights): **3**
 - 보관(archive): 0
-- 마지막 수집(ingest): 2026-06-13
+- 마지막 수집(ingest): 2026-06-13 (branch-inventory → video-skills·my-projects 신설)
 - 마지막 드림 시퀀스: 2026-06-13 (드림 #1 — 통찰 2건 합성)
 
 ## 📚 주제 색인 (Topic Index)
@@ -20,6 +20,10 @@
 
 ### 클로드 코드 운영
 - [[claude-code-skills]] — 스킬 설치 스코프(레포/유저/전역)·지속성, 로컬 PC↔클라우드 구분, 설치 안전. `#클로드코드 #스킬 #환경`
+
+### 내 작업·자산 (브랜치 색인)
+- [[my-projects]] — 흩어진 브랜치별 실제 프로젝트 지도(인스타·당근·성경저널·쿠팡·홍보처크롤러). `#프로젝트 #색인 #사업`
+- [[video-skills]] — 영상·유튜브 스킬 3종(watch·youtube-shorts·osmu) 색인. `#스킬 #영상 #유튜브`
 
 ### 워크플로 3단계
 - [[data-dumping]] — (1단계/수집기) 분류 없이 무가공 투입 → 정리 시간 제로화. `#수집기 #1단계`
@@ -46,10 +50,18 @@ zettelkasten ──(지적 선조/이론적 뿌리)──► second-brain, self-
 
 claude-code-skills ──(같은 원리)──► session-independence
    └ "로컬 PC ↔ 클라우드는 다른 컴퓨터, 커밋한 것만 영속" (brain/inbox 위치 혼선의 근원)
+
+── [내 작업 자산 클러스터] ──
+my-projects ──(콘텐츠 운영 도구)──► video-skills
+   └ 인스타/유튜브 콘텐츠 프로젝트 ◄─ youtube-shorts·osmu 스킬이 뒷받침
+my-projects ══(흩어짐의 해소)══ session-independence
+   └ 17개 브랜치로 흩어진 작업을 brain 색인 하나로 = "하나의 뇌" 목표 실현
 ```
 
 ## ⚠️ 미해결 모순 / 확인필요
 - [확인필요] [[data-dumping]] — "5분 내 스캔"은 데이터 규모에 따라 달라질 수 있는 예시 수치.
 - [확인필요] 설계 긴장 — '자기 언어 재작성'을 AI가 대신하면 사람의 학습 이득이 줄 수 있음(드림#1, INSIGHTS.md). 완화책 검토 필요.
+- [미해결] 기본 브랜치를 main으로 전환 — 사용자가 GitHub Settings에서 직접(MCP 도구 없음). 전환해야 새 세션이 통합된 뇌를 로드.
+- [미해결] [[my-projects]] — 중복 브랜치 4개(festive-wright·graphify-setup·upbeat-goodall·merge-brain-into-main) 정리 + 각 프로젝트 독립 레포 분리 여부 결정.
 
 *(이 인덱스는 `/ingest`·`/dream` 실행 시마다 자동 갱신된다.)*
