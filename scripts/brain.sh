@@ -21,8 +21,8 @@ archive_count=$(find brain/archive -type f -name '*.md' 2>/dev/null | wc -l | tr
 # 위키 전체 단어 수 (주제 + MAP + 통찰)
 words=$(cat brain/wiki/topics/*.md brain/wiki/MAP.md brain/insights/INSIGHTS.md 2>/dev/null | wc -w | tr -d ' ')
 
-# 마지막 드림 시퀀스 시각 (dream-log의 마지막 날짜 헤더, "## " 접두사 제거)
-last_dream=$(grep -hoE '^## [0-9]{4}-[0-9]{2}-[0-9]{2}.*' brain/.state/dream-log.md 2>/dev/null | tail -1 | sed 's/^## //' || true)
+# 마지막 드림 시퀀스 시각 (날짜+시각 헤더를 정렬해 가장 최신 1건, "## " 접두사 제거)
+last_dream=$(grep -hoE '^## [0-9]{4}-[0-9]{2}-[0-9]{2}.*' brain/.state/dream-log.md 2>/dev/null | sort -r | head -1 | sed 's/^## //' || true)
 [ -z "$last_dream" ] && last_dream="(아직 없음)"
 
 echo "🧠 제2의 뇌 상태"
