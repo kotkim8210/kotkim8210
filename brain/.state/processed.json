@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "description": "이미 수집(ingest)된 inbox 파일 추적. /ingest가 자동으로 append 한다.",
+  "processed": [
+    {
+      "file": "brain/inbox/2026-06-13-claude-second-brain.md",
+      "ingested_at": "2026-06-13T09:00Z",
+      "topics": [
+        "second-brain",
+        "data-dumping",
+        "self-evolving-wiki",
+        "dream-sequence",
+        "claude-knowledge-system"
+      ]
+    }
+  ]
+}
