@@ -6,17 +6,21 @@
   "images_per_segment": 6,
   "motion": true,
   "captions": { "mode": "whisper" },
-  "_image_style_help": "주제별 이미지 톤. suffix=모든 컷에 붙는 시대·장소 앵커, motifs=[{kw:정규식,scene:영문장면}]. 생략하면 내장(역사·유럽) 모티프 사용.",
+  "_image_style_help": "preset: webtoon(2D 만화체)/cinematic(실사 다큐). suffix=모든 컷 시대·장소 앵커. character=일관 내레이터(segment.with_character:true 컷에 주입). motifs=[{kw,scene}].",
   "image_style": {
-    "suffix": "1980s to 1990s Japan, Tokyo bubble economy era, no European or 17th-century elements"
+    "preset": "webtoon",
+    "suffix": "1980s to 1990s Japan, Tokyo bubble economy era",
+    "character": "the channel's recurring narrator, a calm sharp-eyed analyst in a dark coat, consistent design"
   },
   "segments": [
     {
       "id": "s1",
       "text": "꽃 한 송이가 집 한 채였다는 그 이야기. 그리고 어느 날 아침, 그 모든 것이 무너졌습니다. 그런데 이 이야기의 대부분은 사실이 아닙니다.",
       "caption": "당신이 아는 튤립 버블은\n거의 다 거짓말입니다",
-      "_image_hint_help": "이 세그먼트 장면을 직접 지정(영/한). image_prompt(완전 영문 프롬프트)로 더 강하게 지정 가능.",
-      "image_hint": "an aerial night view of 1980s Tokyo skyline glowing with neon, vast and cold"
+      "_seg_help": "image_hint=장면 직접 지정. with_character:true=내레이터 등장. animate:true=Kling 영상화 우선 컷(human_tasks 4번에 목록).",
+      "image_hint": "an aerial night view of 1980s Tokyo skyline glowing with neon, vast and cold",
+      "with_character": true,
+      "animate": true
     },
     {
       "id": "s2",

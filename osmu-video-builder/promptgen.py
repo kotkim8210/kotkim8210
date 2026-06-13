@@ -46,6 +46,24 @@ DEFAULT_GUARD = ("no recognizable real person, no celebrity likeness, faces hidd
 DEFAULT_NEG = ("text, letters, watermark, logo, modern objects, smartphone, car, "
                "deformed hands, extra fingers, lowres, jpeg artifacts")
 
+# 스타일 프리셋 — config.image_style.preset 로 선택(개별 키로 덮어쓰기 가능)
+PRESETS = {
+    "cinematic": {
+        "base": DEFAULT_STYLE,
+        "guard": ("no recognizable real person, no celebrity likeness, faces hidden or "
+                  "turned away or silhouetted"),
+        "negative": DEFAULT_NEG,
+    },
+    "webtoon": {
+        "base": ("2d Korean naver webtoon comic style, flat vivid colors, bold clean "
+                 "outlines, minimal cel shading, dramatic webtoon paneling, expressive mood"),
+        # 웹툰은 인물 OK(가공 캐릭터) — 단 '실존 공인 닮은꼴'만 회피해 초상권 안전.
+        "guard": "original fictional characters only, no real public figure likeness",
+        "negative": ("photorealistic, 3d render, photograph, blurry, text, watermark, logo, "
+                     "signature, extra fingers, deformed hands, lowres"),
+    },
+}
+
 # 내장 모티프(역사·유럽 버블) — config.image_style.motifs 없을 때만 사용
 BUILTIN_MOTIFS = [
     (r"거짓말|신화|전설|착각|오해|진짜", "an old leather-bound history book half-open in dim candlelight, dust motes in a single shaft of light"),
@@ -103,10 +121,12 @@ def main():
     cfg = load_config(cfg_path)
 
     style = cfg.get("image_style", {})
-    STYLE = style.get("base", DEFAULT_STYLE)
-    GUARD = style.get("people_guard", DEFAULT_GUARD)
-    NEG = style.get("negative", DEFAULT_NEG)
+    preset = PRESETS.get(style.get("preset", ""), {})
+    STYLE = style.get("base", preset.get("base", DEFAULT_STYLE))
+    GUARD = style.get("people_guard", preset.get("guard", DEFAULT_GUARD))
+    NEG = style.get("negative", preset.get("negative", DEFAULT_NEG))
     SUFFIX = style.get("suffix", "")
+    CHARACTER = style.get("character", "")  # 일관 캐릭터(있으면 character 컷에 주입)
     motifs = get_motifs(style)
     default_motif = style.get("default_motif", DEFAULT_MOTIF)
 
@@ -123,7 +143,11 @@ def main():
         md.append(f"\n## {sid}  ({len(files)}장, 장면 출처: {src})")
         for idx, target in enumerate(files):
             variant = VARIANTS[idx % len(VARIANTS)] if len(files) > 1 else None
-            parts = [scene] + ([variant] if variant else [])
+            parts = [scene]
+            if seg.get("with_character") and CHARACTER:
+                parts.append(CHARACTER)
+            if variant:
+                parts.append(variant)
             if SUFFIX:
                 parts.append(SUFFIX)
             parts += [AR_WORD[ar], STYLE, GUARD]

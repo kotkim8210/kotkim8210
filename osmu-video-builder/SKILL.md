@@ -27,6 +27,9 @@ description: >
    - ★관점 들어가는 세그먼트엔 `"pov": true` 표시 → human_tasks.md 1번에 자동으로 뜸.
    - 비유럽/현대 주제면 `image_style.suffix`(시대·장소 앵커)를 넣고, 필요하면 세그먼트별
      `image_hint`(짧은 장면)로 이미지 프롬프트가 주제에 맞게 나오도록 한다(유럽풍 오출력 방지).
+   - 그림체: `image_style.preset` = `webtoon`(2D 만화체, 무료 Nano Banana Pro/Flow·Kling 궁합) 또는
+     `cinematic`(실사 다큐). `images_per_segment`(롱폼 권장 5~6) + 핵심 컷에 `animate:true`(Kling 우선).
+     무료 스택: 이미지 Flow(Nano Banana Pro, 워터마크X) → 핵심 컷만 Kling(6/일) → CapCut/build.
    - 현대 비교/교훈 세그먼트엔 `"era":"modern"` 태그(시대불일치 오탐 방지).
    - OSMU `clips` 3개(반전 훅/충격 팩트/인용형 통찰), 각 독립 `hook`.
    - 안전 레인만: 역사·과거 버블/사기. **현대 실존인물 나락 금지**(명예훼손·초상권).

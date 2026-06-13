@@ -117,6 +117,18 @@ def gen_human_tasks(cfg, root):
             L.append(f"  - [{mark}] {s['id']}: {have}/{len(imgs)}장  ({imgs[0]} … {imgs[-1].split('/')[-1]})")
     L.append("")
 
+    animate = [s for s in cfg["segments"] if s.get("animate")]
+    if animate:
+        L.append("## 4) 🎬 (선택) Kling 영상화 — 핵심 컷만 (무료 66크레딧/일 = 5초 ×6컷)")
+        L.append("- 아래 컷의 첫 이미지를 Kling에 올려 5초 영상으로 → CapCut(또는 build) 에서 해당 자리에 교체.")
+        for s in animate:
+            first = segment_images(s, cfg)[0]
+            L.append(f"  - [ ] {s['id']} → `{first}`  ({s.get('caption','').splitlines()[0] if s.get('caption') else ''})")
+        L.append("- 나머지 컷은 build.py 켄번즈로 자동 처리(영상화 불필요).")
+        if cfg.get("image_style", {}).get("character"):
+            L.append("- 🔑 캐릭터 일관성: Nano Banana Pro에서 내레이터 1장을 먼저 만들고 **sref(스타일 참조)로 고정** → 모든 컷에 재사용.")
+        L.append("")
+
     L.append("## (참고) 고증 검증")
     if pend:
         L.append(f"- ⏳ {pend}건 대기 — **Claude가 web_search로 처리**(당신 작업 아님).")
