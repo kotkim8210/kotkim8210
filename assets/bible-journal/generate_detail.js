@@ -7,6 +7,7 @@ GlobalFonts.registerFromPath(`${D}/NanumMyeongjo-ExtraBold.ttf`, 'NMX');
 
 const W = 1080, PAD = 120;
 const CREAM = '#F6F1E6', PANEL = '#FBF8F1', INK = '#54603F', CTXT = '#F3EEE0';
+const DARK = '#2E3A32';  // deep green (brand-consistent with thumbnails)
 const BODY = 'rgba(68,74,52,0.95)', SOFT = 'rgba(84,96,63,0.62)';
 
 let ctx; // active context (set per pass)
@@ -84,7 +85,7 @@ function section(bg, els, padTop = 95, padBottom = 95) {
   let inner = 0; for (const el of els) inner += measureEl(el);
   const h = padTop + inner + padBottom;
   ctx.fillStyle = bg; ctx.fillRect(0, Y, W, h);
-  const C = bg === INK
+  const C = (bg === INK || bg === DARK)
     ? { head: CTXT, body: 'rgba(243,238,224,0.88)', label: 'rgba(243,238,224,0.7)', soft: 'rgba(243,238,224,0.5)' }
     : { head: INK, body: BODY, label: SOFT, soft: SOFT };
   let cy = Y + padTop;
@@ -128,7 +129,7 @@ function section(bg, els, padTop = 95, padBottom = 95) {
   ]);
 
   // FEATURES HEADER
-  section(INK, [
+  section(DARK, [
     { t: 'label', text: 'HOW IT WORKS', size: 23 }, { t: 'gap', h: 18 },
     { t: 'h', text: '이렇게 채워갑니다', size: 46, lh: 64 },
   ], 70, 70);
@@ -159,7 +160,7 @@ function section(bg, els, padTop = 95, padBottom = 95) {
   ]);
 
   // PAPER REASON (band)
-  section(INK, [
+  section(DARK, [
     { t: 'label', text: 'WHY ON PAPER', size: 23 }, { t: 'gap', h: 18 },
     { t: 'h', text: '왜 손으로 적어야 할까요?', size: 44, lh: 64 }, { t: 'gap', h: 28 },
     { t: 'body', text: '앱은 알림을 주지만, 손글씨는 마음을 남깁니다.\n크림빛 종이 위에 아이의 이름을 또박또박 적는\n그 시간이, 가장 깊은 기도가 됩니다.', size: 32, lh: 58 },
@@ -182,7 +183,7 @@ function section(bg, els, padTop = 95, padBottom = 95) {
   ]);
 
   // FINAL CTA (band)
-  section(INK, [
+  section(DARK, [
     { t: 'sprig', scale: 1.0, color: CTXT }, { t: 'gap', h: 26 },
     { t: 'h', text: '오늘부터,\n아이를 위한 기도를 남기세요.', size: 48, lh: 72 }, { t: 'gap', h: 30 },
     { t: 'h', text: '엄마의 기도 노트', size: 40, lh: 56 }, { t: 'gap', h: 22 },
@@ -197,5 +198,13 @@ function section(bg, els, padTop = 95, padBottom = 95) {
   // hero standalone
   const hero = createCanvas(W, heroH); hero.getContext('2d').drawImage(big, 0, 0);
   fs.writeFileSync(`${D}/detail_hero.png`, hero.toBuffer('image/png'));
-  console.log('DONE  totalH=' + Y + '  heroH=' + heroH + '  sections=' + sectionLog.length);
+  // slice into upload-ready parts (cut only at section boundaries → no text cut)
+  const b = [0]; for (const h of sectionLog) b.push(b[b.length - 1] + h);
+  const chunks = [[0, 0], [1, 2], [3, 5], [6, 7], [8, 9], [10, 11]];
+  chunks.forEach((ch, i) => {
+    const y0 = Math.round(b[ch[0]]), y1 = Math.round(b[ch[1] + 1]), h = y1 - y0;
+    const part = createCanvas(W, h); part.getContext('2d').drawImage(big, 0, y0, W, h, 0, 0, W, h);
+    fs.writeFileSync(`${D}/detail_part_${i + 1}.png`, part.toBuffer('image/png'));
+  });
+  console.log('DONE  totalH=' + Y + '  heroH=' + heroH + '  sections=' + sectionLog.length + '  parts=' + chunks.length);
 })();

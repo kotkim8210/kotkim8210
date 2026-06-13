@@ -75,15 +75,15 @@ const pages = [];
 {
   const { c, x } = newPage();
   frame(x, 70);
-  spaced(x, 'PRAYER JOURNAL', W / 2, 470, 34, 'NMR', INK_SOFT, 16);
-  sprig(x, W / 2, 760, 1.7, INK);
+  spaced(x, 'PRAYER JOURNAL', W / 2, 455, 44, 'NMR', INK_SOFT, 22);
+  sprig(x, W / 2, 770, 1.7, INK);
   const t = '엄마의 기도 노트';
   const ts = fit(x, t, W - M * 2 - 120, 168, 'NMX');
-  center(x, t, W / 2, 1130, ts, 'NMX', INK);
-  rule(x, W / 2 - 120, 1210, W / 2 + 120, INK_SOFT, 2.5);
-  center(x, '자녀를 위한 기도 저널', W / 2, 1320, 60, 'NMR', INK_SOFT);
-  center(x, '쉬지 말고 기도하라', W / 2, 2050, 50, 'NMR', INK);
-  center(x, '데살로니가전서 5 : 17', W / 2, 2120, 38, 'NMR', INK_SOFT);
+  center(x, t, W / 2, 1140, ts, 'NMX', INK);
+  rule(x, W / 2 - 130, 1220, W / 2 + 130, INK_SOFT, 2.5);
+  center(x, '자녀를 위한 기도 저널', W / 2, 1335, 84, 'NMB', 'rgba(84,96,63,0.92)');
+  center(x, '쉬지 말고 기도하라', W / 2, 2025, 70, 'NMB', INK);
+  center(x, '데살로니가전서 5 : 17', W / 2, 2120, 48, 'NMR', INK_SOFT);
   pages.push(c);
 }
 
