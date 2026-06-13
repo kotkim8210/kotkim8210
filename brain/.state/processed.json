@@ -26,6 +26,13 @@
       "topics": [
         "session-independence"
       ]
+    },
+    {
+      "file": "brain/inbox/2026-06-13-skill-install-session.md",
+      "ingested_at": "2026-06-13T12:40Z",
+      "topics": [
+        "claude-code-skills"
+      ]
     }
   ]
 }

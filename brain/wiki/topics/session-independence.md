@@ -5,7 +5,7 @@ tags: [설계원칙, 운영, 비용, 아키텍처]
 created: 2026-06-13
 updated: 2026-06-13
 sources: [2026-06-13-session-log-제2의뇌-구축.md]
-related: [[claude-knowledge-system]], [[dream-sequence]], [[self-evolving-wiki]], [[data-dumping]]
+related: [[claude-knowledge-system]], [[dream-sequence]], [[self-evolving-wiki]], [[data-dumping]], [[claude-code-skills]]
 confidence: high
 status: active
 ---
@@ -24,6 +24,7 @@ status: active
 - [[dream-sequence]] — 정제기는 GitHub Action 없이도 아무 세션의 `/dream`으로 실행된다(자동화는 옵션).
 - [[self-evolving-wiki]] — `/ingest`·`/recall`도 세션에서 직접 동작하므로 연결·검색이 GitHub에 의존하지 않는다.
 - [[data-dumping]] — 수집 역시 세션 `/ingest`로 충분(push 자동 수집은 옵션).
+- [[claude-code-skills]] — 같은 뿌리 원리: "로컬 PC ↔ 클라우드 컨테이너는 다른 컴퓨터, 커밋한 것만 영속". 스킬 설치·`brain/inbox` 위치 혼선이 모두 여기서 비롯됨.
 
 ## 미해결/모순 (Open Questions)
 - 없음.
