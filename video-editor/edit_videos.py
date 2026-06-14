@@ -327,7 +327,7 @@ def main() -> None:
     p.add_argument("--height", type=int, default=1080, help="결과 세로 해상도")
     p.add_argument("--fps", type=int, default=30, help="결과 프레임레이트")
     # 자막 옵션
-    p.add_argument("--model", default="small",
+    p.add_argument("--model", default="medium",
                    help="faster-whisper 모델: tiny/base/small/medium/large-v3 (클수록 정확·느림)")
     p.add_argument("--language", default="ko", help="전사 언어 코드")
     p.add_argument("--compute-type", default="int8", help="ctranslate2 연산 타입 (int8 권장)")

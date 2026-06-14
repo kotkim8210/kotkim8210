@@ -47,8 +47,11 @@ python video-editor/edit_videos.py
 ## 자주 쓰는 옵션
 
 ```bash
-# 자막 정확도를 높이고 싶을 때 (느리지만 한국어 인식이 가장 좋음)
+# 자막 정확도를 더 높이고 싶을 때 (느리지만 한국어 인식이 가장 좋음)
 python video-editor/edit_videos.py --model large-v3
+
+# 더 빠르게(정확도는 낮게) 돌리고 싶을 때
+python video-editor/edit_videos.py --model small
 
 # 무음 판정을 더 민감/둔감하게 (기본 -30dB, 0.6초)
 python video-editor/edit_videos.py --noise -35dB --min-silence 1.0
@@ -70,7 +73,7 @@ python video-editor/edit_videos.py --name 내영상 --input ./clips --output ./d
 
 | 옵션 | 기본값 | 설명 |
 |------|--------|------|
-| `--model` | `small` | 음성 인식 모델 `tiny`·`base`·`small`·`medium`·`large-v3` (클수록 정확·느림) |
+| `--model` | `medium` | 음성 인식 모델 `tiny`·`base`·`small`·`medium`·`large-v3` (클수록 정확·느림) |
 | `--noise` | `-30dB` | 이보다 작은 소리는 무음으로 간주 |
 | `--min-silence` | `0.6` | 이 길이(초) 이상 조용해야 컷 |
 | `--margin` | `0.20` | 말 구간 앞뒤로 남길 여유(초) |
