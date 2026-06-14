@@ -327,15 +327,19 @@ def transcribe_to_cues(
     segments, info = model.transcribe(
         str(media), language=language, vad_filter=True,
         vad_parameters={"min_silence_duration_ms": 500}, beam_size=5,
-        condition_on_previous_text=False,   # 환청(앞 문맥 끌고가는 헛소리) 억제
     )
     log(f"감지 언어: {info.language} (확률 {info.language_probability:.2f})")
 
+    has_korean = re.compile(r"[가-힣]")
     cues: list[dict] = []
     for seg in segments:
         text = seg.text.strip()
-        if text:
-            cues.extend(split_segment(text, seg.start, seg.end, max_chars))
+        if not text:
+            continue
+        for cue in split_segment(text, seg.start, seg.end, max_chars):
+            # 한글이 한 글자도 없는 조각(영어 환청 'naturally' 등)은 버린다
+            if has_korean.search(cue["text"]):
+                cues.append(cue)
     for c in cues:
         log(f"[{_srt_time(c['start'])}] {c['text']}")
     return cues, info
