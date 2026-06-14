@@ -80,6 +80,7 @@ python video-editor/edit_videos.py --name 내영상 --input ./clips --output ./d
 | `--noise` | `-30dB` | 이보다 작은 소리는 무음으로 간주 |
 | `--min-silence` | `0.6` | 이 길이(초) 이상 조용해야 컷 |
 | `--margin` | `0.20` | 말 구간 앞뒤로 남길 여유(초) |
+| `--no-normalize-audio` | 꺼짐 | 음성 정규화 끄기(작게 녹음된 영상은 거의 잘려나갈 수 있어 권장 안 함) |
 | `--width`/`--height`/`--fps` | `1920`/`1080`/`30` | 결과 영상 규격 |
 | `--font` | `NanumGothic` | 자막 폰트(한글 지원) |
 | `--soft-subs` | 꺼짐 | 자막을 태우지 않고 트랙으로만 삽입 |
