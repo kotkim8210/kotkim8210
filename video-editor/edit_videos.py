@@ -287,10 +287,39 @@ def _ass_time(seconds: float) -> str:
     return f"{h}:{m:02d}:{s:02d}.{c:02d}"
 
 
+def split_segment(text: str, start: float, end: float, max_chars: int) -> list[dict]:
+    """한 문장을 단어 경계에서 ~max_chars 길이로 끊고, 글자 수에 비례해 시간을 배분한다.
+
+    (단어 타임스탬프는 medium 모델에서 환청 토큰·깨진 글자를 만들기 쉬워, 깔끔한
+     문장 단위 전사를 비례 분할하는 방식이 더 안정적이다.)
+    """
+    chunks: list[str] = []
+    cur = ""
+    for w in text.split():
+        cand = f"{cur} {w}".strip()
+        if cur and len(cand) > max_chars:
+            chunks.append(cur)
+            cur = w
+        else:
+            cur = cand
+    if cur:
+        chunks.append(cur)
+    if not chunks:
+        return []
+    total = sum(len(c) for c in chunks) or 1
+    out: list[dict] = []
+    t, span = start, max(0.0, end - start)
+    for c in chunks:
+        ct = span * (len(c) / total)
+        out.append({"start": t, "end": min(end, t + ct), "text": c})
+        t += ct
+    return out
+
+
 def transcribe_to_cues(
     media: Path, *, model_name: str, language: str, compute_type: str, max_chars: int,
 ):
-    """faster-whisper(단어 타임스탬프)로 전사해 ~max_chars 길이의 짧은 자막 큐 목록을 만든다."""
+    """faster-whisper 로 전사한 뒤 문장을 ~max_chars 길이의 짧은 자막 큐로 끊는다."""
     from faster_whisper import WhisperModel  # 지연 임포트(설치 안내를 위해)
 
     log(f"모델 로딩: {model_name} (compute_type={compute_type}) — 최초 1회 다운로드가 있을 수 있음")
@@ -298,32 +327,14 @@ def transcribe_to_cues(
     segments, info = model.transcribe(
         str(media), language=language, vad_filter=True,
         vad_parameters={"min_silence_duration_ms": 500}, beam_size=5,
-        word_timestamps=True,
     )
     log(f"감지 언어: {info.language} (확률 {info.language_probability:.2f})")
 
     cues: list[dict] = []
-
-    def flush(bucket: list) -> None:
-        text = "".join(w.word for w in bucket).strip()
-        if text:
-            cues.append({"start": bucket[0].start, "end": bucket[-1].end, "text": text})
-
     for seg in segments:
-        words = seg.words or []
-        if not words:
-            t = seg.text.strip()
-            if t:
-                cues.append({"start": seg.start, "end": seg.end, "text": t})
-            continue
-        bucket: list = []
-        for w in words:
-            bucket.append(w)
-            if len("".join(x.word for x in bucket).strip()) >= max_chars:
-                flush(bucket)
-                bucket = []
-        if bucket:
-            flush(bucket)
+        text = seg.text.strip()
+        if text:
+            cues.extend(split_segment(text, seg.start, seg.end, max_chars))
     for c in cues:
         log(f"[{_srt_time(c['start'])}] {c['text']}")
     return cues, info
