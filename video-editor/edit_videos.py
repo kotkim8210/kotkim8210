@@ -369,8 +369,12 @@ def _highlight(text: str, keywords: list[str], orange: str, white: str) -> str:
 def write_ass(
     cues: list[dict], path: Path, *, width: int, height: int, font: str,
     font_size: int, orange_hex: str, highlight: list[str], margin_v: int,
+    pop: bool = True,
 ) -> None:
-    """스타일 ASS 자막 생성: 흰색 굵게 + 검은 외곽선, 하단, 중요단어 주황색."""
+    """스타일 ASS 자막 생성: 흰색 굵게 + 검은 외곽선, 하단, 중요단어 주황색.
+
+    pop=True 면 자막이 등장할 때 살짝 커졌다 제자리로 돌아오는 줌팝 효과를 준다.
+    """
     orange, white = hex_to_ass(orange_hex), "&H00FFFFFF&"
     outline = max(2, round(font_size * 0.07))
     header = (
@@ -386,9 +390,12 @@ def write_ass(
         "[Events]\n"
         "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n"
     )
+    # 줌팝: 등장 시 58%→106%→100% 로 빠르게 튀어오르는 효과(\t 변환 태그)
+    pop_tag = (r"{\fscx58\fscy58\t(0,120,\fscx106\fscy106)\t(120,210,\fscx100\fscy100)}"
+               if pop else "")
     rows = [
         f"Dialogue: 0,{_ass_time(c['start'])},{_ass_time(c['end'])},Default,,0,0,0,,"
-        f"{_highlight(c['text'], highlight, orange, white)}"
+        f"{pop_tag}{_highlight(c['text'], highlight, orange, white)}"
         for c in cues
     ]
     path.write_text(header + "\n".join(rows) + "\n", encoding="utf-8")
@@ -478,11 +485,20 @@ def build_intro(merged: Path, sound: Path, dst: Path, *, width: int, height: int
 def render_rich(
     merged: Path, ass: Path, dst: Path, *,
     overlays: list[dict], transitions: list[dict], fontsdir: Path,
+    fps: int, zoom: bool = True,
 ) -> None:
-    """오버레이 이미지 + 자막(ASS) 번인 + 전환 효과음 믹스를 한 번에 렌더한다."""
+    """오버레이 이미지 + 자막(ASS) 번인 + 전환 효과음 믹스를 한 번에 렌더한다.
+
+    zoom=True 면 짤이 등장할 때 줌인, 사라질 때 줌아웃으로 보이도록 크기를 시간에 따라 키운다.
+    """
+    total = ffprobe_duration(merged) + 0.5
     cmd = ["ffmpeg", "-hide_banner", "-y", "-i", str(merged.resolve())]
     for ov in overlays:
-        cmd += ["-i", str(Path(ov["path"]).resolve())]
+        if zoom:  # 시간에 따라 크기를 바꾸려면 정지 이미지를 프레임 흐름으로 만들어야 한다
+            cmd += ["-loop", "1", "-framerate", str(fps), "-t", f"{total:.2f}",
+                    "-i", str(Path(ov["path"]).resolve())]
+        else:
+            cmd += ["-i", str(Path(ov["path"]).resolve())]
     trans_base = 1 + len(overlays)
     for tr in transitions:
         cmd += ["-i", str(Path(tr["sound"]).resolve())]
@@ -490,8 +506,14 @@ def render_rich(
     fc: list[str] = []
     last = "[0:v]"
     for i, ov in enumerate(overlays):
-        fc.append(f"[{1 + i}:v]scale=-2:{ov['height']}[ov{i}]")
-        s, e = ov["start"], ov["start"] + ov["dur"]
+        s, e, H = ov["start"], ov["start"] + ov["dur"], ov["height"]
+        if zoom:
+            ti, to, floor, amp = 0.22, 0.20, 0.42, 0.58   # 등장 줌인 / 퇴장 줌아웃
+            hexpr = (f"{H}*({floor}+{amp}*min(min(max((t-{s:.3f})/{ti},0),1),"
+                     f"min(max(({e:.3f}-t)/{to},0),1)))")
+            fc.append(f"[{1 + i}:v]scale=w=-2:h='{hexpr}':eval=frame[ov{i}]")
+        else:
+            fc.append(f"[{1 + i}:v]scale=-2:{H}[ov{i}]")
         fc.append(f"{last}[ov{i}]overlay=x=W-w-{ov['mx']}:y={ov['my']}:"
                   f"enable='between(t,{s:.2f},{e:.2f})'[v{i}]")
         last = f"[v{i}]"
@@ -551,6 +573,8 @@ def main() -> None:
                    help="짤 삽입: '경로@자막키워드@지속초' (반복 가능). 예: assets/image.jpg@만렙@2.6")
     p.add_argument("--no-intro-sound", action="store_true", help="인트로 효과음(두둥)을 넣지 않는다")
     p.add_argument("--no-transition-sound", action="store_true", help="영상 전환 효과음(휘릭)을 넣지 않는다")
+    p.add_argument("--no-text-pop", action="store_true", help="자막 등장 줌팝 효과를 끈다")
+    p.add_argument("--no-image-zoom", action="store_true", help="짤 등장 줌인/퇴장 줌아웃 효과를 끈다")
     p.add_argument("--no-subs", action="store_true", help="자막 단계를 건너뛴다")
     p.add_argument("--soft-subs", action="store_true", help="자막을 태우지 않고 트랙으로만 넣는다")
     p.add_argument("--keep-work", action="store_true", help="중간 산출물(작업 폴더)을 지우지 않는다")
@@ -656,7 +680,8 @@ def main() -> None:
                 ass = work / "subs.ass"
                 write_ass(cues, ass, width=args.width, height=args.height, font=args.font,
                           font_size=font_size, orange_hex=args.orange,
-                          highlight=highlight, margin_v=args.margin_v)
+                          highlight=highlight, margin_v=args.margin_v,
+                          pop=not args.no_text_pop)
 
                 # 짤(이미지) 오버레이 + 전환 효과음
                 overlays = build_overlays(args.overlay, cues, args.width, args.height)
@@ -669,7 +694,8 @@ def main() -> None:
                 step("자막·짤·효과음 합성 렌더")
                 content = work / "content.mp4"
                 render_rich(merged, ass, content, overlays=overlays,
-                            transitions=transitions, fontsdir=ASSETS_DIR)
+                            transitions=transitions, fontsdir=ASSETS_DIR,
+                            fps=args.fps, zoom=not args.no_image_zoom)
 
                 # 인트로 효과음(두둥) 붙이기
                 intro_dur = 0.0
