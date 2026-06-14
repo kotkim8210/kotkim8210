@@ -463,7 +463,10 @@ def build_overlays(specs: list[str], cues: list[dict], vid_w: int, vid_h: int) -
         if not path.exists():
             log(f"⚠ 짤 파일 없음: {path} → 건너뜀")
             continue
-        t = find_cue_time(cues, keyword) if keyword else 0.0
+        # 키워드는 '만렙|장비템|레전드' 처럼 | 로 여러 후보를 줄 수 있다(전사 흔들림 대비)
+        alts = [k.strip() for k in keyword.split("|") if k.strip()]
+        t = 0.0 if not alts else next(
+            (c["start"] for c in cues if any(a in c["text"] for a in alts)), None)
         if t is None:
             log(f"⚠ 짤 키워드 '{keyword}' 를 자막에서 못 찾음 → 건너뜀")
             continue
