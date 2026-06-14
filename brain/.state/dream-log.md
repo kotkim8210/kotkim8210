@@ -5,6 +5,14 @@
 
 ---
 
+## 2026-06-14 — 드림 시퀀스 #2 (정리 감사)
+- 조감: 주제 10개 전수 + 17개 브랜치 감사.
+- 무결성: 끊긴 위키링크 0, 고아 문서 0, 미처리 inbox 0, MAP 주제수=실제(10) 일치 → 지식 계층 건강.
+- 구식 해소: MAP의 "[미해결] 기본 브랜치 main 전환"이 **이미 완료**(default=main)되어 ✅해결로 표기.
+- 브랜치 감사: 잉여 5개(festive-wright·graphify-setup·upbeat-goodall·index-work·merge-brain-into-main)는 main에 완전 병합 → 삭제 가능(지식 손실 0). 나머지(프로젝트·인프라·zealous-galileo)는 고유 작업물 보유 → 보존. my-projects에 상태 반영.
+- 통찰: **1건 신규** — "brain 레포가 프로젝트 모노레포+지식색인 이중역할 중" 구조적 긴장(INSIGHTS.md).
+- 미해결 유지: data-dumping "5분"[확인필요], 자기언어 재작성 학습 긴장[확인필요], 프로젝트 독립 레포 분리 결정.
+
 ## 2026-06-13 12:14 — 드림 시퀀스 #1
 - 조감: 주제 6개 전수 검토 (second-brain, zettelkasten, claude-knowledge-system, data-dumping, self-evolving-wiki, dream-sequence).
 - 모순: 충돌 주장 없음.
