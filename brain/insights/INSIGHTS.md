@@ -30,3 +30,12 @@
 시스템을 "외부 참조용 창고"로 쓸지, "학습 도구"로도 쓸지에 따라 설계가 달라진다.
 완화책 후보: `/recall` 결과를 사람이 자기 말로 요약해 다시 inbox에 넣는 루틴(human-in-the-loop 재작성).
 > 근거: [[zettelkasten]], [[data-dumping]]
+
+---
+
+### 2026-06-14 (드림 #2) — brain 레포가 '프로젝트 모노레포 + 지식 색인'으로 이중 역할 중 (구조적 긴장)
+[[my-projects]]를 보면 한 레포(`kotkim8210/kotkim8210`)에 **17개 브랜치로 서로 무관한 프로젝트**(인스타 자동화·크롤러·당근·성경저널 POD·Next.js MVP·영상빌더)가 흩어져 있고, 동시에 이 레포가 [[claude-knowledge-system]]의 제2의 뇌이기도 하다.
+[[session-independence]] 원칙(커밋한 것만 영속, 새 세션은 default에서 시작) 때문에 **모든 세션이 같은 default(main)에서 갈라져 나오면서**, 지식(brain)과 프로젝트 코드가 한 레포에 뒤섞이는 구조가 됐다.
+→ 함의: brain 색인은 흩어진 작업을 "하나의 뇌"로 묶는 데 성공했지만, *프로젝트 코드까지 같은 레포에 누적*되면 충돌·검색오염·권한 혼선이 커진다.
+권장 분리안: **이 레포 = 뇌(지식·색인·명령) 전용**으로 두고, 각 프로젝트는 독립 레포로 분리하되 brain의 [[my-projects]]가 그 레포들을 *가리키는 색인* 역할만 유지. (제2의 뇌는 "저장"이 아니라 "연결"이라는 원칙과 일치)
+> 근거: [[my-projects]], [[session-independence]], [[claude-knowledge-system]], [[claude-code-skills]]

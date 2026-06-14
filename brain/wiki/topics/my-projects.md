@@ -30,6 +30,10 @@ status: active
 - `resolve-namespace-conflicts-fmvMO` — everything-claude-code/gstack 네임스페이스 충돌 해소
 - `validate-settings-workflow-GOUhT` — CLAUDE.md 워크플로 템플릿 + validate-settings.sh
 
+## 브랜치 정리 상태 (2026-06-14 드림#2 감사)
+- 🗑️ **삭제 가능**(잉여, main에 완전 병합 → 지식 손실 0): `festive-wright`, `graphify-setup`(옛 기본), `upbeat-goodall`, `index-work`, `merge-brain-into-main`
+- 🔒 **보존**(고유 작업물 보유): 위 프로젝트 5개 + 인프라 3개 + `zealous-galileo`(karpathy 스킬 `d5b6709`). 삭제 전 해당 작업을 main에 병합하거나 독립 레포로 이전 필요.
+
 ## 연결고리 (Connections)
 - [[video-skills]] — youtube-shorts·osmu 스킬이 콘텐츠 프로젝트(인스타·유튜브) 운영을 뒷받침.
 - [[session-independence]] — 이 색인 자체가 "세션이 흩어져도 하나의 뇌에서 전체를 본다"는 원칙의 실현.

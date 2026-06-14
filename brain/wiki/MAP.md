@@ -5,10 +5,10 @@
 
 ## 📊 통계
 - 주제 문서: **10**
-- 누적 통찰(insights): **3**
+- 누적 통찰(insights): **4**
 - 보관(archive): 0
 - 마지막 수집(ingest): 2026-06-13 (branch-inventory → video-skills·my-projects 신설)
-- 마지막 드림 시퀀스: 2026-06-13 (드림 #1 — 통찰 2건 합성)
+- 마지막 드림 시퀀스: 2026-06-14 (드림 #2 — 구식 항목 정리·브랜치 감사)
 
 ## 📚 주제 색인 (Topic Index)
 
@@ -61,7 +61,7 @@ my-projects ══(흩어짐의 해소)══ session-independence
 ## ⚠️ 미해결 모순 / 확인필요
 - [확인필요] [[data-dumping]] — "5분 내 스캔"은 데이터 규모에 따라 달라질 수 있는 예시 수치.
 - [확인필요] 설계 긴장 — '자기 언어 재작성'을 AI가 대신하면 사람의 학습 이득이 줄 수 있음(드림#1, INSIGHTS.md). 완화책 검토 필요.
-- [미해결] 기본 브랜치를 main으로 전환 — 사용자가 GitHub Settings에서 직접(MCP 도구 없음). 전환해야 새 세션이 통합된 뇌를 로드.
-- [미해결] [[my-projects]] — 중복 브랜치 4개(festive-wright·graphify-setup·upbeat-goodall·merge-brain-into-main) 정리 + 각 프로젝트 독립 레포 분리 여부 결정.
+- [✅해결 2026-06-14] 기본 브랜치 main 전환 완료(default=main 확인). 새 세션이 통합 뇌를 로드함.
+- [미해결] [[my-projects]] — 잉여 브랜치 5개(festive-wright·graphify-setup·upbeat-goodall·index-work·merge-brain-into-main)는 main에 완전 병합 → 삭제 가능. 프로젝트·설정 브랜치는 보존. 장기적으로 프로젝트별 독립 레포 분리 검토.
 
 *(이 인덱스는 `/ingest`·`/dream` 실행 시마다 자동 갱신된다.)*
