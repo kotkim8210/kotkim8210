@@ -1,0 +1,47 @@
+name: osmu-ci
+
+on:
+  push:
+    paths:
+      - "osmu-video-builder/**"
+      - ".github/workflows/osmu-ci.yml"
+  pull_request:
+    paths:
+      - "osmu-video-builder/**"
+      - ".github/workflows/osmu-ci.yml"
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: osmu-video-builder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 문법 점검 (py_compile)
+        run: python -m py_compile *.py
+
+      - name: 파이프라인 스모크 테스트 (순수 파이썬 단계)
+        run: |
+          set -e
+          cfg=examples/tulip_full_config.json
+          python factcheck.py "$cfg" --era 17c
+          python ttsfix.py "$cfg"
+          python promptgen.py "$cfg"
+          python promptgen.py "$cfg" --ar 9x16
+          python handoff.py "$cfg"
+
+      - name: 산출물 검증
+        run: |
+          set -e
+          for f in examples/factcheck_todo.json examples/config.tts.json \
+                   examples/image_prompts.16x9.md examples/image_prompts.9x16.md \
+                   examples/image_manifest.json examples/voice_script.md \
+                   examples/human_tasks.md; do
+            test -s "$f" || { echo "MISSING/EMPTY: $f"; exit 1; }
+          done
+          echo "✅ 모든 산출물 생성 확인"
