@@ -32,6 +32,10 @@ DEFAULT_OUTPUT = REPO_ROOT / "output"
 
 VIDEO_EXTS = {".mp4", ".mov", ".mkv", ".avi", ".webm", ".m4v", ".flv", ".wmv", ".mpg", ".mpeg", ".ts"}
 
+# 음성 정규화(EBU R128): 너무 작게 녹음된 영상도 들리게/인식되게 만든다.
+# 무음 컷·자막 생성·출력 오디오에 일관되게 적용해, 마이크 볼륨이 낮은 녹화도 정상 처리한다.
+LOUDNORM = "loudnorm=I=-16:TP=-1.5:LRA=11"
+
 
 # ── 작은 유틸 ─────────────────────────────────────────────────────────────────
 def log(msg: str) -> None:
@@ -89,11 +93,16 @@ _SIL_START = re.compile(r"silence_start:\s*(-?[\d.]+)")
 _SIL_END = re.compile(r"silence_end:\s*(-?[\d.]+)")
 
 
-def detect_silences(path: Path, noise: str, min_silence: float) -> list[tuple[float, float]]:
-    """ffmpeg silencedetect 로 (start, end) 무음 구간 목록을 얻는다."""
+def detect_silences(path: Path, noise: str, min_silence: float, normalize: bool) -> list[tuple[float, float]]:
+    """ffmpeg silencedetect 로 (start, end) 무음 구간 목록을 얻는다.
+
+    normalize=True 면 음성 정규화 후 검출한다(낮은 볼륨 녹화에서 전체가 무음으로
+    잡혀 통째로 잘려나가는 문제를 막는다). 정규화는 타임스탬프를 바꾸지 않는다.
+    """
+    af = (f"{LOUDNORM}," if normalize else "") + f"silencedetect=noise={noise}:d={min_silence}"
     proc = subprocess.run(
         ["ffmpeg", "-hide_banner", "-nostats", "-i", str(path),
-         "-af", f"silencedetect=noise={noise}:d={min_silence}", "-f", "null", "-"],
+         "-af", af, "-f", "null", "-"],
         stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True,
     )
     text = proc.stderr or ""
@@ -163,15 +172,19 @@ def process_clip(
     width: int,
     height: int,
     fps: int,
+    normalize: bool,
 ) -> None:
-    """한 번의 ffmpeg 패스로 (무음 컷 +) 규격 통일을 수행한다.
+    """한 번의 ffmpeg 패스로 (음성 정규화 + 무음 컷 + 규격 통일)을 수행한다.
 
-    segments=None 이면 컷 없이 전체를 정규화한다(오디오가 없는 영상 등).
+    segments=None 이면 컷 없이 전체를 규격화한다(오디오가 없는 영상 등).
+    normalize=True 면 작은 소리를 키워 출력 오디오를 들리게 만든다.
     """
     audio = has_audio_stream(src)
 
     vf_chain = []
     af_chain = []
+    if audio and normalize:
+        af_chain.append(LOUDNORM)              # 작은 소리도 들리게 정규화(컷보다 먼저)
     if segments is not None and segments:
         expr = select_expr(segments)
         vf_chain.append(f"select='{expr}'")
@@ -197,10 +210,8 @@ def process_clip(
 
     cmd += ["-vf", ",".join(vf_chain)]
     if audio:
-        if af_chain:
-            cmd += ["-af", ",".join(af_chain + ["aresample=48000:async=1:first_pts=0"])]
-        else:
-            cmd += ["-af", "aresample=48000:async=1:first_pts=0"]
+        af_chain.append("aresample=48000:async=1:first_pts=0")
+        cmd += ["-af", ",".join(af_chain)]
     else:
         cmd += ["-map", "0:v", "-map", "1:a", "-shortest"]
 
@@ -322,6 +333,8 @@ def main() -> None:
     p.add_argument("--margin", type=float, default=0.20, help="말 구간 앞뒤로 남길 여유(초)")
     p.add_argument("--min-speech", type=float, default=0.20, help="이보다 짧은 조각은 버림(초)")
     p.add_argument("--no-trim", action="store_true", help="무음 컷을 끄고 합치기만 한다")
+    p.add_argument("--no-normalize-audio", action="store_true",
+                   help="음성 정규화를 끈다(작게 녹음된 영상은 거의 잘려나갈 수 있어 권장 안 함)")
     # 규격
     p.add_argument("--width", type=int, default=1920, help="결과 가로 해상도")
     p.add_argument("--height", type=int, default=1080, help="결과 세로 해상도")
@@ -345,6 +358,8 @@ def main() -> None:
 
     args.input.mkdir(parents=True, exist_ok=True)
     args.output.mkdir(parents=True, exist_ok=True)
+
+    normalize = not args.no_normalize_audio
 
     videos = sorted(
         [f for f in args.input.iterdir() if f.is_file() and f.suffix.lower() in VIDEO_EXTS],
@@ -370,7 +385,7 @@ def main() -> None:
                 if not args.no_trim:
                     log("오디오 없음 → 무음 컷 생략, 전체 사용")
             else:
-                silences = detect_silences(v, args.noise, args.min_silence)
+                silences = detect_silences(v, args.noise, args.min_silence, normalize)
                 segments = keep_segments_from_silences(dur, silences, args.margin, args.min_speech)
                 kept = sum(b - a for a, b in segments)
                 log(f"무음 {len(silences)}곳 검출 → {dur:.1f}s 중 {kept:.1f}s 유지 "
@@ -380,7 +395,8 @@ def main() -> None:
                     continue
 
             out_clip = work / f"clip_{idx:03d}.mp4"
-            process_clip(v, out_clip, segments, width=args.width, height=args.height, fps=args.fps)
+            process_clip(v, out_clip, segments, width=args.width, height=args.height,
+                         fps=args.fps, normalize=normalize)
             processed.append(out_clip)
 
         if not processed:

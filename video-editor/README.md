@@ -34,13 +34,16 @@ python video-editor/edit_videos.py
 
 ## 동작 원리 (파이프라인)
 
-1. **무음 컷** — 각 영상에서 일정 시간 이상 조용한 구간을 찾아 잘라냅니다. (ffmpeg `silencedetect`)
+1. **음성 정규화** — 마이크 볼륨이 작게 녹음된 영상도 들리도록 음량을 표준 수준으로 끌어올립니다(EBU R128).
+   이 덕분에 작게 녹음된 영상이 "전부 조용함"으로 잘못 판정돼 통째로 잘려나가거나 자막이 비는 일을 막습니다.
+   (끄려면 `--no-normalize-audio`)
+2. **무음 컷** — 각 영상에서 일정 시간 이상 조용한 구간을 찾아 잘라냅니다. (ffmpeg `silencedetect`)
    말이 끊기지 않도록 말하는 구간 앞뒤에 약간의 여유(margin)를 남깁니다.
-2. **규격 통일 & 이어 붙이기** — 해상도·프레임레이트가 제각각인 영상도 같은 캔버스(기본 1920×1080·30fps)로
+3. **규격 통일 & 이어 붙이기** — 해상도·프레임레이트가 제각각인 영상도 같은 캔버스(기본 1920×1080·30fps)로
    맞춘 뒤(비율 유지 + 레터박스), 파일 이름 순서대로 이어 붙입니다.
-3. **한국어 전사** — 합쳐진 영상의 음성을 [faster-whisper](https://github.com/SYSTRAN/faster-whisper)로
+4. **한국어 전사** — 합쳐진 영상의 음성을 [faster-whisper](https://github.com/SYSTRAN/faster-whisper)로
    한국어 자막(.srt)으로 변환합니다. (VAD로 환청·잡음 구간을 걸러냅니다)
-4. **자막 입히기** — 한글 자막을 영상 위에 태워(burn-in) `output`에 저장합니다.
+5. **자막 입히기** — 한글 자막을 영상 위에 태워(burn-in) `output`에 저장합니다.
 
 ---
 
@@ -97,3 +100,5 @@ python video-editor/edit_videos.py --name 내영상 --input ./clips --output ./d
   Linux는 `fonts-nanum`을 설치하고, macOS는 `--font "AppleSDGothicNeo-Regular"` 처럼 시스템 폰트를 지정하세요.
 - **자막이 부정확함** → `--model large-v3` 로 올려보세요. CPU에서는 느리지만 한국어 정확도가 크게 좋아집니다.
 - **너무 많이/적게 잘림** → `--noise`(예 `-35dB`)와 `--min-silence`(예 `1.0`) 값을 조절하세요.
+- **작게 녹음된 영상인데 거의 다 잘리거나 자막이 안 생김** → 기본적으로 음성 정규화가 켜져 있어 자동으로
+  해결됩니다. 그래도 이상하면 `--noise -45dB` 처럼 무음 기준을 더 낮춰보세요.
