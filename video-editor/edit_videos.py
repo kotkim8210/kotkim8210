@@ -327,6 +327,7 @@ def transcribe_to_cues(
     segments, info = model.transcribe(
         str(media), language=language, vad_filter=True,
         vad_parameters={"min_silence_duration_ms": 500}, beam_size=5,
+        condition_on_previous_text=False,   # 환청(앞 문맥 끌고가는 헛소리) 억제
     )
     log(f"감지 언어: {info.language} (확률 {info.language_probability:.2f})")
 
