@@ -29,6 +29,19 @@ SCRIPT_DIR = Path(__file__).resolve().parent          # .../video-editor
 REPO_ROOT = SCRIPT_DIR.parent                          # 저장소 루트
 DEFAULT_INPUT = REPO_ROOT / "input"
 DEFAULT_OUTPUT = REPO_ROOT / "output"
+ASSETS_DIR = REPO_ROOT / "assets"            # 폰트·효과음·이미지
+
+IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".webp")
+AUDIO_EXTS = (".wav", ".mp3", ".m4a", ".aac", ".ogg", ".flac")
+
+
+def find_asset(stem: str, exts) -> "Path | None":
+    """assets 폴더에서 stem.* 형태의 리소스를 찾는다(예: sound, image1)."""
+    for ext in exts:
+        p = ASSETS_DIR / f"{stem}{ext}"
+        if p.exists():
+            return p
+    return None
 
 VIDEO_EXTS = {".mp4", ".mov", ".mkv", ".avi", ".webm", ".m4v", ".flv", ".wmv", ".mpg", ".mpeg", ".ts"}
 
@@ -77,6 +90,16 @@ def ffprobe_duration(path: Path) -> float:
         return float(proc.stdout.strip())
     except ValueError:
         return 0.0
+
+
+def image_dims(path: Path) -> tuple[int, int]:
+    proc = run(
+        ["ffprobe", "-v", "error", "-select_streams", "v:0",
+         "-show_entries", "stream=width,height", "-of", "csv=p=0:s=x", str(path)],
+        capture=True,
+    )
+    w, h = proc.stdout.strip().split("x")
+    return int(w), int(h)
 
 
 def has_audio_stream(path: Path) -> bool:
@@ -248,44 +271,127 @@ def _srt_time(seconds: float) -> str:
     return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
 
 
-def transcribe_to_srt(
-    media: Path,
-    srt_path: Path,
-    *,
-    model_name: str,
-    language: str,
-    compute_type: str,
-) -> int:
-    """faster-whisper 로 음성을 전사해 SRT 파일을 만든다. 자막 개수를 반환."""
+def hex_to_ass(hex_color: str) -> str:
+    """#RRGGBB → ASS 색상(&H00BBGGRR&)."""
+    h = hex_color.lstrip("#")
+    return f"&H00{h[4:6]}{h[2:4]}{h[0:2]}&".upper()
+
+
+def _ass_time(seconds: float) -> str:
+    if seconds < 0:
+        seconds = 0.0
+    cs = int(round(seconds * 100))
+    h, rem = divmod(cs, 360000)
+    m, rem = divmod(rem, 6000)
+    s, c = divmod(rem, 100)
+    return f"{h}:{m:02d}:{s:02d}.{c:02d}"
+
+
+def transcribe_to_cues(
+    media: Path, *, model_name: str, language: str, compute_type: str, max_chars: int,
+):
+    """faster-whisper(단어 타임스탬프)로 전사해 ~max_chars 길이의 짧은 자막 큐 목록을 만든다."""
     from faster_whisper import WhisperModel  # 지연 임포트(설치 안내를 위해)
 
     log(f"모델 로딩: {model_name} (compute_type={compute_type}) — 최초 1회 다운로드가 있을 수 있음")
     model = WhisperModel(model_name, device="cpu", compute_type=compute_type)
-
     segments, info = model.transcribe(
-        str(media),
-        language=language,
-        vad_filter=True,                       # 음성 구간 감지로 환청(hallucination) 감소
-        vad_parameters={"min_silence_duration_ms": 500},
-        beam_size=5,
+        str(media), language=language, vad_filter=True,
+        vad_parameters={"min_silence_duration_ms": 500}, beam_size=5,
+        word_timestamps=True,
     )
     log(f"감지 언어: {info.language} (확률 {info.language_probability:.2f})")
 
-    count = 0
-    lines: list[str] = []
-    for seg in segments:
-        text = seg.text.strip()
-        if not text:
-            continue
-        count += 1
-        lines.append(str(count))
-        lines.append(f"{_srt_time(seg.start)} --> {_srt_time(seg.end)}")
-        lines.append(text)
-        lines.append("")
-        log(f"[{_srt_time(seg.start)}] {text}")
+    cues: list[dict] = []
 
-    srt_path.write_text("\n".join(lines), encoding="utf-8")
-    return count
+    def flush(bucket: list) -> None:
+        text = "".join(w.word for w in bucket).strip()
+        if text:
+            cues.append({"start": bucket[0].start, "end": bucket[-1].end, "text": text})
+
+    for seg in segments:
+        words = seg.words or []
+        if not words:
+            t = seg.text.strip()
+            if t:
+                cues.append({"start": seg.start, "end": seg.end, "text": t})
+            continue
+        bucket: list = []
+        for w in words:
+            bucket.append(w)
+            if len("".join(x.word for x in bucket).strip()) >= max_chars:
+                flush(bucket)
+                bucket = []
+        if bucket:
+            flush(bucket)
+    for c in cues:
+        log(f"[{_srt_time(c['start'])}] {c['text']}")
+    return cues, info
+
+
+def write_srt(cues: list[dict], path: Path, *, offset: float = 0.0) -> None:
+    lines: list[str] = []
+    for i, c in enumerate(cues, 1):
+        lines += [str(i),
+                  f"{_srt_time(c['start'] + offset)} --> {_srt_time(c['end'] + offset)}",
+                  c["text"], ""]
+    path.write_text("\n".join(lines), encoding="utf-8")
+
+
+def _highlight(text: str, keywords: list[str], orange: str, white: str) -> str:
+    """중요 단어를 주황색 ASS 태그로 감싼다."""
+    spans: list[list[int]] = []
+    for kw in keywords:
+        if not kw:
+            continue
+        start = 0
+        while (i := text.find(kw, start)) >= 0:
+            spans.append([i, i + len(kw)])
+            start = i + len(kw)
+    if not spans:
+        return text
+    spans.sort()
+    merged: list[list[int]] = []
+    for s, e in spans:
+        if merged and s <= merged[-1][1]:
+            merged[-1][1] = max(merged[-1][1], e)
+        else:
+            merged.append([s, e])
+    out, prev = [], 0
+    for s, e in merged:
+        out.append(text[prev:s])
+        out.append(f"{{\\1c{orange}}}{text[s:e]}{{\\1c{white}}}")
+        prev = e
+    out.append(text[prev:])
+    return "".join(out)
+
+
+def write_ass(
+    cues: list[dict], path: Path, *, width: int, height: int, font: str,
+    font_size: int, orange_hex: str, highlight: list[str], margin_v: int,
+) -> None:
+    """스타일 ASS 자막 생성: 흰색 굵게 + 검은 외곽선, 하단, 중요단어 주황색."""
+    orange, white = hex_to_ass(orange_hex), "&H00FFFFFF&"
+    outline = max(2, round(font_size * 0.07))
+    header = (
+        "[Script Info]\n"
+        "ScriptType: v4.00+\n"
+        f"PlayResX: {width}\nPlayResY: {height}\nWrapStyle: 2\nScaledBorderAndShadow: yes\n\n"
+        "[V4+ Styles]\n"
+        "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, "
+        "BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, "
+        "BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n"
+        f"Style: Default,{font},{font_size},{white},&H000000FF,&H00000000,&H64000000,"
+        f"1,0,0,0,100,100,0,0,1,{outline},1,2,60,60,{margin_v},1\n\n"
+        "[Events]\n"
+        "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n"
+    )
+    rows = [
+        f"Dialogue: 0,{_ass_time(c['start'])},{_ass_time(c['end'])},Default,,0,0,0,,"
+        f"{_highlight(c['text'], highlight, orange, white)}"
+        for c in cues
+    ]
+    path.write_text(header + "\n".join(rows) + "\n", encoding="utf-8")
 
 
 # ── 5) 자막 입히기(번인) ──────────────────────────────────────────────────────
@@ -318,6 +424,97 @@ def mux_soft_subtitles(video: Path, srt: Path, dst: Path) -> None:
     ])
 
 
+# ── 6) 짤(이미지) 오버레이 · 효과음 · 인트로 ─────────────────────────────────
+def find_cue_time(cues: list[dict], keyword: str) -> "float | None":
+    """자막 큐에서 keyword 가 처음 나오는 시점을 찾는다(짤 삽입 타이밍)."""
+    for c in cues:
+        if keyword and keyword in c["text"]:
+            return c["start"]
+    return None
+
+
+def build_overlays(specs: list[str], cues: list[dict], vid_w: int, vid_h: int) -> list[dict]:
+    """'경로@키워드@지속초' 스펙들을 SRT 타이밍에 맞춘 오버레이 목록으로 변환한다."""
+    box_w, box_h = vid_w * 0.42, vid_h * 0.50
+    overlays: list[dict] = []
+    for spec in specs or []:
+        parts = spec.split("@")
+        path = Path(parts[0])
+        keyword = parts[1].strip() if len(parts) > 1 else ""
+        dur = float(parts[2]) if len(parts) > 2 and parts[2] else 2.6
+        if not path.exists():
+            log(f"⚠ 짤 파일 없음: {path} → 건너뜀")
+            continue
+        t = find_cue_time(cues, keyword) if keyword else 0.0
+        if t is None:
+            log(f"⚠ 짤 키워드 '{keyword}' 를 자막에서 못 찾음 → 건너뜀")
+            continue
+        iw, ih = image_dims(path)
+        scale = min(box_w / iw, box_h / ih)
+        h = max(2, int(round(ih * scale / 2)) * 2)
+        overlays.append({"path": str(path), "start": max(0.0, t - 0.2),
+                         "dur": dur, "height": h, "mx": 60, "my": 70})
+        log(f"짤 삽입: {path.name} @ {_srt_time(t)} ('{keyword}')")
+    return overlays
+
+
+def build_intro(merged: Path, sound: Path, dst: Path, *, width: int, height: int, fps: int) -> float:
+    """합본 첫 프레임을 정지화면으로 두고 인트로 효과음(두둥)을 깐 짧은 인트로. 길이를 반환."""
+    first = dst.parent / "first.png"
+    run(["ffmpeg", "-hide_banner", "-y", "-i", str(merged), "-frames:v", "1", str(first)])
+    dur = max(1.0, ffprobe_duration(sound))
+    run([
+        "ffmpeg", "-hide_banner", "-y",
+        "-loop", "1", "-t", f"{dur:.3f}", "-i", str(first), "-i", str(sound),
+        "-vf", f"scale={width}:{height},fps={fps},format=yuv420p,fade=t=in:st=0:d=0.4",
+        "-r", str(fps),
+        "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
+        "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-ac", "2", "-shortest",
+        str(dst),
+    ])
+    return dur
+
+
+def render_rich(
+    merged: Path, ass: Path, dst: Path, *,
+    overlays: list[dict], transitions: list[dict], fontsdir: Path,
+) -> None:
+    """오버레이 이미지 + 자막(ASS) 번인 + 전환 효과음 믹스를 한 번에 렌더한다."""
+    cmd = ["ffmpeg", "-hide_banner", "-y", "-i", str(merged.resolve())]
+    for ov in overlays:
+        cmd += ["-i", str(Path(ov["path"]).resolve())]
+    trans_base = 1 + len(overlays)
+    for tr in transitions:
+        cmd += ["-i", str(Path(tr["sound"]).resolve())]
+
+    fc: list[str] = []
+    last = "[0:v]"
+    for i, ov in enumerate(overlays):
+        fc.append(f"[{1 + i}:v]scale=-2:{ov['height']}[ov{i}]")
+        s, e = ov["start"], ov["start"] + ov["dur"]
+        fc.append(f"{last}[ov{i}]overlay=x=W-w-{ov['mx']}:y={ov['my']}:"
+                  f"enable='between(t,{s:.2f},{e:.2f})'[v{i}]")
+        last = f"[v{i}]"
+    fc.append(f"{last}ass={ass.resolve().as_posix()}:fontsdir={fontsdir.resolve().as_posix()}[vout]")
+
+    if transitions:
+        amix = ["[0:a]"]
+        for j, tr in enumerate(transitions):
+            d = int(round(tr["at"] * 1000))
+            fc.append(f"[{trans_base + j}:a]adelay={d}|{d},volume=1.0[tr{j}]")
+            amix.append(f"[tr{j}]")
+        fc.append("".join(amix) + f"amix=inputs={len(amix)}:duration=first:normalize=0[aout]")
+        amap = "[aout]"
+    else:
+        amap = "0:a"
+
+    cmd += ["-filter_complex", ";".join(fc), "-map", "[vout]", "-map", amap,
+            "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
+            "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-ac", "2",
+            "-movflags", "+faststart", str(dst.resolve())]
+    run(cmd)
+
+
 # ── 메인 ──────────────────────────────────────────────────────────────────────
 def main() -> None:
     p = argparse.ArgumentParser(
@@ -344,8 +541,16 @@ def main() -> None:
                    help="faster-whisper 모델: tiny/base/small/medium/large-v3 (클수록 정확·느림)")
     p.add_argument("--language", default="ko", help="전사 언어 코드")
     p.add_argument("--compute-type", default="int8", help="ctranslate2 연산 타입 (int8 권장)")
-    p.add_argument("--font", default="NanumGothic", help="자막 폰트 이름(한글 지원 폰트)")
-    p.add_argument("--font-size", type=int, default=22, help="자막 글자 크기")
+    p.add_argument("--font", default="Gmarket Sans TTF", help="자막 폰트(assets 폴더 폰트도 사용 가능)")
+    p.add_argument("--font-size", type=int, default=0, help="자막 글자 크기(0=해상도에 맞춰 자동)")
+    p.add_argument("--max-chars", type=int, default=12, help="자막 한 줄당 글자수(이 정도로 끊음)")
+    p.add_argument("--margin-v", type=int, default=20, help="자막을 화면 아래에서 띄울 거리(px)")
+    p.add_argument("--orange", default="#FF8C42", help="중요 단어 강조 색(밝은 주황)")
+    p.add_argument("--highlight", default="", help="주황색으로 강조할 단어들(쉼표로 구분)")
+    p.add_argument("--overlay", action="append", default=[],
+                   help="짤 삽입: '경로@자막키워드@지속초' (반복 가능). 예: assets/image.jpg@만렙@2.6")
+    p.add_argument("--no-intro-sound", action="store_true", help="인트로 효과음(두둥)을 넣지 않는다")
+    p.add_argument("--no-transition-sound", action="store_true", help="영상 전환 효과음(휘릭)을 넣지 않는다")
     p.add_argument("--no-subs", action="store_true", help="자막 단계를 건너뛴다")
     p.add_argument("--soft-subs", action="store_true", help="자막을 태우지 않고 트랙으로만 넣는다")
     p.add_argument("--keep-work", action="store_true", help="중간 산출물(작업 폴더)을 지우지 않는다")
@@ -411,37 +616,75 @@ def main() -> None:
             concat_clips(processed, merged, work)
         log(f"합본 길이: {ffprobe_duration(merged):.1f}s")
 
+        # ── 클립 경계(전환 효과음 위치) ──
+        clip_durs = [ffprobe_duration(c) for c in processed]
+        boundaries, acc = [], 0.0
+        for d in clip_durs[:-1]:
+            acc += d
+            boundaries.append(acc)
+
         # ── 결과 파일명 ──
         stamp = _dt.datetime.now().strftime("%Y%m%d_%H%M%S")
         base = args.name or f"edited_{stamp}"
         final = args.output / f"{base}.mp4"
+        srt_out = args.output / f"{base}.srt"
 
-        # ── 자막 ──
         if args.no_subs:
             step("자막 단계 생략 → 합본 저장")
             shutil.copy(merged, final)
         else:
-            step("한국어 자막 자동 생성")
-            srt = work / "subtitles.srt"
-            n = transcribe_to_srt(
-                merged, srt,
-                model_name=args.model, language=args.language, compute_type=args.compute_type,
+            step("한국어 자막 자동 생성 (단어 타임스탬프 → 짧은 큐)")
+            cues, _info = transcribe_to_cues(
+                merged, model_name=args.model, language=args.language,
+                compute_type=args.compute_type, max_chars=args.max_chars,
             )
-            # SRT 도 결과 폴더에 보관
-            srt_out = args.output / f"{base}.srt"
-            shutil.copy(srt, srt_out)
-            log(f"자막 {n}개 생성 → {srt_out.name}")
+            log(f"자막 {len(cues)}개 생성")
 
-            if n == 0:
+            if not cues:
                 log("전사된 음성이 없어 자막 없이 저장합니다.")
                 shutil.copy(merged, final)
             elif args.soft_subs:
+                srt = work / "subs.srt"
+                write_srt(cues, srt)
+                shutil.copy(srt, srt_out)
                 step("소프트 자막 트랙으로 합치기")
-                final = args.output / f"{base}.mp4"
                 mux_soft_subtitles(merged, srt, final)
             else:
-                step("영상에 자막 입히기(번인)")
-                burn_subtitles(merged, srt, final, font=args.font, font_size=args.font_size)
+                # 자막(ASS): 흰색 굵게 + 검은 외곽선, 하단, 중요단어 주황색
+                font_size = args.font_size or max(20, round(args.height * 0.076))
+                highlight = [w.strip() for w in args.highlight.split(",") if w.strip()]
+                ass = work / "subs.ass"
+                write_ass(cues, ass, width=args.width, height=args.height, font=args.font,
+                          font_size=font_size, orange_hex=args.orange,
+                          highlight=highlight, margin_v=args.margin_v)
+
+                # 짤(이미지) 오버레이 + 전환 효과음
+                overlays = build_overlays(args.overlay, cues, args.width, args.height)
+                transitions = []
+                tsound = find_asset("sound1", AUDIO_EXTS)
+                if tsound and boundaries and not args.no_transition_sound:
+                    transitions = [{"sound": str(tsound), "at": b} for b in boundaries]
+                    log(f"전환 효과음(휘릭) {len(transitions)}곳 삽입")
+
+                step("자막·짤·효과음 합성 렌더")
+                content = work / "content.mp4"
+                render_rich(merged, ass, content, overlays=overlays,
+                            transitions=transitions, fontsdir=ASSETS_DIR)
+
+                # 인트로 효과음(두둥) 붙이기
+                intro_dur = 0.0
+                isound = find_asset("sound", AUDIO_EXTS)
+                if isound and not args.no_intro_sound:
+                    step("인트로 효과음(두둥) 붙이기")
+                    intro = work / "intro.mp4"
+                    intro_dur = build_intro(merged, isound, intro,
+                                            width=args.width, height=args.height, fps=args.fps)
+                    concat_clips([intro, content], final, work)
+                else:
+                    shutil.copy(content, final)
+
+                write_srt(cues, srt_out, offset=intro_dur)   # 최종 타임라인 기준 자막 파일
+                log(f"자막 {len(cues)}개 → {srt_out.name}")
 
         step("완료 🎬")
         log(f"결과물: {final}")

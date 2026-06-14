@@ -44,6 +44,14 @@ python video-editor/edit_videos.py
 4. **한국어 전사** — 합쳐진 영상의 음성을 [faster-whisper](https://github.com/SYSTRAN/faster-whisper)로
    한국어 자막(.srt)으로 변환합니다. (VAD로 환청·잡음 구간을 걸러냅니다)
 5. **자막 입히기** — 한글 자막을 영상 위에 태워(burn-in) `output`에 저장합니다.
+   - 글자수 ~12자로 짧게 끊고, **GmarketSans 굵은 글씨 + 검은 외곽선**, 화면 하단에 배치.
+   - `--highlight` 로 지정한 **중요 단어는 밝은 주황색(#FF8C42)** 으로 강조.
+6. **효과음 & 짤(이미지)** — `assets/` 폴더의 리소스를 활용합니다.
+   - **인트로 효과음**(`assets/sound.wav`, "두둥")을 맨 앞에 붙입니다.
+   - **전환 효과음**(`assets/sound1.wav`, "휘릭")을 영상이 넘어가는 지점(2개 이상일 때)에 넣습니다.
+   - `--overlay '경로@자막키워드@지속초'` 로 **짤 이미지**를 자막 키워드가 나오는 타이밍에 오버레이합니다.
+
+> 폰트·효과음은 `bash video-editor/setup.sh` 또는 `assets/` 폴더에 들어 있습니다. (출처는 `assets/README.md`)
 
 ---
 
@@ -70,6 +78,15 @@ python video-editor/edit_videos.py --width 1080 --height 1920
 
 # 결과 파일 이름 지정 / 입력·출력 폴더 변경
 python video-editor/edit_videos.py --name 내영상 --input ./clips --output ./done
+
+# 중요 단어 주황색 강조 + 짤(이미지) 자동 삽입
+python video-editor/edit_videos.py \
+  --highlight "피그마,AI,색상,상세페이지" \
+  --overlay "assets/image.jpg@만렙@2.6" \
+  --overlay "assets/image1.jpg@일자리@2.6"
+
+# 효과음 끄기
+python video-editor/edit_videos.py --no-intro-sound --no-transition-sound
 ```
 
 전체 옵션은 `python video-editor/edit_videos.py --help` 로 볼 수 있습니다.
@@ -82,7 +99,13 @@ python video-editor/edit_videos.py --name 내영상 --input ./clips --output ./d
 | `--margin` | `0.20` | 말 구간 앞뒤로 남길 여유(초) |
 | `--no-normalize-audio` | 꺼짐 | 음성 정규화 끄기(작게 녹음된 영상은 거의 잘려나갈 수 있어 권장 안 함) |
 | `--width`/`--height`/`--fps` | `1920`/`1080`/`30` | 결과 영상 규격 |
-| `--font` | `NanumGothic` | 자막 폰트(한글 지원) |
+| `--font` | `Gmarket Sans TTF` | 자막 폰트(assets 폴더 폰트 사용) |
+| `--max-chars` | `12` | 자막 한 줄당 글자수(이 정도로 끊음) |
+| `--margin-v` | `20` | 자막을 화면 아래에서 띄울 거리(px) |
+| `--highlight` | (없음) | 주황색으로 강조할 단어들(쉼표 구분) |
+| `--orange` | `#FF8C42` | 강조 색 |
+| `--overlay` | (없음) | 짤 삽입 `경로@자막키워드@지속초` (반복 가능) |
+| `--no-intro-sound` / `--no-transition-sound` | 꺼짐 | 인트로/전환 효과음 끄기 |
 | `--soft-subs` | 꺼짐 | 자막을 태우지 않고 트랙으로만 삽입 |
 | `--no-subs` / `--no-trim` | 꺼짐 | 자막 / 무음 컷 단계 건너뛰기 |
 
