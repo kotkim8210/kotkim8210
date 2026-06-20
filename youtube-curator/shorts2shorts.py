@@ -78,6 +78,20 @@ def download(url: str, dst: Path, *, insecure: bool, cookies: "str | None") -> t
 
 
 # ── LLM 편집기(카테고리 공식) ────────────────────────────────────────────────
+def _tuning_block(category: dict) -> str:
+    """카테고리의 정밀 튜닝 노브(있는 것만)를 LLM 프롬프트용 지시문으로 만든다."""
+    knobs = [
+        ("hook_sec", "훅(맨 앞 끌리는 구간) 목표 길이 ≈ {v}초 — 그 안에 가장 강한 한 방을 넣어라."),
+        ("target_cuts", "목표 컷 수 ≈ {v}개 — 그만큼 빠른 호흡으로 쓸 문장을 추려라."),
+        ("caption_chars", "한 컷 자막은 {v}자 이내로 짧게."),
+        ("pace", "호흡: {v}"),
+        ("retention", "체류율 전술: {v}"),
+        ("cta", "마무리: {v}"),
+    ]
+    lines = [t.format(v=category[k]) for k, t in knobs if category.get(k) not in (None, "", 0)]
+    return ("\n[정밀 튜닝 파라미터 — 반드시 반영]\n" + "\n".join(f"- {x}" for x in lines)) if lines else ""
+
+
 def llm_edit_plan(segments: list[dict], *, category: dict, model: str) -> dict:
     """카테고리 '공식'대로 (쓸 구간·순서 + 분위기 한국어 번역 + 후킹 제목)을 정한다.
 
@@ -96,10 +110,11 @@ def llm_edit_plan(segments: list[dict], *, category: dict, model: str) -> dict:
         prompt = (
             f"너는 한국 쇼츠 편집 디렉터다. 카테고리: {category['name']}.\n"
             f"이 카테고리의 떡상 공식:\n{category.get('formula', '')}\n"
-            f"아래는 원본({category.get('lang', 'zh')}) 쇼츠의 자막(번호:문장)이다. 위 공식에 맞게 "
-            "한국 쇼츠로 재편집하라:\n"
-            "① 쓸 문장과 '순서'를 정한다(후킹을 공식대로 맨 앞에, 군더더기 제거).\n"
-            "② 각 문장을 공식의 자막 톤에 맞는 한국어로 번역(직역 금지, 짧고 입에 붙게).\n"
+            f"{_tuning_block(category)}\n"
+            f"아래는 원본({category.get('lang', 'zh')}) 쇼츠의 자막(번호:문장)이다. 위 공식과 튜닝 "
+            "파라미터에 맞게 한국 쇼츠로 재편집하라:\n"
+            "① 쓸 문장과 '순서'를 정한다(후킹을 공식대로 맨 앞에, 군더더기 제거, 목표 컷 수에 맞춰).\n"
+            "② 각 문장을 공식의 자막 톤·글자수에 맞는 한국어로 번역(직역 금지, 짧고 입에 붙게).\n"
             "오직 JSON 으로: {\"order\":[원본번호...], \"captions\":[\"번역문...\"(order와 같은 순서·길이)], "
             "\"title\":\"후킹 제목\"}\n\n" + numbered
         )

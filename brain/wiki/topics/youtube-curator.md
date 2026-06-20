@@ -32,5 +32,12 @@ danbi 분석 사이트의 *발굴*과 우리 `video-editor`의 *편집*을 합�
 - [✅구현 2026-06-20] `manifest.json`을 읽는 **정적 분석 대시보드**(`dashboard/index.html`) — 통계·카드·CC 배지·떡상점수. 크론 아티팩트에 동봉. 크론 시각 19:50 KST.
 - [✅구현 2026-06-20] **쇼츠→쇼츠**(`shorts2shorts.py`) — 틱톡/샤오홍수 떡상 소재→한국 쇼츠. **카테고리별 '떡상 공식'**(`shorts_sources.yaml`의 `formula`, 주제마다 다름 → LLM 편집기가 구간·순서·번역·후킹 결정, 설정만 고쳐 계속 다듬음). 후킹 앞배치 재정렬+9:16+한국어 자막. 입력=워치리스트(6h 크론)+떡상링크 즉시(workflow_dispatch). 속도 최우선. ⚖️비-CC라 출처표기·변형 전제. (후킹 맨앞은 long→shorts `_llm_highlight`에도 보강.) 봇벽=쿠키 secret. 핵심 재정렬+9:16+자막 로컬 검증 OK(틱톡 다운로드는 봇차단→운영 쿠키).
 - [✅구현 2026-06-20] **채널 분석(랭킹+예측)** — `channels.py`: 구독자 스냅샷 누적 → 랭킹·일성장·7/30일 구독자 예측·최근영상 주간 조회수 예측. 추적 채널=수동(`channels.yaml`)+자동(디스커버리 CC 창작자→`auto_channels.json`). 대시보드 '📊 채널 분석' 탭. 호스팅=로컬/아티팩트(프로필 레포라 Pages 안 함).
+- [✅구현 2026-06-20] **카테고리 공식 정밀 튜닝** — `shorts_sources.yaml` 에 LLM 편집기가 실제로 읽는 구조적 노브
+  추가(`hook_sec`·`target_cuts`·`caption_chars`·`pace`·`retention`·`cta`). `mukbang` 을 정밀 레퍼런스로 시드
+  (사운드 큰 한 입 훅·10컷·8자 의성어·루프 마무리). `shorts2shorts.py` `_tuning_block` 이 프롬프트에 주입.
+  → 카테고리별로 숫자/문구만 고쳐 성과 보며 계속 튜닝.
+- [✅구현 2026-06-20] **검수 후 반자동 업로드(YouTube OAuth)** — `upload.py`(YouTube Data API v3). 권리 안전 설계:
+  `--list` 검수 → 콕 집어 업로드, 기본 `private`, public 은 `--confirm` 필수, 비-CC는 비공개 외엔 추가 `--confirm`.
+  설명란=만들 때 `.txt`(CC 출처표기) 그대로. 자격증명 커밋 금지(`output/*.json` gitignore). `upload.yml`=수동 전용(크론 없음).
 - [확인필요] CI에서 봇 벽 안정성 — `YT_COOKIES` 없이 android 클라이언트만으로 충분한지 실측 필요.
-- [미해결] 검수 후 반자동 업로드(YouTube OAuth), TOP 1200 대규모 랭킹(대형 시드+쿠키) — 다음 빌드.
+- [미해결] TOP 1200 대규모 랭킹(대형 시드+쿠키) — 다음 빌드.

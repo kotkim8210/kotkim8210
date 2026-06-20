@@ -55,6 +55,8 @@ python youtube-curator/curate.py --only worldcup --per-category 1
 | `discover.py` | CC 떡상 발굴 + 권리 게이트(YouTube API 키 불필요) |
 | `curate.py` | 발굴→다운로드→하이라이트→9:16 숏츠 편집→매니페스트 오케스트레이션 |
 | `channels.py` | 채널 스냅샷 수집 + 랭킹 + 성장/조회수 예측 |
+| `shorts2shorts.py` / `shorts_sources.yaml` | 틱톡/샤오홍수 → 한국 쇼츠(카테고리별 떡상 공식·정밀 튜닝 노브) |
+| `upload.py` | 검수 후 반자동 업로드(YouTube OAuth, 기본 비공개·공개는 확인 필수) |
 | `categories.yaml` / `channels.yaml` | 카테고리 설정 / 추적 채널(수동) 설정 |
 | `dashboard/index.html` | 분석 대시보드(숏츠 + 채널 분석 탭) |
 | `../video-editor/` | 실제 편집 엔진(9:16 `--fit cover`·자막·번역·무음컷) 재사용 |
@@ -99,6 +101,10 @@ python -m http.server -d youtube-curator/dashboard 8000   # → http://localhost
 
 - **카테고리별 떡상 공식**: `shorts_sources.yaml` 의 `formula` (먹방/펫/꿀팁/신기/중드 등 — 주제마다 공식이 달라
   LLM 편집기가 그 공식대로 **쓸 구간·순서·후킹·자막 톤**을 결정). 성과 보며 `formula` 한 줄만 고쳐 계속 다듬습니다.
+  - **정밀 튜닝 노브**(LLM 편집기가 실제로 읽음): `hook_sec`(훅 길이) · `target_cuts`(컷 수=호흡) ·
+    `caption_chars`(자막 글자수) · `pace`(호흡) · `retention`(체류 전술) · `cta`(루프/저장 유도).
+    **먹방(`mukbang`)** 카테고리가 정밀 튜닝 레퍼런스 — 사운드 큰 '한 입'을 훅으로, 10컷 빠른 호흡,
+    8자 의성어 자막, 마지막을 또 한 입으로 끝내 **루프(반복재생)**. 다른 카테고리도 이 구조로 숫자만 바꿔 튜닝.
 - **후킹 앞배치**: 공식에 맞는 훅 구간을 **맨 앞**으로 재정렬(ffmpeg) → 9:16 + 한국어 자막(GmarketSans).
 - **입력 = 둘 다**: ① `shorts_sources.yaml`의 `sources`(크리에이터 워치리스트, 6시간 크론 자동) ② **떡상 링크 즉시 처리**.
 ```bash
@@ -112,6 +118,19 @@ python youtube-curator/shorts2shorts.py --only mukbang --urls "https://www.tikto
 ## 떡상 점수
 `떡상 = 조회수 / 업로드 후 경과일` (하루 평균 조회수). 신선도(`max_age_days`)·길이 조건으로 트렌드만 추립니다.
 
+## 검수 후 반자동 업로드 (YouTube OAuth) ✅
+만든 숏츠를 **사람이 검수한 뒤** YouTube 에 올리는 `upload.py` (YouTube Data API v3 OAuth).
+> ⚠️ **완전 자동 공개 업로드는 일부러 안 합니다.** 기본 공개범위 `private`, 공개(public)는 `--confirm` 명시 필수,
+> 비-CC 소재(쇼츠→쇼츠)는 비공개가 아니면 추가 `--confirm` 요구 → 잘못된 자동 재업로드 방지.
+```bash
+python youtube-curator/upload.py --list                          # ① 검수: 안 올린 숏츠 목록(CC/비-CC 배지)
+python youtube-curator/upload.py --upload mukbang_xxx.mp4 --privacy unlisted   # ② 콕 집어 미공개 업로드
+python youtube-curator/upload.py --upload 0 --privacy public --confirm         # ③ 검수 끝 → 공개
+```
+- **자격증명(절대 커밋 금지, `output/*.json` gitignore)**: Google Cloud Console → OAuth 클라이언트 ID(**데스크톱 앱**) JSON 을
+  `--client-secret`(또는 env `YT_OAUTH_CLIENT_SECRET_FILE`)으로 지정. 첫 실행 시 브라우저 동의 → 토큰 자동 저장/갱신(`output/youtube_token.json`).
+- **설명란 = 만들 때 써둔 `.txt`**(캡션 + CC/출처표기)를 그대로 사용 → CC 출처표기 의무 자동 충족.
+- **GitHub Actions**: `upload.yml`(수동 `workflow_dispatch` 전용, **크론 없음**). 로컬 1회 인증 토큰을 secret `YT_OAUTH_TOKEN` 으로 주입.
+
 ## 다음 단계(선택)
-- 검수 후 **반자동 업로드**(YouTube OAuth)
 - TOP 1200 대규모 랭킹(대형 채널 시드 + 쿠키 필요)

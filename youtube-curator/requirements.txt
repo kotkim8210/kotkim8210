@@ -3,3 +3,8 @@ yt-dlp>=2024.0.0        # CC 발굴·다운로드 (YouTube API 키 불필요)
 PyYAML>=6.0            # 카테고리 설정
 faster-whisper>=1.0.0  # 전사(하이라이트 선택·자막) — video-editor 와 공용
 anthropic>=0.40.0      # (선택) 하이라이트 선택을 LLM 으로. 키 없으면 휴리스틱.
+
+# (선택) 검수 후 반자동 업로드 — upload.py (YouTube Data API v3 OAuth)
+google-api-python-client>=2.0.0
+google-auth-oauthlib>=1.0.0
+google-auth-httplib2>=0.2.0
