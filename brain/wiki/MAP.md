@@ -70,6 +70,6 @@ my-projects ══(흩어짐의 해소)══ session-independence
 - [확인필요] 설계 긴장 — '자기 언어 재작성'을 AI가 대신하면 사람의 학습 이득이 줄 수 있음(드림#1, INSIGHTS.md). 완화책 검토 필요.
 - [✅해결 2026-06-14] 기본 브랜치 main 전환 완료(default=main 확인). 새 세션이 통합 뇌를 로드함.
 - [미해결] [[my-projects]] — 잉여 브랜치 5개(festive-wright·graphify-setup·upbeat-goodall·index-work·merge-brain-into-main)는 main에 완전 병합 → 삭제 가능. 프로젝트·설정 브랜치는 보존. 장기적으로 프로젝트별 독립 레포 분리 검토.
-- [미해결] [[video-editing-automation]] — 영상 자동화 최대 미개척 레버 = **2단계 LLM 내용컷**(무음 아닌 군말·중복 제거). 내 `video-editor/`도 글의 도구들도 아직 미구현. 다음 빌드 1순위.
+- [✅구현 2026-06-14] [[video-editing-automation]] — 최대 미개척 레버였던 **2단계 LLM 내용컷**(군말·중복 제거)을 `video-editor`에 구현(`--llm-cut`/`--cut-segments`). 무음 너머 '의미' 컷을 실제로 뚫음.
 
 *(이 인덱스는 `/ingest`·`/dream` 실행 시마다 자동 갱신된다.)*

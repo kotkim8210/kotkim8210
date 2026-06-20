@@ -50,6 +50,6 @@ faster-whisper STT, `silencedetect` 무음감지, 컷 후 `setpts/asetpts` 싱�
 - [[claude-code-skills]] — 결과물을 `/video-edit` 슬래시 스킬(`.claude/commands/video-edit.md`)로 박제 → 어느 세션서든 호출.
 
 ## 미해결/모순 (Open Questions)
-- [미해결] **2단계 LLM 내용컷 미구현** — 무음이 아닌 군말·중복을 SRT 기반으로 LLM이 KEEP/CUT 판단. *다음 빌드 1순위 레버.*
+- [✅구현 2026-06-14] **2단계 LLM 내용컷 구현 완료** — `video-editor`에 `--llm-cut`(Claude API) / `--cut-segments`(수동) 추가. 문장 단위 전사 → LLM이 군말·중복 문장 선택 → 해당 구간만 컷(비발화 구간 보존) + 자막 타임코드 재정렬. 실측: 210.9s→186.3s, 문장 6개(군말·깨짐·반복)만 제거. *"미개척 최대 레버"였던 의미 컷을 실제로 뚫음.*
 - [확인필요] large-v3-turbo가 CPU(저음량 오디오)에서도 환청이 적은지 — GPU 없이 실측 미검증(현재는 medium 권장).
 - [확인필요] Remotion 도입 ROI — 모션그래픽 이득 vs Node+Chromium 무게/속도. 어느 임계에서 ffmpeg ASS를 넘어서나.

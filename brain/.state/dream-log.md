@@ -5,6 +5,13 @@
 
 ---
 
+## 2026-06-14 — 빌드: 2단계 LLM 내용 컷 구현 (미개척 레버 해소)
+- 동기: 직전 통찰 "영상 자동화의 미개척지는 무음이 아니라 '의미' 컷" → 바로 구현.
+- 구현: `video-editor/edit_videos.py` 에 문장 단위 전사(transcribe_segments) + `--llm-cut`(Claude API, 기본 opus-4-8) / `--cut-segments`(수동) + apply_content_cut(여집합 컷 + 타임코드 보정).
+- 함정 해소: 초기 구현이 문장 사이 비발화 구간(데모 등)까지 날림 → '전체-잘라낼구간' 여집합만 제거하도록 수정.
+- 검증: 옥수수영상 합본 210.9s→186.3s, 군말·깨짐·반복 문장 6개만 제거, 남은 자막 타임코드 정확히 당겨짐(72.2s→68.4s).
+- 색인: [[video-editing-automation]] 미해결 항목 ✅구현으로, MAP 미해결 목록·`/video-edit` escalation 갱신.
+
 ## 2026-06-14 — 수집(ingest) #3 + 스킬 습득 (영상 자동화 외부글 검토)
 - 입력: 외부 글(min-inter 영상편집 자동화) 1건을 inbox에 캡처 → 냉정 리뷰 후 주제 신설.
 - 신설: [[video-editing-automation]] (5단계 골격 + 내 `video-editor/` 양방향 비교).

@@ -55,7 +55,7 @@ python video-editor/edit_videos.py
 
 - **단어 단위 정밀/노래방 자막**이 필요 → WhisperX(forced alignment, wav2vec2).
 - **복잡한 모션그래픽/데이터 기반 그래픽** → Remotion(React로 매 프레임 렌더). 단 Node+headless Chromium, 느림.
-- **군말·중복·횡설수설 자동 컷**(무음이 아니라 내용) → SRT를 LLM에 주고 KEEP/CUT 구간 받기. ← 다음 빌드 1순위.
+- **군말·중복·횡설수설 자동 컷**(무음이 아니라 내용) → ✅구현됨: `--llm-cut`(Claude API 키) 또는 `--cut-segments '4,12,16'`(대화형으로 내가 고른 번호). 문장 단위 전사 → LLM이 뺄 문장 선택 → 해당 구간만 컷·자막 타임코드 재정렬(비발화 구간 보존).
 - **인터뷰/다화자** → WhisperX diarization(pyannote).
 - **대량/긴 영상 빠른 인코딩** → GPU `h264_nvenc`.
 

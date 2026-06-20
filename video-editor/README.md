@@ -90,7 +90,19 @@ python video-editor/edit_videos.py --no-intro-sound --no-transition-sound
 
 # 자막 정확도 ↑: 도메인 어휘 힌트(상품명·전문용어)를 주면 깨짐·환청이 줄어듦
 python video-editor/edit_videos.py --initial-prompt "피그마,상세페이지,초당옥수수,제주다팜"
+
+# 2단계 내용 컷: 무음이 아니라 '군말·중복' 문장까지 LLM이 골라 제거
+#   (A) 자동 — Claude API 키가 있을 때
+export ANTHROPIC_API_KEY=sk-...
+python video-editor/edit_videos.py --llm-cut
+#   (B) 수동 — 잘라낼 문장 번호를 직접 지정(대화형으로 고른 번호 주입)
+python video-editor/edit_videos.py --cut-segments "4,12,16,23,39"
 ```
+
+> **2단계 내용 컷이란?** 무음 컷은 *말을 멈춘 곳*만 자릅니다. 내용 컷은 *말은 하지만
+> 빼도 되는* 군말·말 더듬기·같은 말 반복·횡설수설을 문장 단위로 골라 잘라냅니다.
+> "의미 판단은 AI, 시간 계산은 코드" — 어떤 문장을 뺄지는 LLM이, 초 단위 컷·타임코드
+> 재정렬은 코드가 합니다. 비발화 구간(화면 데모 등)은 보존됩니다.
 
 전체 옵션은 `python video-editor/edit_videos.py --help` 로 볼 수 있습니다.
 
@@ -109,6 +121,8 @@ python video-editor/edit_videos.py --initial-prompt "피그마,상세페이지,�
 | `--highlight` | (없음) | 주황색으로 강조할 단어들(쉼표 구분) |
 | `--orange` | `#FF8C42` | 강조 색 |
 | `--overlay` | (없음) | 짤 삽입 `경로@자막키워드@지속초` (반복 가능) |
+| `--llm-cut` | 꺼짐 | Claude(ANTHROPIC_API_KEY)로 군말·중복 문장 자동 제거(2단계 내용 컷) |
+| `--cut-segments` | (없음) | 직접 제거할 문장 번호 `4,12,16-18` (수동 내용 컷) |
 | `--no-intro-sound` / `--no-transition-sound` | 꺼짐 | 인트로/전환 효과음 끄기 |
 | `--soft-subs` | 꺼짐 | 자막을 태우지 않고 트랙으로만 삽입 |
 | `--no-subs` / `--no-trim` | 꺼짐 | 자막 / 무음 컷 단계 건너뛰기 |
