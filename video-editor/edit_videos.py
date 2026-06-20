@@ -196,6 +196,7 @@ def process_clip(
     height: int,
     fps: int,
     normalize: bool,
+    fit: str = "contain",
 ) -> None:
     """한 번의 ffmpeg 패스로 (음성 정규화 + 무음 컷 + 규격 통일)을 수행한다.
 
@@ -216,14 +217,15 @@ def process_clip(
             af_chain.append(f"aselect='{expr}'")
             af_chain.append("asetpts=N/SR/TB")
 
-    # 비디오 규격 통일: fps 고정 → 비율 유지 축소 → 레터박스 패딩 → SAR/픽셀포맷 고정
-    vf_chain += [
-        f"fps={fps}",
-        f"scale={width}:{height}:force_original_aspect_ratio=decrease",
-        f"pad={width}:{height}:(ow-iw)/2:(oh-ih)/2:color=black",
-        "setsar=1",
-        "format=yuv420p",
-    ]
+    # 비디오 규격 통일: fps 고정 → 캔버스 맞춤(레터박스 또는 크롭) → SAR/픽셀포맷 고정
+    vf_chain.append(f"fps={fps}")
+    if fit == "cover":   # 9:16 쇼츠용 — 채우고 중앙 크롭(여백 없음)
+        vf_chain += [f"scale={width}:{height}:force_original_aspect_ratio=increase",
+                     f"crop={width}:{height}"]
+    else:                # contain — 비율 유지 축소 + 레터박스(혼합 소스 합치기용)
+        vf_chain += [f"scale={width}:{height}:force_original_aspect_ratio=decrease",
+                     f"pad={width}:{height}:(ow-iw)/2:(oh-ih)/2:color=black"]
+    vf_chain += ["setsar=1", "format=yuv420p"]
 
     cmd = ["ffmpeg", "-hide_banner", "-y", "-i", str(src)]
 
@@ -683,6 +685,8 @@ def main() -> None:
     p.add_argument("--width", type=int, default=1920, help="결과 가로 해상도")
     p.add_argument("--height", type=int, default=1080, help="결과 세로 해상도")
     p.add_argument("--fps", type=int, default=30, help="결과 프레임레이트")
+    p.add_argument("--fit", choices=["contain", "cover"], default="contain",
+                   help="캔버스 맞춤: contain(레터박스) / cover(채우고 크롭 — 9:16 쇼츠용)")
     # 자막 옵션
     p.add_argument("--model", default="medium",
                    help="faster-whisper 모델: tiny/base/small/medium/large-v3/large-v3-turbo "
@@ -759,7 +763,7 @@ def main() -> None:
 
             out_clip = work / f"clip_{idx:03d}.mp4"
             process_clip(v, out_clip, segments, width=args.width, height=args.height,
-                         fps=args.fps, normalize=normalize)
+                         fps=args.fps, normalize=normalize, fit=args.fit)
             processed.append(out_clip)
 
         if not processed:

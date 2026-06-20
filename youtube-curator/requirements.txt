@@ -1,0 +1,5 @@
+# 큐레이터 의존성
+yt-dlp>=2024.0.0        # CC 발굴·다운로드 (YouTube API 키 불필요)
+PyYAML>=6.0            # 카테고리 설정
+faster-whisper>=1.0.0  # 전사(하이라이트 선택·자막) — video-editor 와 공용
+anthropic>=0.40.0      # (선택) 하이라이트 선택을 LLM 으로. 키 없으면 휴리스틱.
