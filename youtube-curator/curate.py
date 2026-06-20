@@ -93,7 +93,9 @@ def _llm_highlight(segments: list[dict], target: float) -> tuple[float, float]:
     numbered = "\n".join(f"{i + 1}: [{s['start']:.0f}s] {s['text']}" for i, s in enumerate(segments))
     prompt = (
         f"다음은 한 영상의 자막입니다. 숏츠(약 {int(target)}초)로 만들 때 **가장 후킹되고 "
-        "자체로 완결되는** 연속 구간을 고르세요(도입 군말 제외, 임팩트 있는 곳).\n"
+        "자체로 완결되는** 연속 구간을 고르세요.\n"
+        "⭐ 구간은 반드시 **썸네일/주제와 연관된 가장 끌리는 후킹 문장으로 '시작'** 해야 합니다"
+        "(도입 군말·인사로 시작 금지 — 첫 1~2초에 훅).\n"
         "시작 문장번호와 끝 문장번호만 JSON 으로: {\"start\":N,\"end\":M}\n\n" + numbered
     )
     c = anthropic.Anthropic()

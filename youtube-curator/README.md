@@ -93,6 +93,22 @@ python -m http.server -d youtube-curator/dashboard 8000   # → http://localhost
 - 매일 크론 아티팩트(`curator-<id>`)에 대시보드 + 데이터(`manifest.json`·`channels.json`)가 같이 들어갑니다. 받아서 `index.html` 열면 그날 결과.
 - 데이터 없으면 `*.sample.json` 으로 미리보기.
 
+## 쇼츠 → 쇼츠 (틱톡/샤오홍수 → 한국 쇼츠) ⚡ ✅
+중국 쇼츠(틱톡·샤오홍수)의 **최신 떡상 소재**를 받아 **한국어 번역 + 카테고리 공식대로 재편집**해 빠르게 뽑습니다.
+"스피드가 생명" — 트렌드는 늦으면 끝나므로 **링크 받으면 즉시 처리**가 핵심.
+
+- **카테고리별 떡상 공식**: `shorts_sources.yaml` 의 `formula` (먹방/펫/꿀팁/신기/중드 등 — 주제마다 공식이 달라
+  LLM 편집기가 그 공식대로 **쓸 구간·순서·후킹·자막 톤**을 결정). 성과 보며 `formula` 한 줄만 고쳐 계속 다듬습니다.
+- **후킹 앞배치**: 공식에 맞는 훅 구간을 **맨 앞**으로 재정렬(ffmpeg) → 9:16 + 한국어 자막(GmarketSans).
+- **입력 = 둘 다**: ① `shorts_sources.yaml`의 `sources`(크리에이터 워치리스트, 6시간 크론 자동) ② **떡상 링크 즉시 처리**.
+```bash
+# 떡상 링크 즉시 처리(가장 빠름) — 카테고리 공식 적용
+python youtube-curator/shorts2shorts.py --only mukbang --urls "https://www.tiktok.com/@x/video/123"
+# GitHub Actions: '쇼츠→쇼츠' 워크플로 → Run workflow 에 urls 붙여넣으면 즉시 실행
+```
+- ⚖️ **권리**: 틱톡/샤오홍수는 CC 아님 → 재업로드 위험. 출처표기(`*.txt`)·번역·재편집 변형 전제, 본인 권리/허락 소재 권장.
+- 봇 차단 우회: secrets `TIKTOK_COOKIES`(또는 `YT_COOKIES`) 권장.
+
 ## 떡상 점수
 `떡상 = 조회수 / 업로드 후 경과일` (하루 평균 조회수). 신선도(`max_age_days`)·길이 조건으로 트렌드만 추립니다.
 
