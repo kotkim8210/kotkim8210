@@ -318,8 +318,12 @@ def split_segment(text: str, start: float, end: float, max_chars: int) -> list[d
 
 def transcribe_to_cues(
     media: Path, *, model_name: str, language: str, compute_type: str, max_chars: int,
+    initial_prompt: str = "",
 ):
-    """faster-whisper 로 전사한 뒤 문장을 ~max_chars 길이의 짧은 자막 큐로 끊는다."""
+    """faster-whisper 로 전사한 뒤 문장을 ~max_chars 길이의 짧은 자막 큐로 끊는다.
+
+    initial_prompt 에 도메인 어휘(상품명·전문용어 등)를 주면 한국어 인식 정확도가 올라간다.
+    """
     from faster_whisper import WhisperModel  # 지연 임포트(설치 안내를 위해)
 
     log(f"모델 로딩: {model_name} (compute_type={compute_type}) — 최초 1회 다운로드가 있을 수 있음")
@@ -327,6 +331,7 @@ def transcribe_to_cues(
     segments, info = model.transcribe(
         str(media), language=language, vad_filter=True,
         vad_parameters={"min_silence_duration_ms": 500}, beam_size=5,
+        initial_prompt=initial_prompt or None,   # 도메인 어휘 힌트(정확도↑)
     )
     log(f"감지 언어: {info.language} (확률 {info.language_probability:.2f})")
 
@@ -579,7 +584,10 @@ def main() -> None:
     p.add_argument("--fps", type=int, default=30, help="결과 프레임레이트")
     # 자막 옵션
     p.add_argument("--model", default="medium",
-                   help="faster-whisper 모델: tiny/base/small/medium/large-v3 (클수록 정확·느림)")
+                   help="faster-whisper 모델: tiny/base/small/medium/large-v3/large-v3-turbo "
+                        "(GPU 있으면 large-v3-turbo 권장 — 정확·빠름)")
+    p.add_argument("--initial-prompt", default="",
+                   help="도메인 어휘 힌트(상품명·전문용어). 한국어 인식 정확도↑. 예: '피그마,상세페이지,초당옥수수'")
     p.add_argument("--language", default="ko", help="전사 언어 코드")
     p.add_argument("--compute-type", default="int8", help="ctranslate2 연산 타입 (int8 권장)")
     p.add_argument("--font", default="Gmarket Sans TTF", help="자막 폰트(assets 폴더 폰트도 사용 가능)")
@@ -680,6 +688,7 @@ def main() -> None:
             cues, _info = transcribe_to_cues(
                 merged, model_name=args.model, language=args.language,
                 compute_type=args.compute_type, max_chars=args.max_chars,
+                initial_prompt=args.initial_prompt,
             )
             log(f"자막 {len(cues)}개 생성")
 

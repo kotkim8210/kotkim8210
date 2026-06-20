@@ -87,13 +87,17 @@ python video-editor/edit_videos.py \
 
 # 효과음 끄기
 python video-editor/edit_videos.py --no-intro-sound --no-transition-sound
+
+# 자막 정확도 ↑: 도메인 어휘 힌트(상품명·전문용어)를 주면 깨짐·환청이 줄어듦
+python video-editor/edit_videos.py --initial-prompt "피그마,상세페이지,초당옥수수,제주다팜"
 ```
 
 전체 옵션은 `python video-editor/edit_videos.py --help` 로 볼 수 있습니다.
 
 | 옵션 | 기본값 | 설명 |
 |------|--------|------|
-| `--model` | `medium` | 음성 인식 모델 `tiny`·`base`·`small`·`medium`·`large-v3` (클수록 정확·느림) |
+| `--model` | `medium` | 음성 인식 모델 `tiny`·`base`·`small`·`medium`·`large-v3`·`large-v3-turbo` (GPU 있으면 turbo 권장) |
+| `--initial-prompt` | (없음) | 도메인 어휘 힌트(상품명·전문용어). 한국어 인식 정확도↑ |
 | `--noise` | `-30dB` | 이보다 작은 소리는 무음으로 간주 |
 | `--min-silence` | `0.6` | 이 길이(초) 이상 조용해야 컷 |
 | `--margin` | `0.20` | 말 구간 앞뒤로 남길 여유(초) |

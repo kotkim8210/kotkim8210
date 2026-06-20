@@ -5,6 +5,15 @@
 
 ---
 
+## 2026-06-14 — 수집(ingest) #3 + 스킬 습득 (영상 자동화 외부글 검토)
+- 입력: 외부 글(min-inter 영상편집 자동화) 1건을 inbox에 캡처 → 냉정 리뷰 후 주제 신설.
+- 신설: [[video-editing-automation]] (5단계 골격 + 내 `video-editor/` 양방향 비교).
+- 습득(코드): `video-editor/edit_videos.py`에 `--initial-prompt`(도메인 어휘 힌트) 추가 — 한국어 전사 깨짐·환청 직격. `--model`에 large-v3-turbo 권장 명시.
+- 습득(스킬): `.claude/commands/video-edit.md`(`/video-edit`) 신설 — 5단계 플레이북 + escalation(WhisperX·Remotion·LLM 내용컷).
+- 통찰: **2건 신규** — ① 미개척지는 '무음'이 아니라 '의미' 컷(2단계 LLM) ② 서베이형 자료는 실전함정(loudnorm) 체계적 누락[확인필요].
+- 재색인: MAP 통계(주제 11·통찰 6)·수집시각·색인('영상 자동화' 그룹)·연결그래프(loudnorm 간선)·미해결(LLM 내용컷) 갱신. processed.json append.
+- 근거: 외부 글이 기존 [[video-skills]]·[[my-projects]]와 만나며 '실구현이 외부 서베이를 어디서 앞서고 뒤지는가'가 드러남.
+
 ## 2026-06-14 — 드림 시퀀스 #2 (정리 감사)
 - 조감: 주제 10개 전수 + 17개 브랜치 감사.
 - 무결성: 끊긴 위키링크 0, 고아 문서 0, 미처리 inbox 0, MAP 주제수=실제(10) 일치 → 지식 계층 건강.

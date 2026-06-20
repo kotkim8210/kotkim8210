@@ -4,10 +4,10 @@
 > 클로드는 이 인덱스로 위치를 좁힌 뒤 관련 주제 문서 1~3개만 펼쳐 몇 초 만에 답한다.
 
 ## 📊 통계
-- 주제 문서: **10**
-- 누적 통찰(insights): **4**
+- 주제 문서: **11**
+- 누적 통찰(insights): **6**
 - 보관(archive): 0
-- 마지막 수집(ingest): 2026-06-13 (branch-inventory → video-skills·my-projects 신설)
+- 마지막 수집(ingest): 2026-06-14 (min-inter 영상자동화 글 검토 → video-editing-automation 신설 + `/video-edit` 스킬·`--initial-prompt` 습득)
 - 마지막 드림 시퀀스: 2026-06-14 (드림 #2 — 구식 항목 정리·브랜치 감사)
 
 ## 📚 주제 색인 (Topic Index)
@@ -24,6 +24,9 @@
 ### 내 작업·자산 (브랜치 색인)
 - [[my-projects]] — 흩어진 브랜치별 실제 프로젝트 지도(인스타·당근·성경저널·쿠팡·홍보처크롤러). `#프로젝트 #색인 #사업`
 - [[video-skills]] — 영상·유튜브 스킬 3종(watch·youtube-shorts·osmu) 색인. `#스킬 #영상 #유튜브`
+
+### 영상 자동화
+- [[video-editing-automation]] — 영상편집 자동화 5단계 골격 + min-inter 글 냉정 리뷰(내 `video-editor/` 비교). 내가 앞선 것=loudnorm·규격통일, 글이 앞선 것=Remotion·WhisperX·LLM 내용컷. `#영상 #자동화 #ffmpeg #whisper #리뷰`
 
 ### 워크플로 3단계
 - [[data-dumping]] — (1단계/수집기) 분류 없이 무가공 투입 → 정리 시간 제로화. `#수집기 #1단계`
@@ -52,10 +55,14 @@ claude-code-skills ──(같은 원리)──► session-independence
    └ "로컬 PC ↔ 클라우드는 다른 컴퓨터, 커밋한 것만 영속" (brain/inbox 위치 혼선의 근원)
 
 ── [내 작업 자산 클러스터] ──
-my-projects ──(콘텐츠 운영 도구)──► video-skills
+my-projects ──(콘텐츠 운영 도구)──► video-skills ──(파이프라인 이론)──► video-editing-automation
    └ 인스타/유튜브 콘텐츠 프로젝트 ◄─ youtube-shorts·osmu 스킬이 뒷받침
+   └ video-editing-automation = video-skills의 *이론적 토대*(5단계 골격) + 실구현 `video-editor/`·`/video-edit`
 my-projects ══(흩어짐의 해소)══ session-independence
    └ 17개 브랜치로 흩어진 작업을 brain 색인 하나로 = "하나의 뇌" 목표 실현
+
+💡 video-editing-automation.loudnorm ══(외부글에 없는 실전지식)══ my-projects
+   └ 작게 녹음된 영상의 99% 오컷 함정 = loudnorm으로 해결 (글엔 없음, INSIGHTS.md 참고)
 ```
 
 ## ⚠️ 미해결 모순 / 확인필요
@@ -63,5 +70,6 @@ my-projects ══(흩어짐의 해소)══ session-independence
 - [확인필요] 설계 긴장 — '자기 언어 재작성'을 AI가 대신하면 사람의 학습 이득이 줄 수 있음(드림#1, INSIGHTS.md). 완화책 검토 필요.
 - [✅해결 2026-06-14] 기본 브랜치 main 전환 완료(default=main 확인). 새 세션이 통합 뇌를 로드함.
 - [미해결] [[my-projects]] — 잉여 브랜치 5개(festive-wright·graphify-setup·upbeat-goodall·index-work·merge-brain-into-main)는 main에 완전 병합 → 삭제 가능. 프로젝트·설정 브랜치는 보존. 장기적으로 프로젝트별 독립 레포 분리 검토.
+- [미해결] [[video-editing-automation]] — 영상 자동화 최대 미개척 레버 = **2단계 LLM 내용컷**(무음 아닌 군말·중복 제거). 내 `video-editor/`도 글의 도구들도 아직 미구현. 다음 빌드 1순위.
 
 *(이 인덱스는 `/ingest`·`/dream` 실행 시마다 자동 갱신된다.)*
