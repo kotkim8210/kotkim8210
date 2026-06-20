@@ -5,9 +5,9 @@
 categories:
   - name: 축구 월드컵
     slug: worldcup
-    query: 월드컵 축구 하이라이트
-    lang: ko
-    hint: 월드컵,축구,대표팀,골,하이라이트,예선,조별리그
+    query: world cup 2026 highlights
+    lang: en            # 영어 CC 영상이 풍부 → 한국어로 자동 번역
+    translate: true     # 분위기 맞춤 한국어 자막(ANTHROPIC_API_KEY 필요)
     short_len: 50
     min_dur: 90
     max_dur: 1800

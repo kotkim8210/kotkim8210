@@ -340,8 +340,62 @@ def transcribe_segments(
     out: list[dict] = []
     for seg in segments:
         text = seg.text.strip()
-        if text and has_korean.search(text):   # 한글 없는 영어 환청 세그먼트는 버림
-            out.append({"start": seg.start, "end": seg.end, "text": text})
+        if not text:
+            continue
+        # 한국어 오디오일 때만 '한글 없는 영어 환청' 세그먼트를 버린다.
+        # (영어 등 외국어 원본은 번역 대상이므로 그대로 둔다)
+        if language == "ko" and not has_korean.search(text):
+            continue
+        out.append({"start": seg.start, "end": seg.end, "text": text})
+    return out
+
+
+def translate_segments_ko(segments: list[dict], *, model: str) -> list[dict]:
+    """원본 문장들을 **영상 분위기에 맞춰** 자연스러운 한국어로 번역(타임코드 유지).
+
+    코믹 → 센스·트렌드 표현, 감동 → 감정선 살아있는 단어, 스포츠/정보 → 임팩트 있게.
+    ANTHROPIC_API_KEY 가 없으면 원문을 그대로 둔다.
+    """
+    import json
+    import os
+
+    if not segments:
+        return segments
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        log("번역 건너뜀: ANTHROPIC_API_KEY 없음 → 원문 자막 유지")
+        return segments
+    try:
+        import anthropic
+    except ImportError:
+        log("번역 건너뜀: anthropic 미설치 → 원문 유지")
+        return segments
+
+    numbered = "\n".join(f"{i + 1}: {s['text']}" for i, s in enumerate(segments))
+    prompt = (
+        "다음은 한 영상의 자막 문장들이다(번호: 문장).\n"
+        "① 먼저 영상의 분위기/장르를 파악하라(코믹·감동·스포츠 하이라이트·정보 등).\n"
+        "② 그 분위기에 '딱 맞는' 한국어로 자연스럽게 번역하라(직역 금지):\n"
+        "   - 코믹/예능 → 센스있고 요즘 유행하는 표현·밈 감성\n"
+        "   - 감동/스토리 → 감정선이 살아있는 단어\n"
+        "   - 스포츠/정보 → 짧고 임팩트 있게\n"
+        "쇼츠 자막이라 짧고 입에 붙어야 한다. **문장 수와 순서는 그대로 유지**.\n"
+        "오직 JSON 배열로만 답하라(문장 순서대로 번역문 문자열만):\n\n" + numbered
+    )
+    try:
+        client = anthropic.Anthropic()
+        msg = client.messages.create(model=model, max_tokens=4096,
+                                     messages=[{"role": "user", "content": prompt}])
+        text = "".join(b.text for b in msg.content if b.type == "text")
+        arr = json.loads(re.search(r"\[.*\]", text, re.S).group(0))
+    except Exception as e:
+        log(f"번역 실패({e}) → 원문 유지")
+        return segments
+
+    out = []
+    for i, s in enumerate(segments):
+        ko = arr[i] if i < len(arr) and isinstance(arr[i], str) and arr[i].strip() else s["text"]
+        out.append({"start": s["start"], "end": s["end"], "text": ko.strip()})
+    log(f"한국어 번역 완료: {len(out)}문장 (영상 분위기 반영)")
     return out, info
 
 
@@ -713,6 +767,8 @@ def main() -> None:
     p.add_argument("--llm-model", default="claude-opus-4-8", help="내용 컷에 쓸 Claude 모델")
     p.add_argument("--cut-segments", default="",
                    help="직접 제거할 문장 번호(1-기반): 예 '3,7,12-15'  (--llm-cut 대신 수동 지정)")
+    p.add_argument("--translate-ko", action="store_true",
+                   help="외국어 원본 자막을 영상 분위기에 맞춰 한국어로 자동 번역(ANTHROPIC_API_KEY 필요)")
     p.add_argument("--no-subs", action="store_true", help="자막 단계를 건너뛴다")
     p.add_argument("--soft-subs", action="store_true", help="자막을 태우지 않고 트랙으로만 넣는다")
     p.add_argument("--keep-work", action="store_true", help="중간 산출물(작업 폴더)을 지우지 않는다")
@@ -817,6 +873,11 @@ def main() -> None:
                         die("내용 컷 후 남은 문장이 없습니다. 컷 목록을 줄여보세요.")
                 else:
                     log("LLM 이 자를 문장을 고르지 않았습니다 (전부 유지).")
+
+            # ── 한국어 자동 번역(분위기 반영) ──
+            if args.translate_ko and segments:
+                step("한국어 자막 자동 번역 (영상 분위기 반영)")
+                segments = translate_segments_ko(segments, model=args.llm_model)
 
             cues = cues_from_segments(segments, args.max_chars)
             log(f"자막 {len(cues)}개 생성")

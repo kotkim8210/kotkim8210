@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🎯 YouTube 큐레이터 대시보드</title>
+<style>
+  :root{--bg:#0f1216;--card:#171c23;--line:#262d36;--txt:#e8edf2;--mut:#8a95a3;
+        --acc:#ff8c42;--cc:#4ade80;--blue:#5b9dff}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',system-ui,sans-serif}
+  header{padding:28px 24px 8px;max-width:1180px;margin:0 auto}
+  h1{margin:0;font-size:24px;letter-spacing:-.5px}
+  .sub{color:var(--mut);font-size:13px;margin-top:6px}
+  .wrap{max-width:1180px;margin:0 auto;padding:16px 24px 60px}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:18px 0}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .stat .n{font-size:26px;font-weight:700}
+  .stat .l{color:var(--mut);font-size:12px;margin-top:4px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 20px}
+  .chip{background:var(--card);border:1px solid var(--line);color:var(--txt);
+        padding:7px 14px;border-radius:999px;font-size:13px;cursor:pointer}
+  .chip.on{background:var(--acc);border-color:var(--acc);color:#1a1205;font-weight:700}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}
+  .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .badge{font-size:11px;padding:3px 9px;border-radius:999px;background:#232a33;color:var(--blue);white-space:nowrap}
+  .cc{background:rgba(74,222,128,.12);color:var(--cc);border:1px solid rgba(74,222,128,.3)}
+  .title{font-size:15px;font-weight:600;line-height:1.35}
+  .meta{color:var(--mut);font-size:12.5px;display:flex;gap:10px;flex-wrap:wrap}
+  .score{font-size:22px;font-weight:800;color:var(--acc);line-height:1}
+  .score small{font-size:11px;color:var(--mut);font-weight:500}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  a{color:var(--blue);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .files{font-size:12px;color:var(--mut)}
+  .empty{background:var(--card);border:1px dashed var(--line);border-radius:16px;padding:40px;text-align:center;color:var(--mut)}
+  code{background:#232a33;padding:2px 6px;border-radius:6px;color:#cdd6e0}
+  footer{max-width:1180px;margin:0 auto;padding:0 24px 40px;color:var(--mut);font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎯 YouTube 큐레이터 대시보드</h1>
+  <div class="sub">카테고리별 <b>CC 떡상</b> 영상 발굴 → 롱폼→숏츠 자동 편집 결과 · <span id="updated">—</span></div>
+</header>
+<div class="wrap">
+  <div class="stats" id="stats"></div>
+  <div class="chips" id="chips"></div>
+  <div id="content"></div>
+</div>
+<footer>
+  ⚖️ 편집·재유통은 <b>Creative Commons</b> 라이선스 영상으로 한정합니다 · 각 카드의 출처표기는 CC 의무입니다.
+</footer>
+
+<script>
+const fmt = n => (n??0).toLocaleString('ko-KR');
+async function loadManifest(){
+  for(const p of ['manifest.json','../output/manifest.json','manifest.sample.json']){
+    try{ const r = await fetch(p,{cache:'no-store'}); if(r.ok){ const j = await r.json(); if(Array.isArray(j)) return j; } }catch(e){}
+  }
+  return null;
+}
+function stat(n,l){ return `<div class="stat"><div class="n">${n}</div><div class="l">${l}</div></div>`; }
+function card(m){
+  const s=m.source||{};
+  return `<div class="card" data-cat="${m.slug||''}">
+    <div class="top">
+      <span class="badge">${m.category||''}</span>
+      <span class="badge cc">CC BY</span>
+    </div>
+    <div class="title">${s.title||m.short||''}</div>
+    <div class="row">
+      <div class="score">${fmt(s.viral_score)}<small> 떡상/일</small></div>
+      <div class="meta" style="text-align:right">${fmt(s.views)} views<br>${s.channel||''}</div>
+    </div>
+    <div class="meta">⏱ 하이라이트 ${(m.highlight||[]).join('–')}s · ${(m.created||'').slice(0,10)}</div>
+    <div class="row">
+      <span class="files">🎬 ${m.short||''}</span>
+      <a href="${s.url||'#'}" target="_blank" rel="noopener">원본 보기 ↗</a>
+    </div>
+  </div>`;
+}
+(async()=>{
+  const data = await loadManifest();
+  const content=document.getElementById('content');
+  if(!data || !data.length){
+    document.getElementById('stats').innerHTML='';
+    content.innerHTML=`<div class="empty">아직 만든 숏츠가 없어요.<br><br>
+      <code>python youtube-curator/curate.py --only worldcup</code> 를 돌리거나<br>
+      GitHub Actions 의 <b>YouTube 큐레이터</b> 워크플로를 실행하면 여기에 채워집니다.</div>`;
+    return;
+  }
+  // 통계
+  const cats=[...new Set(data.map(d=>d.category))];
+  const avg=Math.round(data.reduce((a,d)=>a+(d.source?.viral_score||0),0)/data.length);
+  const views=data.reduce((a,d)=>a+(d.source?.views||0),0);
+  document.getElementById('stats').innerHTML =
+     stat(fmt(data.length),'만든 숏츠') + stat(cats.length,'카테고리')
+   + stat(fmt(avg),'평균 떡상/일') + stat(fmt(views),'원본 누적 조회수');
+  document.getElementById('updated').textContent = '최근 업데이트 ' + (data[0]?.created||'').replace('T',' ').slice(0,16);
+  // 필터 칩
+  const chips=document.getElementById('chips');
+  let active='all';
+  const render=()=>{ content.innerHTML='<div class="grid">'
+     + data.filter(d=>active==='all'||d.category===active).map(card).join('') + '</div>'; };
+  const mkChip=(label,val)=>{ const c=document.createElement('div'); c.className='chip'+(val===active?' on':'');
+     c.textContent=label; c.onclick=()=>{active=val;[...chips.children].forEach(x=>x.classList.remove('on'));c.classList.add('on');render();}; return c; };
+  chips.appendChild(mkChip('전체','all'));
+  cats.forEach(cat=>chips.appendChild(mkChip(cat,cat)));
+  render();
+})();
+</script>
+</body>
+</html>

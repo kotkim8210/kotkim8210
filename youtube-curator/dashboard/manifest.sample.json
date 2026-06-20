@@ -1,0 +1,41 @@
+[
+  {
+    "category": "축구 월드컵", "slug": "worldcup",
+    "short": "worldcup_World-Cup-2026-Guide.mp4", "srt": "worldcup_World-Cup-2026-Guide.srt",
+    "desc": "worldcup_World-Cup-2026-Guide.txt",
+    "source": {
+      "title": "Your 1-Sentence Guide to EVERY TEAM in the 2026 World Cup",
+      "channel": "vlogbrothers",
+      "url": "https://www.youtube.com/watch?v=zbBndWexLWQ",
+      "license": "Creative Commons Attribution license (reuse allowed)",
+      "views": 552383, "viral_score": 50217
+    },
+    "highlight": [62.0, 112.0], "created": "2026-06-20T19:50:11"
+  },
+  {
+    "category": "축구 월드컵", "slug": "worldcup",
+    "short": "worldcup_England-Fans-Culture.mp4", "srt": "worldcup_England-Fans-Culture.srt",
+    "desc": "worldcup_England-Fans-Culture.txt",
+    "source": {
+      "title": "Foreigners on SHOCKING Culture of England Fans! (World Cup)",
+      "channel": "UniverseofKorede",
+      "url": "https://www.youtube.com/watch?v=-Td_y7ASPtE",
+      "license": "Creative Commons Attribution license (reuse allowed)",
+      "views": 18937, "viral_score": 9468
+    },
+    "highlight": [30.0, 78.0], "created": "2026-06-20T19:51:40"
+  },
+  {
+    "category": "쇼핑 숏츠", "slug": "shopping",
+    "short": "shopping_kkultem-review.mp4", "srt": "shopping_kkultem-review.srt",
+    "desc": "shopping_kkultem-review.txt",
+    "source": {
+      "title": "이거 사세요! 쿠팡 가성비 꿀템 리뷰 BEST",
+      "channel": "리뷰왕",
+      "url": "https://www.youtube.com/watch?v=EXAMPLE",
+      "license": "Creative Commons Attribution license (reuse allowed)",
+      "views": 41200, "viral_score": 6867
+    },
+    "highlight": [15.0, 55.0], "created": "2026-06-20T19:52:30"
+  }
+]

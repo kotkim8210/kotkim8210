@@ -19,7 +19,7 @@
 - ⚠️ 자동 **업로드는 일부러 안 합니다.** 결과 숏츠를 보고 사람이 올리세요(잘못된 자동 업로드 방지).
 
 ## 자동 실행 ('안 봐도 알아서')
-- `.github/workflows/curate.yml` 이 **매일 06:00 KST** 자동 실행 → 결과를 **아티팩트**로 저장.
+- `.github/workflows/curate.yml` 이 **매일 19:50 KST** 자동 실행 → 결과(숏츠 + 대시보드)를 **아티팩트**로 저장.
 - 수동 실행: 깃허브 Actions 탭 → *YouTube 큐레이터* → **Run workflow** (카테고리 slug 지정 가능).
 - 필요한 secrets (Settings → Secrets → Actions):
   - `YT_COOKIES` *(권장)* — YouTube 쿠키(`cookies.txt` 내용). 데이터센터 IP의 'bot 확인' 벽을 100% 우회.
@@ -59,10 +59,28 @@ python youtube-curator/curate.py --only worldcup --per-category 1
 | `../.github/workflows/curate.yml` | 매일 크론 자동화 |
 | `output/manifest.json` | 만든 숏츠·출처·떡상점수 기록(대시보드용 데이터) |
 
+## 한국어 자막 자동 번역 (분위기 반영) ✅
+외국어 CC 원본은 **영상 분위기에 맞춰** 한국어 자막으로 자동 번역됩니다(`categories.yaml`의 `translate: true`).
+- 코믹/예능 → 센스있고 요즘 유행하는 표현·밈 감성
+- 감동/스토리 → 감정선이 살아있는 단어
+- 스포츠/정보 → 짧고 임팩트 있게
+
+LLM 이 먼저 분위기/장르를 파악한 뒤 그에 맞는 어휘로 번역합니다. (`ANTHROPIC_API_KEY` 필요, 없으면 원문 유지)
+기본 **축구 월드컵** 카테고리는 영어 CC 영상이 풍부해 `lang: en, translate: true` 로 설정돼 있습니다.
+
+## 대시보드 ✅
+`dashboard/index.html` — `manifest.json` 을 읽어 **만든 숏츠·원본 출처·떡상 점수·CC 라이선스**를
+카드/통계로 보여주는 정적 분석 페이지(danbi 스타일).
+```bash
+# 로컬에서 보기 (서버로 띄워야 manifest fetch 가 됨)
+python -m http.server -d youtube-curator/dashboard 8000   # → http://localhost:8000
+```
+- 매일 크론 아티팩트(`curator-<id>`)에 대시보드가 같이 들어가니, 받아서 `index.html` 열면 그날 결과를 봅니다.
+- 데이터 없으면 `manifest.sample.json` 으로 미리보기. GitHub Pages 로 올리면 **고정 URL**로도 가능(프로필 레포라 Pages 설정은 직접 켜세요).
+
 ## 떡상 점수
 `떡상 = 조회수 / 업로드 후 경과일` (하루 평균 조회수). 신선도(`max_age_days`)·길이 조건으로 트렌드만 추립니다.
 
-## 다음 단계(예정)
-- 비한국어 CC 원본 → **한국어 자막 자동 번역**(LLM) 옵션
-- `manifest.json` 을 읽는 **분석 대시보드**(danbi 클론) 웹페이지
-- (원하면) 검수 후 **반자동 업로드**(YouTube OAuth)
+## 다음 단계(선택)
+- 검수 후 **반자동 업로드**(YouTube OAuth)
+- 채널 랭킹/예측까지 갖춘 풀 danbi 분석 페이지

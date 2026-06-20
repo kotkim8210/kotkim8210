@@ -139,11 +139,18 @@ def make_short(category: dict, item: dict, work: Path, out_dir: Path, *, insecur
     shutil.copy(clip, in_dir / "clip.mp4")
     slug = re.sub(r"[^\w가-힣]+", "-", item["title"])[:40].strip("-") or item["id"]
     name = f"{category['slug']}_{slug}"
-    subprocess.run([sys.executable, str(EDITOR), "--input", str(in_dir), "--output", str(out_dir),
-                    "--name", name, "--width", "1080", "--height", "1920", "--fit", "cover",
-                    "--margin-v", "120", "--language", lang, "--model", category.get("model", "small"),
-                    "--initial-prompt", category.get("hint", ""),
-                    "--no-intro-sound", "--no-transition-sound"], check=True)
+    translate = bool(category.get("translate"))
+    cmd = [sys.executable, str(EDITOR), "--input", str(in_dir), "--output", str(out_dir),
+           "--name", name, "--width", "1080", "--height", "1920", "--fit", "cover",
+           "--margin-v", "120", "--language", lang, "--model", category.get("model", "small"),
+           "--no-intro-sound", "--no-transition-sound"]
+    if translate:
+        cmd += ["--translate-ko"]                       # 외국어 원본 → 한국어 자막(분위기 반영)
+        if category.get("llm_model"):
+            cmd += ["--llm-model", category["llm_model"]]
+    else:
+        cmd += ["--initial-prompt", category.get("hint", "")]   # 한국어 원본은 도메인 힌트
+    subprocess.run(cmd, check=True)
 
     short = out_dir / f"{name}.mp4"
     (out_dir / f"{name}.txt").write_text(  # CC 출처표기(설명란용)
