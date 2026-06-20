@@ -316,11 +316,10 @@ def split_segment(text: str, start: float, end: float, max_chars: int) -> list[d
     return out
 
 
-def transcribe_to_cues(
-    media: Path, *, model_name: str, language: str, compute_type: str, max_chars: int,
-    initial_prompt: str = "",
+def transcribe_segments(
+    media: Path, *, model_name: str, language: str, compute_type: str, initial_prompt: str = "",
 ):
-    """faster-whisper 로 전사한 뒤 문장을 ~max_chars 길이의 짧은 자막 큐로 끊는다.
+    """faster-whisper 로 문장(세그먼트) 단위로 전사한다. (내용 컷·자막의 공통 입력)
 
     initial_prompt 에 도메인 어휘(상품명·전문용어 등)를 주면 한국어 인식 정확도가 올라간다.
     """
@@ -331,23 +330,119 @@ def transcribe_to_cues(
     segments, info = model.transcribe(
         str(media), language=language, vad_filter=True,
         vad_parameters={"min_silence_duration_ms": 500}, beam_size=5,
-        initial_prompt=initial_prompt or None,   # 도메인 어휘 힌트(정확도↑)
+        initial_prompt=initial_prompt or None,
     )
     log(f"감지 언어: {info.language} (확률 {info.language_probability:.2f})")
 
     has_korean = re.compile(r"[가-힣]")
-    cues: list[dict] = []
+    out: list[dict] = []
     for seg in segments:
         text = seg.text.strip()
-        if not text:
+        if text and has_korean.search(text):   # 한글 없는 영어 환청 세그먼트는 버림
+            out.append({"start": seg.start, "end": seg.end, "text": text})
+    return out, info
+
+
+def cues_from_segments(segments: list[dict], max_chars: int) -> list[dict]:
+    """문장들을 ~max_chars 길이의 짧은 자막 큐로 끊는다."""
+    cues: list[dict] = []
+    for s in segments:
+        cues.extend(split_segment(s["text"], s["start"], s["end"], max_chars))
+    return cues
+
+
+# ── 2.5) LLM 내용 컷 (무음이 아니라 '의미' — 군말·중복·횡설수설 제거) ────────────
+def parse_index_spec(spec: str, n: int) -> set:
+    """'1,4,7-9' 같은 1-기반 번호 스펙을 0-기반 인덱스 집합으로 바꾼다."""
+    out: set = set()
+    for part in spec.split(","):
+        part = part.strip()
+        if not part:
             continue
-        for cue in split_segment(text, seg.start, seg.end, max_chars):
-            # 한글이 한 글자도 없는 조각(영어 환청 'naturally' 등)은 버린다
-            if has_korean.search(cue["text"]):
-                cues.append(cue)
-    for c in cues:
-        log(f"[{_srt_time(c['start'])}] {c['text']}")
-    return cues, info
+        if "-" in part:
+            a, b = part.split("-")
+            out.update(range(int(a) - 1, int(b)))
+        else:
+            out.add(int(part) - 1)
+    return {i for i in out if 0 <= i < n}
+
+
+def llm_select_cuts(segments: list[dict], *, model: str) -> set:
+    """ANTHROPIC_API_KEY 가 있으면 Claude 가 군말·중복 문장 번호를 골라준다."""
+    import json
+    import os
+
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        die("--llm-cut 에는 ANTHROPIC_API_KEY 가 필요합니다. (또는 내가 고른 번호를 --cut-segments 로 주세요)")
+    try:
+        import anthropic
+    except ImportError:
+        die("anthropic 패키지가 필요합니다:  pip install anthropic")
+
+    numbered = "\n".join(f"{i + 1}: {s['text']}" for i, s in enumerate(segments))
+    prompt = (
+        "다음은 한 영상의 자막 문장 목록입니다 (번호: 문장).\n"
+        "**빼도 되는 문장의 번호만** 골라주세요 — 군말·말 더듬기·같은 말 반복·횡설수설·"
+        "의미 없는 추임새(어, 음, 그, 뭐냐 등). 핵심 정보가 담긴 문장은 반드시 남깁니다.\n"
+        "보수적으로: 애매하면 남기세요.\n\n"
+        f"{numbered}\n\n"
+        "잘라낼 문장 번호만 JSON 배열로 답하세요. 예: [3, 7, 12]. 없으면 []."
+    )
+    client = anthropic.Anthropic()
+    msg = client.messages.create(
+        model=model, max_tokens=2000,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    text = "".join(b.text for b in msg.content if b.type == "text")
+    m = re.search(r"\[[\d,\s]*\]", text)
+    idx: set = set()
+    if m:
+        for n in json.loads(m.group(0)):
+            if 1 <= int(n) <= len(segments):
+                idx.add(int(n) - 1)
+    return idx
+
+
+def apply_content_cut(merged: Path, segments: list[dict], cut_idx: set, dst: Path, *, fps: int):
+    """cut_idx 문장 구간을 잘라낸 영상을 만들고, 남은 문장의 타임코드를 새 타임라인으로 보정한다."""
+    keep = sorted((s["start"], s["end"]) for i, s in enumerate(segments) if i not in cut_idx)
+    if not keep:
+        return None, []
+    ranges: list[list[float]] = []
+    for a, b in keep:                       # 맞닿은 구간 병합
+        if ranges and a <= ranges[-1][1] + 0.05:
+            ranges[-1][1] = max(ranges[-1][1], b)
+        else:
+            ranges.append([a, b])
+
+    expr = select_expr([(a, b) for a, b in ranges])
+    run([
+        "ffmpeg", "-hide_banner", "-y", "-i", str(merged),
+        "-vf", f"select='{expr}',setpts=N/FRAME_RATE/TB,fps={fps}",
+        "-af", f"aselect='{expr}',asetpts=N/SR/TB,aresample=48000",
+        "-r", str(fps), "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p",
+        "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-ac", "2", str(dst),
+    ])
+
+    offsets, acc = [], 0.0                  # 원본 t → 새 타임라인 t 매핑
+    for a, b in ranges:
+        offsets.append((a, b, acc))
+        acc += b - a
+
+    def remap(t: float):
+        for a, b, off in offsets:
+            if a - 1e-3 <= t <= b + 1e-3:
+                return off + (max(a, min(t, b)) - a)
+        return None
+
+    new_segs: list[dict] = []
+    for i, s in enumerate(segments):
+        if i in cut_idx:
+            continue
+        ns, ne = remap(s["start"]), remap(s["end"])
+        if ns is not None and ne is not None:
+            new_segs.append({"start": ns, "end": max(ns, ne), "text": s["text"]})
+    return dst, new_segs
 
 
 def write_srt(cues: list[dict], path: Path, *, offset: float = 0.0) -> None:
@@ -602,6 +697,12 @@ def main() -> None:
     p.add_argument("--no-transition-sound", action="store_true", help="영상 전환 효과음(휘릭)을 넣지 않는다")
     p.add_argument("--no-text-pop", action="store_true", help="자막 등장 줌팝 효과를 끈다")
     p.add_argument("--no-image-zoom", action="store_true", help="짤 등장 줌인/퇴장 줌아웃 효과를 끈다")
+    # LLM 내용 컷 (2단계: 무음이 아니라 군말·중복 제거)
+    p.add_argument("--llm-cut", action="store_true",
+                   help="Claude(ANTHROPIC_API_KEY)로 군말·중복 문장을 자동 제거한다")
+    p.add_argument("--llm-model", default="claude-opus-4-8", help="내용 컷에 쓸 Claude 모델")
+    p.add_argument("--cut-segments", default="",
+                   help="직접 제거할 문장 번호(1-기반): 예 '3,7,12-15'  (--llm-cut 대신 수동 지정)")
     p.add_argument("--no-subs", action="store_true", help="자막 단계를 건너뛴다")
     p.add_argument("--soft-subs", action="store_true", help="자막을 태우지 않고 트랙으로만 넣는다")
     p.add_argument("--keep-work", action="store_true", help="중간 산출물(작업 폴더)을 지우지 않는다")
@@ -684,23 +785,41 @@ def main() -> None:
             step("자막 단계 생략 → 합본 저장")
             shutil.copy(merged, final)
         else:
-            step("한국어 자막 자동 생성 (단어 타임스탬프 → 짧은 큐)")
-            cues, _info = transcribe_to_cues(
+            step("한국어 자막 자동 생성 (문장 단위 전사)")
+            segments, _info = transcribe_segments(
                 merged, model_name=args.model, language=args.language,
-                compute_type=args.compute_type, max_chars=args.max_chars,
-                initial_prompt=args.initial_prompt,
+                compute_type=args.compute_type, initial_prompt=args.initial_prompt,
             )
+            video = merged   # 내용 컷을 하면 잘린 영상으로 바뀐다
+
+            # ── 2단계: LLM 내용 컷 (무음이 아니라 군말·중복 제거) ──
+            if (args.cut_segments or args.llm_cut) and segments:
+                step("LLM 내용 컷 (군말·중복 문장 제거)")
+                cut_idx = (parse_index_spec(args.cut_segments, len(segments))
+                           if args.cut_segments else llm_select_cuts(segments, model=args.llm_model))
+                if cut_idx:
+                    cut_vid = work / "content_cut.mp4"
+                    video, segments = apply_content_cut(merged, segments, cut_idx, cut_vid, fps=args.fps)
+                    if video:
+                        log(f"문장 {len(cut_idx)}개 제거 → {ffprobe_duration(video):.1f}s "
+                            f"(원본 {ffprobe_duration(merged):.1f}s)")
+                    else:
+                        die("내용 컷 후 남은 문장이 없습니다. 컷 목록을 줄여보세요.")
+                else:
+                    log("LLM 이 자를 문장을 고르지 않았습니다 (전부 유지).")
+
+            cues = cues_from_segments(segments, args.max_chars)
             log(f"자막 {len(cues)}개 생성")
 
             if not cues:
                 log("전사된 음성이 없어 자막 없이 저장합니다.")
-                shutil.copy(merged, final)
+                shutil.copy(video, final)
             elif args.soft_subs:
                 srt = work / "subs.srt"
                 write_srt(cues, srt)
                 shutil.copy(srt, srt_out)
                 step("소프트 자막 트랙으로 합치기")
-                mux_soft_subtitles(merged, srt, final)
+                mux_soft_subtitles(video, srt, final)
             else:
                 # 자막(ASS): 흰색 굵게 + 검은 외곽선, 하단, 중요단어 주황색
                 font_size = args.font_size or max(20, round(args.height * 0.076))
@@ -721,7 +840,7 @@ def main() -> None:
 
                 step("자막·짤·효과음 합성 렌더")
                 content = work / "content.mp4"
-                render_rich(merged, ass, content, overlays=overlays,
+                render_rich(video, ass, content, overlays=overlays,
                             transitions=transitions, fontsdir=ASSETS_DIR,
                             fps=args.fps, zoom=not args.no_image_zoom)
 
@@ -731,7 +850,7 @@ def main() -> None:
                 if isound and not args.no_intro_sound:
                     step("인트로 효과음(두둥) 붙이기")
                     intro = work / "intro.mp4"
-                    intro_dur = build_intro(merged, isound, intro,
+                    intro_dur = build_intro(video, isound, intro,
                                             width=args.width, height=args.height, fps=args.fps)
                     concat_clips([intro, content], final, work)
                 else:
