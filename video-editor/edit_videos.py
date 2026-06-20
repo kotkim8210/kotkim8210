@@ -852,7 +852,7 @@ def main() -> None:
             shutil.copy(merged, final)
         else:
             step("한국어 자막 자동 생성 (문장 단위 전사)")
-            segments, _info = transcribe_segments(
+            segments = transcribe_segments(
                 merged, model_name=args.model, language=args.language,
                 compute_type=args.compute_type, initial_prompt=args.initial_prompt,
             )

@@ -73,18 +73,26 @@ def pick_highlight(segments: list[dict], target: float) -> tuple[float, float]:
 
 
 def _dense_window(segments: list[dict], target: float) -> tuple[float, float]:
-    best, best_density = None, -1.0
-    for i in range(len(segments)):
+    """말이 가장 '많이 담긴' ~target초 연속 창을 고른다.
+
+    밀도(글자/초)가 아니라 **창 안 총 글자수**를 최대화한다. 밀도로 고르면 짧고 빽빽한
+    1~2문장(예: 4초)이 이겨 숏츠가 너무 짧아지는 문제가 있어, 총량 기준으로 ~target초를 꽉 채운다.
+    """
+    n = len(segments)
+    best, best_chars = None, -1
+    for i in range(n):
         j, chars = i, 0
-        while j < len(segments) and segments[j]["end"] - segments[i]["start"] <= target:
+        while j < n and segments[j]["end"] - segments[i]["start"] <= target:
             chars += len(segments[j]["text"])
             j += 1
-        span = segments[min(j, len(segments) - 1)]["end"] - segments[i]["start"]
+        end_idx = max(i, j - 1)
+        if j == i:                       # 시작 세그먼트 하나가 target보다 길어도 그건 포함
+            chars, end_idx = len(segments[i]["text"]), i
+        span = segments[end_idx]["end"] - segments[i]["start"]
         if span <= 0:
             continue
-        density = chars / span
-        if density > best_density:
-            best_density, best = density, (segments[i]["start"], segments[min(j, len(segments) - 1)]["end"])
+        if chars > best_chars:
+            best_chars, best = chars, (segments[i]["start"], segments[end_idx]["end"])
     return best or (segments[0]["start"], min(segments[-1]["end"], target))
 
 
@@ -121,9 +129,9 @@ def make_short(category: dict, item: dict, work: Path, out_dir: Path, *, insecur
     log(f"다운로드 완료: {raw.name}")
 
     lang = category.get("lang", "ko")
-    segs, _info = transcribe_segments(raw, model_name=category.get("model", "small"),
-                                      language=lang, compute_type="int8",
-                                      initial_prompt=category.get("hint", ""))
+    segs = transcribe_segments(raw, model_name=category.get("model", "small"),
+                               language=lang, compute_type="int8",
+                               initial_prompt=category.get("hint", ""))
     target = float(category.get("short_len", 50))
     a, b = pick_highlight(segs, target)
     b = min(b, a + target * 1.4)            # 너무 길어지지 않게 상한
@@ -144,8 +152,8 @@ def make_short(category: dict, item: dict, work: Path, out_dir: Path, *, insecur
     translate = bool(category.get("translate"))
     cmd = [sys.executable, str(EDITOR), "--input", str(in_dir), "--output", str(out_dir),
            "--name", name, "--width", "1080", "--height", "1920", "--fit", "cover",
-           "--margin-v", "120", "--language", lang, "--model", category.get("model", "small"),
-           "--no-intro-sound", "--no-transition-sound"]
+           "--margin-v", "576", "--language", lang, "--model", category.get("model", "small"),
+           "--no-intro-sound", "--no-transition-sound"]   # 자막=중하단(9:16 높이의 ~30%)
     if translate:
         cmd += ["--translate-ko"]                       # 외국어 원본 → 한국어 자막(분위기 반영)
         if category.get("llm_model"):

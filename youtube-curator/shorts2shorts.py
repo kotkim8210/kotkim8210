@@ -178,8 +178,8 @@ def make_short(cat: dict, url: str, work: Path, out_dir: Path, *, insecure: bool
     step(f"[{cat['name']}] {url}")
     raw, meta = download(url, work / "raw", insecure=insecure, cookies=cookies)
     log(f"다운로드: {meta['title'][:40]} ({meta['duration']}s)")
-    segs, _ = transcribe_segments(raw, model_name=cat.get("model", "small"),
-                                  language=cat.get("lang", "zh"), compute_type="int8")
+    segs = transcribe_segments(raw, model_name=cat.get("model", "small"),
+                               language=cat.get("lang", "zh"), compute_type="int8")
     plan = llm_edit_plan(segs, category=cat, model=os.environ.get("CURATE_LLM_MODEL", "claude-opus-4-8"))
     slug = re.sub(r"[^\w가-힣]+", "-", meta["title"])[:32].strip("-") or "clip"
     name = f"{cat['slug']}_{slug}"
