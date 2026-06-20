@@ -4,10 +4,10 @@
 > 클로드는 이 인덱스로 위치를 좁힌 뒤 관련 주제 문서 1~3개만 펼쳐 몇 초 만에 답한다.
 
 ## 📊 통계
-- 주제 문서: **11**
+- 주제 문서: **12**
 - 누적 통찰(insights): **6**
 - 보관(archive): 0
-- 마지막 수집(ingest): 2026-06-14 (min-inter 영상자동화 글 검토 → video-editing-automation 신설 + `/video-edit` 스킬·`--initial-prompt` 습득)
+- 마지막 수집(ingest): 2026-06-20 (danbi 큐레이터 사이트 → youtube-curator 시스템 신설: CC 떡상 발굴→숏츠 자동편집 + 매일 크론)
 - 마지막 드림 시퀀스: 2026-06-14 (드림 #2 — 구식 항목 정리·브랜치 감사)
 
 ## 📚 주제 색인 (Topic Index)
@@ -26,6 +26,7 @@
 - [[video-skills]] — 영상·유튜브 스킬 3종(watch·youtube-shorts·osmu) 색인. `#스킬 #영상 #유튜브`
 
 ### 영상 자동화
+- [[youtube-curator]] — CC 떡상 영상 발굴→롱폼투숏츠 자동편집 + 매일 크론(저작권 CC 한정). `#유튜브 #큐레이션 #자동화 #숏츠`
 - [[video-editing-automation]] — 영상편집 자동화 5단계 골격 + min-inter 글 냉정 리뷰(내 `video-editor/` 비교). 내가 앞선 것=loudnorm·규격통일, 글이 앞선 것=Remotion·WhisperX·LLM 내용컷. `#영상 #자동화 #ffmpeg #whisper #리뷰`
 
 ### 워크플로 3단계
