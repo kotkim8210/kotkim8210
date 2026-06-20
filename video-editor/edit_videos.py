@@ -404,18 +404,27 @@ def llm_select_cuts(segments: list[dict], *, model: str) -> set:
 
 
 def apply_content_cut(merged: Path, segments: list[dict], cut_idx: set, dst: Path, *, fps: int):
-    """cut_idx 문장 구간을 잘라낸 영상을 만들고, 남은 문장의 타임코드를 새 타임라인으로 보정한다."""
-    keep = sorted((s["start"], s["end"]) for i, s in enumerate(segments) if i not in cut_idx)
+    """선택 문장 구간만 잘라낸다(나머지·문장 사이 비발화 구간은 보존). 남은 자막 타임코드를 보정한다."""
+    total = ffprobe_duration(merged)
+    cuts: list[list[float]] = []            # 잘라낼 구간만 모아 병합
+    for a, b in sorted((segments[i]["start"], segments[i]["end"]) for i in cut_idx):
+        if cuts and a <= cuts[-1][1] + 0.02:
+            cuts[-1][1] = max(cuts[-1][1], b)
+        else:
+            cuts.append([max(0.0, a), min(total, b)])
+
+    keep: list[tuple[float, float]] = []    # keep = 전체 - 잘라낼 구간 (여집합)
+    cursor = 0.0
+    for a, b in cuts:
+        if a > cursor + 0.02:
+            keep.append((cursor, a))
+        cursor = max(cursor, b)
+    if cursor < total - 0.02:
+        keep.append((cursor, total))
     if not keep:
         return None, []
-    ranges: list[list[float]] = []
-    for a, b in keep:                       # 맞닿은 구간 병합
-        if ranges and a <= ranges[-1][1] + 0.05:
-            ranges[-1][1] = max(ranges[-1][1], b)
-        else:
-            ranges.append([a, b])
 
-    expr = select_expr([(a, b) for a, b in ranges])
+    expr = select_expr(keep)
     run([
         "ffmpeg", "-hide_banner", "-y", "-i", str(merged),
         "-vf", f"select='{expr}',setpts=N/FRAME_RATE/TB,fps={fps}",
@@ -424,24 +433,21 @@ def apply_content_cut(merged: Path, segments: list[dict], cut_idx: set, dst: Pat
         "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-ac", "2", str(dst),
     ])
 
-    offsets, acc = [], 0.0                  # 원본 t → 새 타임라인 t 매핑
-    for a, b in ranges:
-        offsets.append((a, b, acc))
-        acc += b - a
-
-    def remap(t: float):
-        for a, b, off in offsets:
-            if a - 1e-3 <= t <= b + 1e-3:
-                return off + (max(a, min(t, b)) - a)
-        return None
+    def shifted(t: float) -> float:         # t 이전에 잘려나간 시간만큼 당긴다
+        removed = 0.0
+        for a, b in cuts:
+            if b <= t:
+                removed += b - a
+            elif a < t < b:
+                removed += t - a
+        return max(0.0, t - removed)
 
     new_segs: list[dict] = []
     for i, s in enumerate(segments):
         if i in cut_idx:
             continue
-        ns, ne = remap(s["start"]), remap(s["end"])
-        if ns is not None and ne is not None:
-            new_segs.append({"start": ns, "end": max(ns, ne), "text": s["text"]})
+        ns, ne = shifted(s["start"]), shifted(s["end"])
+        new_segs.append({"start": ns, "end": max(ns, ne), "text": s["text"]})
     return dst, new_segs
 
 
