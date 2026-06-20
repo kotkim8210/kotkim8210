@@ -1,0 +1,26 @@
+[
+  {
+    "rank": 1, "rising_rank": 2, "name": "FIFA", "url": "https://www.youtube.com/@FIFA",
+    "category": "축구 월드컵", "subs": 29400000, "snapshots": 6,
+    "daily_growth": 12000, "growth_pct": 0.041,
+    "pred_subs_7d": 29484000, "pred_subs_30d": 29760000, "status": "예측 가능",
+    "latest_video": {"title": "Team Feature: Brazil", "views": 1240000, "velocity": 88000},
+    "video_pred_7d": 1856000
+  },
+  {
+    "rank": 2, "rising_rank": 1, "name": "ESPN FC", "url": "https://www.youtube.com/@ESPNFC",
+    "category": "축구 월드컵", "subs": 5210000, "snapshots": 6,
+    "daily_growth": 4500, "growth_pct": 0.086,
+    "pred_subs_7d": 5241500, "pred_subs_30d": 5345000, "status": "예측 가능",
+    "latest_video": {"title": "World Cup Reaction", "views": 52000, "velocity": 2765},
+    "video_pred_7d": 71355
+  },
+  {
+    "rank": 3, "rising_rank": 3, "name": "433", "url": "https://www.youtube.com/@433",
+    "category": "축구 월드컵", "subs": 312000, "snapshots": 6,
+    "daily_growth": 600, "growth_pct": 0.192,
+    "pred_subs_7d": 316200, "pred_subs_30d": 330000, "status": "예측 가능",
+    "latest_video": {"title": "Skills Mix", "views": 8400, "velocity": 21},
+    "video_pred_7d": 8547
+  }
+]

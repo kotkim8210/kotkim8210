@@ -43,9 +43,17 @@ jobs:
           python youtube-curator/curate.py --per-category 1 \
             ${{ github.event.inputs.only != '' && format('--only {0}', github.event.inputs.only) || '' }}
 
-      - name: 대시보드에 최신 매니페스트 반영
+      - name: 채널 스냅샷 수집 + 랭킹·예측 갱신 (수동+자동 채널)
         if: always()
-        run: cp -f youtube-curator/output/manifest.json youtube-curator/dashboard/manifest.json 2>/dev/null || true
+        env:
+          YT_COOKIES_FILE: ${{ secrets.YT_COOKIES != '' && '/tmp/yt_cookies.txt' || '' }}
+        run: python youtube-curator/channels.py --collect --cookies "${YT_COOKIES_FILE}" || true
+
+      - name: 대시보드에 최신 데이터 반영 (매니페스트 + 채널)
+        if: always()
+        run: |
+          cp -f youtube-curator/output/manifest.json youtube-curator/dashboard/manifest.json 2>/dev/null || true
+          cp -f youtube-curator/output/channels.json youtube-curator/dashboard/channels.json 2>/dev/null || true
 
       - name: 결과(숏츠 + 대시보드) 업로드 — 아티팩트 받아서 dashboard/index.html 열면 됨
         if: always()
@@ -57,7 +65,11 @@ jobs:
             youtube-curator/output/*.srt
             youtube-curator/output/*.txt
             youtube-curator/output/manifest.json
+            youtube-curator/output/channels.json
+            youtube-curator/output/channels_history.jsonl
+            youtube-curator/output/auto_channels.json
             youtube-curator/dashboard/index.html
             youtube-curator/dashboard/manifest.json
+            youtube-curator/dashboard/channels.json
           if-no-files-found: warn
           retention-days: 14

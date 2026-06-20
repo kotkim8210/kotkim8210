@@ -54,10 +54,12 @@ python youtube-curator/curate.py --only worldcup --per-category 1
 |------|------|
 | `discover.py` | CC 떡상 발굴 + 권리 게이트(YouTube API 키 불필요) |
 | `curate.py` | 발굴→다운로드→하이라이트→9:16 숏츠 편집→매니페스트 오케스트레이션 |
-| `categories.yaml` | 카테고리 설정(검색어·길이·언어) |
-| `../video-editor/` | 실제 편집 엔진(9:16 `--fit cover`·자막·무음컷) 재사용 |
-| `../.github/workflows/curate.yml` | 매일 크론 자동화 |
-| `output/manifest.json` | 만든 숏츠·출처·떡상점수 기록(대시보드용 데이터) |
+| `channels.py` | 채널 스냅샷 수집 + 랭킹 + 성장/조회수 예측 |
+| `categories.yaml` / `channels.yaml` | 카테고리 설정 / 추적 채널(수동) 설정 |
+| `dashboard/index.html` | 분석 대시보드(숏츠 + 채널 분석 탭) |
+| `../video-editor/` | 실제 편집 엔진(9:16 `--fit cover`·자막·번역·무음컷) 재사용 |
+| `../.github/workflows/curate.yml` | 매일 19:50 KST 크론 자동화 |
+| `output/manifest.json` · `channels.json` | 숏츠·출처·떡상점수 / 채널 랭킹·예측 데이터(대시보드용) |
 
 ## 한국어 자막 자동 번역 (분위기 반영) ✅
 외국어 CC 원본은 **영상 분위기에 맞춰** 한국어 자막으로 자동 번역됩니다(`categories.yaml`의 `translate: true`).
@@ -68,19 +70,32 @@ python youtube-curator/curate.py --only worldcup --per-category 1
 LLM 이 먼저 분위기/장르를 파악한 뒤 그에 맞는 어휘로 번역합니다. (`ANTHROPIC_API_KEY` 필요, 없으면 원문 유지)
 기본 **축구 월드컵** 카테고리는 영어 CC 영상이 풍부해 `lang: en, translate: true` 로 설정돼 있습니다.
 
-## 대시보드 ✅
-`dashboard/index.html` — `manifest.json` 을 읽어 **만든 숏츠·원본 출처·떡상 점수·CC 라이선스**를
-카드/통계로 보여주는 정적 분석 페이지(danbi 스타일).
+## 채널 분석 — 랭킹 + 성장 예측 (danbi 스타일) ✅
+`channels.py` 가 채널별 **구독자 + 최근 영상 성과**를 매일 스냅샷으로 모아(`output/channels_history.jsonl`):
+- **랭킹**: 구독자순 + 급상승(일 성장순)
+- **예측**: 스냅샷 2일+ 쌓이면 일 성장률로 **7/30일 구독자 예측**, 최근 영상 떡상 속도로 **주간 조회수 예측**
+  (스냅샷이 쌓일수록 정확해짐 — danbi 가 2025년부터 모은 것과 같은 원리. 첫날은 "데이터 축적 중")
+
+**추적 채널 = 수동 + 자동**
+- 수동: `channels.yaml` 에 **내 채널 + 경쟁사**를 넣음
+- 자동: 큐레이션(발굴)에서 나온 **CC 창작자 채널**이 `output/auto_channels.json` 에 자동 추가돼 랭킹이 알아서 늘어남
+
 ```bash
-# 로컬에서 보기 (서버로 띄워야 manifest fetch 가 됨)
+python youtube-curator/channels.py --collect    # 스냅샷 1회 수집 + 랭킹·예측 갱신 → output/channels.json
+```
+
+## 대시보드 ✅ (탭 2개)
+`dashboard/index.html` — 정적 분석 페이지. **📹 만든 숏츠**(출처·떡상점수·CC 배지) + **📊 채널 분석**(랭킹·구독자·일성장·7/30일 예측·최근영상 주간예상) 탭.
+```bash
+# 로컬에서 보기 (서버로 띄워야 fetch 가 됨)
 python -m http.server -d youtube-curator/dashboard 8000   # → http://localhost:8000
 ```
-- 매일 크론 아티팩트(`curator-<id>`)에 대시보드가 같이 들어가니, 받아서 `index.html` 열면 그날 결과를 봅니다.
-- 데이터 없으면 `manifest.sample.json` 으로 미리보기. GitHub Pages 로 올리면 **고정 URL**로도 가능(프로필 레포라 Pages 설정은 직접 켜세요).
+- 매일 크론 아티팩트(`curator-<id>`)에 대시보드 + 데이터(`manifest.json`·`channels.json`)가 같이 들어갑니다. 받아서 `index.html` 열면 그날 결과.
+- 데이터 없으면 `*.sample.json` 으로 미리보기.
 
 ## 떡상 점수
 `떡상 = 조회수 / 업로드 후 경과일` (하루 평균 조회수). 신선도(`max_age_days`)·길이 조건으로 트렌드만 추립니다.
 
 ## 다음 단계(선택)
 - 검수 후 **반자동 업로드**(YouTube OAuth)
-- 채널 랭킹/예측까지 갖춘 풀 danbi 분석 페이지
+- TOP 1200 대규모 랭킹(대형 채널 시드 + 쿠키 필요)

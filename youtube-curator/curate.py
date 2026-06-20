@@ -159,6 +159,7 @@ def make_short(category: dict, item: dict, work: Path, out_dir: Path, *, insecur
         "category": category["name"], "slug": category["slug"],
         "short": short.name, "srt": f"{name}.srt", "desc": f"{name}.txt",
         "source": {"title": item["title"], "channel": item["channel"], "url": item["url"],
+                   "channel_url": item.get("channel_url", ""),
                    "license": item["license"], "views": item["views"], "viral_score": item["viral_score"]},
         "highlight": [round(a, 1), round(b, 1)], "created": _dt.datetime.now().isoformat(timespec="seconds"),
     }
@@ -168,6 +169,20 @@ def load_categories(path: Path) -> list[dict]:
     import yaml
     data = yaml.safe_load(path.read_text(encoding="utf-8"))
     return data["categories"]
+
+
+def record_channel(out_dir: Path, entry: dict) -> None:
+    """숏츠로 쓴 CC 원본의 채널을 자동 추적 목록에 추가(채널 분석 랭킹/예측용)."""
+    s = entry.get("source", {})
+    url = s.get("channel_url")
+    if not url:
+        return
+    path = out_dir / "auto_channels.json"
+    chans = json.loads(path.read_text()) if path.exists() else []
+    if any(c.get("url") == url for c in chans):
+        return
+    chans.append({"name": s.get("channel", ""), "url": url, "category": entry.get("category", "")})
+    path.write_text(json.dumps(chans, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def main() -> None:
@@ -207,6 +222,7 @@ def main() -> None:
                 entry = make_short(cat, item, work, args.output, insecure=args.insecure, cookies=args.cookies)
                 manifest.insert(0, entry)
                 manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+                record_channel(args.output, entry)   # 원본 채널을 자동 추적 목록에 추가
                 log(f"✅ 숏츠 완성: {entry['short']}")
             except Exception as e:
                 log(f"✖ 실패({item['id']}): {e}")
