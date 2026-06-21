@@ -217,15 +217,30 @@ def process_clip(
             af_chain.append(f"aselect='{expr}'")
             af_chain.append("asetpts=N/SR/TB")
 
-    # 비디오 규격 통일: fps 고정 → 캔버스 맞춤(레터박스 또는 크롭) → SAR/픽셀포맷 고정
+    # 비디오 규격 통일: fps 고정 → 캔버스 맞춤(레터박스/크롭/블러패드) → SAR/픽셀포맷 고정
     vf_chain.append(f"fps={fps}")
-    if fit == "cover":   # 9:16 쇼츠용 — 채우고 중앙 크롭(여백 없음)
+    geom_linear = True
+    if fit == "cover":   # 채우고 중앙 크롭(여백 없음) — 피사체가 가운데 있는 영상에만
         vf_chain += [f"scale={width}:{height}:force_original_aspect_ratio=increase",
                      f"crop={width}:{height}"]
-    else:                # contain — 비율 유지 축소 + 레터박스(혼합 소스 합치기용)
+    elif fit == "blur":  # 전체를 다 보여주고 위아래는 '블러 배경'으로 채움(롱→쇼츠 표준)
+        geom_linear = False
+    else:                # contain — 비율 유지 축소 + 검정 레터박스(혼합 소스 합치기용)
         vf_chain += [f"scale={width}:{height}:force_original_aspect_ratio=decrease",
                      f"pad={width}:{height}:(ow-iw)/2:(oh-ih)/2:color=black"]
-    vf_chain += ["setsar=1", "format=yuv420p"]
+    if geom_linear:
+        vf_chain += ["setsar=1", "format=yuv420p"]
+        vf_str = ",".join(vf_chain)
+    else:
+        # split → [bg] 채워서 크롭+강한 블러 / [fg] 전체 비율유지 축소 → 가운데 합성
+        pre = ",".join(vf_chain)            # select,setpts,fps (항상 fps 포함)
+        vf_str = (
+            f"{pre},split=2[bg][fg];"
+            f"[bg]scale={width}:{height}:force_original_aspect_ratio=increase,"
+            f"crop={width}:{height},gblur=sigma=20[bg2];"
+            f"[fg]scale={width}:{height}:force_original_aspect_ratio=decrease[fg2];"
+            f"[bg2][fg2]overlay=(W-w)/2:(H-h)/2,setsar=1,format=yuv420p"
+        )
 
     cmd = ["ffmpeg", "-hide_banner", "-y", "-i", str(src)]
 
@@ -233,7 +248,7 @@ def process_clip(
         # 오디오가 없으면 무음 트랙을 합성해 규격을 맞춘다(concat 호환성).
         cmd += ["-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=48000"]
 
-    cmd += ["-vf", ",".join(vf_chain)]
+    cmd += ["-vf", vf_str]
     if audio:
         af_chain.append("aresample=48000:async=1:first_pts=0")
         cmd += ["-af", ",".join(af_chain)]
@@ -739,8 +754,9 @@ def main() -> None:
     p.add_argument("--width", type=int, default=1920, help="결과 가로 해상도")
     p.add_argument("--height", type=int, default=1080, help="결과 세로 해상도")
     p.add_argument("--fps", type=int, default=30, help="결과 프레임레이트")
-    p.add_argument("--fit", choices=["contain", "cover"], default="contain",
-                   help="캔버스 맞춤: contain(레터박스) / cover(채우고 크롭 — 9:16 쇼츠용)")
+    p.add_argument("--fit", choices=["contain", "cover", "blur"], default="contain",
+                   help="캔버스 맞춤: contain(검정 레터박스) / cover(채우고 중앙크롭 — 피사체가 가운데일 때) "
+                        "/ blur(전체 보이고 위아래 블러배경 — 롱→쇼츠 표준, 잘림 없음)")
     # 자막 옵션
     p.add_argument("--model", default="medium",
                    help="faster-whisper 모델: tiny/base/small/medium/large-v3/large-v3-turbo "

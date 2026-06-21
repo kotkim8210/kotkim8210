@@ -151,9 +151,11 @@ def make_short(category: dict, item: dict, work: Path, out_dir: Path, *, insecur
     name = f"{category['slug']}_{slug}"
     translate = bool(category.get("translate"))
     cmd = [sys.executable, str(EDITOR), "--input", str(in_dir), "--output", str(out_dir),
-           "--name", name, "--width", "1080", "--height", "1920", "--fit", "cover",
+           "--name", name, "--width", "1080", "--height", "1920", "--fit", category.get("fit", "blur"),
            "--margin-v", "576", "--language", lang, "--model", category.get("model", "small"),
            "--no-intro-sound", "--no-transition-sound"]   # 자막=중하단(9:16 높이의 ~30%)
+    # fit=blur: 전체를 다 보여주고 위아래만 블러로 채움(가로 원본 잘림 방지, 롱→쇼츠 표준).
+    # 피사체가 화면 중앙에 꽉 차는 카테고리는 categories.yaml 에 fit: cover 로 지정 가능.
     if translate:
         cmd += ["--translate-ko"]                       # 외국어 원본 → 한국어 자막(분위기 반영)
         if category.get("llm_model"):
