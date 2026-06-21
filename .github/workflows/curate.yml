@@ -28,6 +28,12 @@ jobs:
         with:
           python-version: "3.11"
 
+      # YouTube 'n 챌린지' JS 해독에 필요(node20 은 yt-dlp 가 unsupported 로 거부).
+      # 이게 없으면 다운로드가 "Only images are available" 로 통째로 실패한다.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
       - name: 파이썬 패키지
         run: pip install -r youtube-curator/requirements.txt
 

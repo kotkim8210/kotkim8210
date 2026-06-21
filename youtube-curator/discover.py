@@ -10,6 +10,8 @@
 from __future__ import annotations
 
 import datetime as _dt
+import shutil
+import subprocess
 from urllib.parse import quote
 
 from yt_dlp import YoutubeDL
@@ -25,9 +27,51 @@ CC_SEARCH_SP = "EgIwAQ%3D%3D"
 YT_EXTRACTOR_ARGS = {"youtube": {"player_client": ["android"]}}
 
 
+# ── YouTube 'n 챌린지'(throttling 시그니처) 해독용 JS 런타임 ───────────────────
+# 다운로드 단계에서 yt-dlp 는 player JS 의 'n' 시그니처를 풀어야 영상/오디오 포맷이
+# 열린다. 이 해독에는 JS 런타임이 필요한데, yt-dlp 기본은 deno 만 활성화한다.
+# deno 가 없으면 node(>=22) 를 명시해야 한다(node20 은 yt-dlp 가 unsupported 로 거부).
+# + 해독기 스크립트 패키지 'yt-dlp-ejs' 가 설치돼 있어야 한다(requirements.txt).
+# 이게 없으면 "Only images are available" 로 다운로드가 통째로 실패한다(실측).
+_JS_RUNTIMES: "dict | None" = None
+
+
+def _node_path(min_major: int = 22) -> "str | None":
+    """EJS 해독기가 쓸 수 있는 node(>=22) 실행 파일을 찾는다(없으면 None)."""
+    for cand in ("/opt/node22/bin/node", shutil.which("node"), shutil.which("nodejs")):
+        if not cand:
+            continue
+        try:
+            out = subprocess.run([cand, "--version"], capture_output=True,
+                                 text=True, timeout=10).stdout.strip()
+            if int(out.lstrip("v").split(".")[0]) >= min_major:
+                return cand
+        except Exception:
+            continue
+    return None
+
+
+def js_runtimes() -> dict:
+    """yt-dlp 에 넘길 ``js_runtimes`` 설정(탐지는 1회만, 이후 캐시).
+
+    deno(최우선)와 node(>=22)를 함께 등록한다. yt-dlp 는 '활성화돼 있고 사용 가능한'
+    최우선 런타임을 고르므로, CI(deno 또는 node22 설치)·샌드박스(node22) 어디서든
+    동작한다. 둘 다 없으면 {'deno': {}} 만 남아 yt-dlp 기본과 동일(경고 후 포맷 누락).
+    """
+    global _JS_RUNTIMES
+    if _JS_RUNTIMES is None:
+        rt: dict = {"deno": {}}
+        node = _node_path()
+        if node:
+            rt["node"] = {"path": node}
+        _JS_RUNTIMES = rt
+    return _JS_RUNTIMES
+
+
 def _opts(insecure: bool, flat: bool, limit: int = 0, cookies: "str | None" = None) -> dict:
     o = {"quiet": True, "no_warnings": True, "skip_download": True,
-         "nocheckcertificate": insecure, "extractor_args": YT_EXTRACTOR_ARGS}
+         "nocheckcertificate": insecure, "extractor_args": YT_EXTRACTOR_ARGS,
+         "js_runtimes": js_runtimes()}
     if flat:
         o["extract_flat"] = "in_playlist"
     if limit:

@@ -46,7 +46,8 @@ def latest_from_source(url: str, *, insecure: bool, cookies: "str | None", n: in
     """크리에이터/소스 URL 에서 최신 영상 URL 들을 가져온다(워치리스트)."""
     from yt_dlp import YoutubeDL
     opts = {"quiet": True, "no_warnings": True, "skip_download": True,
-            "extract_flat": "in_playlist", "playlistend": n, "nocheckcertificate": insecure}
+            "extract_flat": "in_playlist", "playlistend": n, "nocheckcertificate": insecure,
+            "js_runtimes": D.js_runtimes()}
     if cookies:
         opts["cookiefile"] = cookies
     with YoutubeDL(opts) as y:
@@ -64,7 +65,7 @@ def download(url: str, dst: Path, *, insecure: bool, cookies: "str | None") -> t
     from yt_dlp import YoutubeDL
     opts = {"quiet": True, "no_warnings": True, "outtmpl": str(dst.with_suffix(".%(ext)s")),
             "format": "bv*[height<=1280]+ba/b/best", "merge_output_format": "mp4",
-            "nocheckcertificate": insecure}
+            "nocheckcertificate": insecure, "js_runtimes": D.js_runtimes()}
     if cookies:
         opts["cookiefile"] = cookies
     with YoutubeDL(opts) as y:

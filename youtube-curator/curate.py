@@ -38,16 +38,25 @@ def step(m: str) -> None:
 
 
 def yt_download(video_id: str, dst: Path, *, insecure: bool, cookies: "str | None") -> Path:
-    """CC 영상을 받는다(android 클라이언트로 봇 벽 우회, 720p 이하)."""
+    """CC 영상을 받는다(720p 이하).
+
+    클라이언트 선택이 핵심(실측):
+      - 쿠키 있음 → 기본 클라이언트 + js_runtimes(n 챌린지 해독)로 받는다.
+        쿠키와 android 클라이언트를 함께 쓰면 'Failed to extract any player
+        response' 로 깨지므로 android 강제를 끈다.
+      - 쿠키 없음 → android 클라이언트로 봇 벽(데이터센터 IP)을 우회한다.
+    """
     from yt_dlp import YoutubeDL
     opts = {
         "quiet": True, "no_warnings": True, "outtmpl": str(dst.with_suffix(".%(ext)s")),
         "format": "bv*[height<=720]+ba/b[height<=720]/best",
         "merge_output_format": "mp4", "nocheckcertificate": insecure,
-        "extractor_args": D.YT_EXTRACTOR_ARGS,
+        "js_runtimes": D.js_runtimes(),   # n 챌린지 해독(없으면 영상 포맷이 안 열려 실패)
     }
     if cookies:
         opts["cookiefile"] = cookies
+    else:
+        opts["extractor_args"] = D.YT_EXTRACTOR_ARGS   # 쿠키 없을 때만 android 우회
     with YoutubeDL(opts) as y:
         y.download([f"https://www.youtube.com/watch?v={video_id}"])
     for ext in (".mp4", ".mkv", ".webm"):

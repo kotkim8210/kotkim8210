@@ -28,6 +28,9 @@ jobs:
         run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-nanum
       - uses: actions/setup-python@v5
         with: { python-version: "3.11" }
+      # YouTube 'n 챌린지' JS 해독용(node20=unsupported → node22 필요). 없으면 다운로드 실패.
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
       - name: 파이썬 패키지
         run: pip install -r youtube-curator/requirements.txt
 

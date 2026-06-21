@@ -22,7 +22,8 @@ HERE = Path(__file__).resolve().parent
 def _flat(url: str, *, limit: int, insecure: bool, cookies: "str | None") -> dict:
     opts = {"quiet": True, "no_warnings": True, "skip_download": True,
             "nocheckcertificate": insecure, "extract_flat": "in_playlist",
-            "playlistend": limit, "extractor_args": D.YT_EXTRACTOR_ARGS}
+            "playlistend": limit, "extractor_args": D.YT_EXTRACTOR_ARGS,
+            "js_runtimes": D.js_runtimes()}
     if cookies:
         opts["cookiefile"] = cookies
     with YoutubeDL(opts) as y:

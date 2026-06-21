@@ -49,6 +49,14 @@ python youtube-curator/curate.py --only worldcup --per-category 1
 ```
 > 이 저장소의 샌드박스처럼 TLS 프록시 뒤라면 `--insecure` 를 붙이세요(개발 전용).
 
+> **⚙️ JS 런타임 필수(다운로드).** 유튜브는 영상 포맷을 열기 전 `n` 시그니처(JS)를 풀어야 한다.
+> yt-dlp 는 이 해독에 **JS 런타임**과 해독기 스크립트(`yt-dlp-ejs`, requirements 에 포함)가 필요하다.
+> 없으면 `Only images are available` 로 다운로드가 통째로 실패한다. 런타임은 **deno** 또는
+> **node ≥ 22**(node 20 은 yt-dlp 가 *unsupported* 로 거부) — 워크플로는 `setup-node@22` 로 자동 설치,
+> 로컬은 `node22`(또는 `deno`)만 PATH 에 있으면 코드가 자동 탐지한다.
+> **쿠키 사용 시 주의:** `YT_COOKIES_FILE` 쿠키와 android 클라이언트를 같이 쓰면 깨지므로,
+> 쿠키가 있으면 기본 클라이언트로 받는다(`curate.py` 가 자동 분기).
+
 ## 구성
 | 파일 | 역할 |
 |------|------|
