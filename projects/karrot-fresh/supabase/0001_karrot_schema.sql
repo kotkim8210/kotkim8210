@@ -124,7 +124,9 @@ comment on view karrot.v_order_margin is '주문별 매출/원가/마진 — 당
 
 -- ── updated_at 자동 갱신 트리거 ─────────────────────────────
 create or replace function karrot.touch_updated_at()
-returns trigger language plpgsql as $$
+returns trigger language plpgsql
+set search_path = ''   -- 보안 린트 0011: search_path 고정
+as $$
 begin new.updated_at = now(); return new; end; $$;
 
 drop trigger if exists trg_customers_touch on karrot.customers;
@@ -134,25 +136,14 @@ drop trigger if exists trg_products_touch on karrot.products;
 create trigger trg_products_touch before update on karrot.products
     for each row execute function karrot.touch_updated_at();
 
--- ── RLS (개인 단일 운영자 가정) ─────────────────────────────
--- service_role(서버/대시보드)은 RLS를 우회한다. 클라이언트 직접접속을 쓸 경우
--- 아래로 인증 사용자에게만 허용. 단순 운영이면 그대로 두어도 service_role로 동작.
+-- ── RLS (개인 단일 운영자 — service_role 전용) ──────────────
+-- RLS를 켜되 정책을 두지 않으면 anon/authenticated는 기본 차단되고,
+-- 서버 키(service_role)와 Supabase 대시보드만 접근한다.
+-- (보안 린트 0024 회피: USING(true) 같은 과도 허용 정책을 쓰지 않음.)
+-- 클라이언트 인증 접속이 필요해지면 그때 auth.uid() 기반 정책을 추가한다.
 alter table karrot.customers        enable row level security;
 alter table karrot.products         enable row level security;
 alter table karrot.orders           enable row level security;
 alter table karrot.order_items      enable row level security;
 alter table karrot.cs_cases         enable row level security;
 alter table karrot.restock_reminders enable row level security;
-
-do $$
-declare t text;
-begin
-  foreach t in array array['customers','products','orders','order_items','cs_cases','restock_reminders']
-  loop
-    execute format($f$
-      drop policy if exists "owner_all" on karrot.%I;
-      create policy "owner_all" on karrot.%I
-        for all to authenticated using (true) with check (true);
-    $f$, t, t);
-  end loop;
-end $$;

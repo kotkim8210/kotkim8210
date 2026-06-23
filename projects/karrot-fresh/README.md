@@ -9,7 +9,7 @@
 | `.claude/commands/listing.md` | **`/listing`** — 제목·본문·CS약관·해시태그 자동 생성 스킬 | ✅ 사용가능 |
 | `cs-scripts.md` | 당근 비즈프로필 자동응답 + 채팅/이메일 템플릿 팩 | ✅ 붙여넣기용 |
 | `design-brief.md` | Canva 이미지 자동생성용 디자인 브리프(벤치마킹 근거) | ✅ 완성 |
-| `supabase/0001_karrot_schema.sql` | 주문·단골·마진·CS·재입고 DB 스키마 | ⏳ 적용 대기(아래) |
+| `supabase/0001_karrot_schema.sql` | 주문·단골·마진·CS·재입고 DB 스키마 | ✅ 적용 완료(karrot 스키마) |
 
 ## 🧊 자동화 가능/불가 — 솔직한 경계
 당근은 **외부 공개 API가 없다.** 따라서 자동화는 "당근 안"이 아니라 **양 끝단**에서만 가능:
@@ -25,8 +25,10 @@
 4. 주문 들어오면 **Supabase**(`karrot` 스키마)에 기록 → 단골·마진·제철 재입고 추적
 5. 제철 시작 전 `restock_reminders` 기준 **단골 알림/재게시**로 광고비 0원 완판
 
-## 🗄️ Supabase 적용 방법 (비용·동의 필요)
-기존 프로젝트 `kotkim8210's Project`(서울 리전)가 **INACTIVE(일시정지)** 상태.
-- 복원(restore)은 **무료**지만 *이번 세션이 만든 프로젝트가 아니라* 자동권한에서 보류됨 → **사용자 동의 후** 진행.
-- 동의 시: 프로젝트 복원(수 분) → `0001_karrot_schema.sql`을 `karrot` 스키마로 적용(기존 `public` 무손상) → 보안 어드바이저 점검.
-- 또는 Supabase **SQL 에디터에 직접 붙여넣기**로 셀프 적용 가능.
+## 🗄️ Supabase — 적용 완료
+기존 프로젝트 `kotkim8210's Project`(서울 리전, `jjlphqevznrifiholkic`)를 복원 →
+`karrot` 스키마에 6개 테이블 + 마진 뷰(`v_order_margin`, 당근 수수료 3.3% 반영) 적용 완료.
+- 기존 `public` 스키마 **무손상**(별도 `karrot` 스키마 사용).
+- 보안: RLS 활성 + 정책 없음 = **service_role(서버/대시보드) 전용** deny-by-default.
+  함수 `search_path` 고정. 보안 어드바이저 WARN 0건(INFO만 = 의도된 상태).
+- 테이블: `customers`(단골) · `products` · `orders` · `order_items` · `cs_cases` · `restock_reminders`
