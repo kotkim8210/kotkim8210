@@ -41,6 +41,14 @@
         "video-skills",
         "my-projects"
       ]
+    },
+    {
+      "file": "brain/inbox/2026-06-23-농산물-공급가-3종.md",
+      "ingested_at": "2026-06-23T12:00Z",
+      "topics": [
+        "nongsan-supply-prices",
+        "delivery-trade-policy"
+      ]
     }
   ]
 }

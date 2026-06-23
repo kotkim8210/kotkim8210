@@ -4,10 +4,10 @@
 > 클로드는 이 인덱스로 위치를 좁힌 뒤 관련 주제 문서 1~3개만 펼쳐 몇 초 만에 답한다.
 
 ## 📊 통계
-- 주제 문서: **10**
-- 누적 통찰(insights): **4**
+- 주제 문서: **13**
+- 누적 통찰(insights): **5**
 - 보관(archive): 0
-- 마지막 수집(ingest): 2026-06-13 (branch-inventory → video-skills·my-projects 신설)
+- 마지막 수집(ingest): 2026-06-23 (농산물-공급가-3종 → nongsan-supply-prices·delivery-trade-policy·danggeun-margin-calculator)
 - 마지막 드림 시퀀스: 2026-06-14 (드림 #2 — 구식 항목 정리·브랜치 감사)
 
 ## 📚 주제 색인 (Topic Index)
@@ -24,6 +24,11 @@
 ### 내 작업·자산 (브랜치 색인)
 - [[my-projects]] — 흩어진 브랜치별 실제 프로젝트 지도(인스타·당근·성경저널·쿠팡·홍보처크롤러). `#프로젝트 #색인 #사업`
 - [[video-skills]] — 영상·유튜브 스킬 3종(watch·youtube-shorts·osmu) 색인. `#스킬 #영상 #유튜브`
+
+### 사업 데이터 (공급가·정책·도구)
+- [[nongsan-supply-prices]] — 홍감자·제주 미니밤호박·성주참외 3종 품목·등급·중량별 공급가표(택배비 포함가). `#공급가 #농산물 #가격표`
+- [[delivery-trade-policy]] — 공급가=택배비 포함 · 거래 사실상 100% 택배(직거래 이력 0) · `[직출고]`=산지직출고(≠직거래). `#거래방식 #배송 #정책`
+- [[danggeun-margin-calculator]] — 당근 마진계산기 xlsx(7시트). 택배비 포함·100% 택배 전제로 재작성(이전 '직거래로 가라' 폐기). `#당근 #마진 #도구`
 
 ### 워크플로 3단계
 - [[data-dumping]] — (1단계/수집기) 분류 없이 무가공 투입 → 정리 시간 제로화. `#수집기 #1단계`
@@ -56,6 +61,15 @@ my-projects ──(콘텐츠 운영 도구)──► video-skills
    └ 인스타/유튜브 콘텐츠 프로젝트 ◄─ youtube-shorts·osmu 스킬이 뒷받침
 my-projects ══(흩어짐의 해소)══ session-independence
    └ 17개 브랜치로 흩어진 작업을 brain 색인 하나로 = "하나의 뇌" 목표 실현
+
+── [사업 데이터 클러스터] ──
+nongsan-supply-prices ══(모든 가격에 적용)══ delivery-trade-policy
+   └ 공급가표(데이터) ◄─ 택배비포함·택배거래100%·직출고정의(정책)
+danggeun-margin-calculator ──(전제 차용)──► delivery-trade-policy
+   └ 택배비 포함·100% 택배 전제로 마진 재계산 → 이전 "직거래로 가라" 결론 폐기(INSIGHTS 2026-06-23)
+danggeun-margin-calculator ──(공급가 prefill)──► nongsan-supply-prices
+my-projects ──(매입단가/운영전제/도구)──► nongsan-supply-prices, delivery-trade-policy, danggeun-margin-calculator
+   └ 당근스토어·쿠팡 재판매/드롭배송의 실제 매입가·배송 전제·마진도구
 ```
 
 ## ⚠️ 미해결 모순 / 확인필요
