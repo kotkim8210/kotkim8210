@@ -1,0 +1,4 @@
+# Google AdSense — ads.txt
+# 배포 후 아래 줄의 pub-XXXXXXXXXXXXXXXX 를 본인 게시자 ID 숫자(ca-pub- 의 'ca-'를 뺀 부분)로 교체하세요.
+# 예) ca-pub-1234567890123456 → 아래에는 pub-1234567890123456 으로 입력합니다.
+google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0

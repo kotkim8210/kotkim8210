@@ -1,0 +1,13 @@
+{
+  "name": "셀러픽 — 쿠팡·토스 상품 이미지 변환기",
+  "short_name": "셀러픽",
+  "description": "쿠팡·스마트스토어 대표이미지(1000×1000)와 토스 행사 배너를 무료로 JPG 변환.",
+  "lang": "ko",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#17171C",
+  "theme_color": "#17171C",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
