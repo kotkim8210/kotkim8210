@@ -5,7 +5,7 @@ tags: [프로젝트, 색인, 사업, 콘텐츠, 브랜치]
 created: 2026-06-13
 updated: 2026-06-13
 sources: [2026-06-13-branch-inventory.md]
-related: [[video-skills]], [[claude-code-skills]], [[session-independence]], [[nongsan-supply-prices]], [[delivery-trade-policy]]
+related: [[video-skills]], [[claude-code-skills]], [[session-independence]], [[nongsan-supply-prices]], [[delivery-trade-policy]], [[danggeun-margin-calculator]]
 confidence: high
 status: active
 ---
@@ -39,7 +39,8 @@ status: active
 - [[session-independence]] — 이 색인 자체가 "세션이 흩어져도 하나의 뇌에서 전체를 본다"는 원칙의 실현.
 - [[claude-code-skills]] — 프로젝트마다 `.claude/` 설정이 달라 스킬 스코프 규칙의 영향을 받음.
 - [[nongsan-supply-prices]] — 당근스토어·쿠팡 등 재판매 프로젝트의 실제 매입 단가(농산물 공급가표).
-- [[delivery-trade-policy]] — 재판매/드롭배송 운영 전제(공급가에 택배비 포함, 산지직출고, 택배거래 99%).
+- [[delivery-trade-policy]] — 재판매/드롭배송 운영 전제(공급가에 택배비 포함, 산지직출고, 사실상 100% 택배).
+- [[danggeun-margin-calculator]] — 당근 상품별 마진계산기 xlsx(마진 추적기의 실제 도구).
 
 ## 미해결/모순 (Open Questions)
 - [ ] 각 프로젝트를 독립 레포로 분리할지, 이 레포 서브폴더로 유지할지 결정.
