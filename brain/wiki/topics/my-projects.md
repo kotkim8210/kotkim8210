@@ -20,6 +20,7 @@ status: active
 | **인스타/쓰레드 콘텐츠 자동화** | `automate-infographic-reels-dwO7j` | @알쓸지잡10 트렌드 콘텐츠 JSON 60+, 번들 빌드 스크립트(Node) | 진행 |
 | **홍보처 이메일 크롤러** | `friendly-goldberg-i3mwo8` | 요양/한방병원 이메일 크롤러(검수 41건), 네이버 밴드·B2B 공급처 엑셀 | 진행 |
 | **당근스토어 상품등록 자동화** | `gallant-keller-Vlmnq` | 폼 자동채움 북마클릿(7종), 마진 추적기, 당근 수수료 3.3% | 진행 |
+| **당근 농수산물 판매 자동화** | `claude/stoic-hamilton-8xoqzp` | `/listing` 카피생성 스킬, CS 자동응답·메일 팩, Canva 디자인 브리프, Supabase 주문·단골·마진 스키마 → 상세 [[karrot-fresh-selling]] | 진행 |
 | **성경저널 POD** | `tender-wright-hf5pq1` | 등산저널→성경저널 피벗, 랜딩 7종 HTML, '엄마의 기도 노트' 디자인, GA4 | 진행 |
 | **Next.js 쿠팡파트너스 MVP** | `lean-dev-workflow-i6yeq`, `setup-claude-code-plugin-LIuOs` | Next.js 15 랜딩+A/B, 쿠팡파트너스 수익 페이지 | 진행 |
 
