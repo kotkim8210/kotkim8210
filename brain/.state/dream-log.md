@@ -5,6 +5,22 @@
 
 ---
 
+## 2026-06-14 — 빌드: 2단계 LLM 내용 컷 구현 (미개척 레버 해소)
+- 동기: 직전 통찰 "영상 자동화의 미개척지는 무음이 아니라 '의미' 컷" → 바로 구현.
+- 구현: `video-editor/edit_videos.py` 에 문장 단위 전사(transcribe_segments) + `--llm-cut`(Claude API, 기본 opus-4-8) / `--cut-segments`(수동) + apply_content_cut(여집합 컷 + 타임코드 보정).
+- 함정 해소: 초기 구현이 문장 사이 비발화 구간(데모 등)까지 날림 → '전체-잘라낼구간' 여집합만 제거하도록 수정.
+- 검증: 옥수수영상 합본 210.9s→186.3s, 군말·깨짐·반복 문장 6개만 제거, 남은 자막 타임코드 정확히 당겨짐(72.2s→68.4s).
+- 색인: [[video-editing-automation]] 미해결 항목 ✅구현으로, MAP 미해결 목록·`/video-edit` escalation 갱신.
+
+## 2026-06-14 — 수집(ingest) #3 + 스킬 습득 (영상 자동화 외부글 검토)
+- 입력: 외부 글(min-inter 영상편집 자동화) 1건을 inbox에 캡처 → 냉정 리뷰 후 주제 신설.
+- 신설: [[video-editing-automation]] (5단계 골격 + 내 `video-editor/` 양방향 비교).
+- 습득(코드): `video-editor/edit_videos.py`에 `--initial-prompt`(도메인 어휘 힌트) 추가 — 한국어 전사 깨짐·환청 직격. `--model`에 large-v3-turbo 권장 명시.
+- 습득(스킬): `.claude/commands/video-edit.md`(`/video-edit`) 신설 — 5단계 플레이북 + escalation(WhisperX·Remotion·LLM 내용컷).
+- 통찰: **2건 신규** — ① 미개척지는 '무음'이 아니라 '의미' 컷(2단계 LLM) ② 서베이형 자료는 실전함정(loudnorm) 체계적 누락[확인필요].
+- 재색인: MAP 통계(주제 11·통찰 6)·수집시각·색인('영상 자동화' 그룹)·연결그래프(loudnorm 간선)·미해결(LLM 내용컷) 갱신. processed.json append.
+- 근거: 외부 글이 기존 [[video-skills]]·[[my-projects]]와 만나며 '실구현이 외부 서베이를 어디서 앞서고 뒤지는가'가 드러남.
+
 ## 2026-06-14 — 드림 시퀀스 #2 (정리 감사)
 - 조감: 주제 10개 전수 + 17개 브랜치 감사.
 - 무결성: 끊긴 위키링크 0, 고아 문서 0, 미처리 inbox 0, MAP 주제수=실제(10) 일치 → 지식 계층 건강.

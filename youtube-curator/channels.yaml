@@ -1,0 +1,10 @@
+# 분석할 채널 목록 — 내 채널 + 경쟁 채널을 넣으면 랭킹·예측에 잡힙니다.
+# url: 채널 주소(@핸들 또는 /channel/UC...).  category: 묶음용.  name: 표시 이름.
+channels:
+  - { name: FIFA, url: "https://www.youtube.com/@FIFA", category: 축구 월드컵 }
+  - { name: "433", url: "https://www.youtube.com/@433", category: 축구 월드컵 }
+  - { name: ESPN FC, url: "https://www.youtube.com/@ESPNFC", category: 축구 월드컵 }
+
+  # 👉 내 채널 / 경쟁 채널을 여기에 추가하세요:
+  # - { name: 내채널, url: "https://www.youtube.com/@my_handle", category: 축구 월드컵 }
+  # - { name: 쇼핑경쟁사, url: "https://www.youtube.com/@some_shop", category: 쇼핑 숏츠 }

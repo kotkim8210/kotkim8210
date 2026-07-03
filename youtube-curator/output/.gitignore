@@ -1,0 +1,8 @@
+# 생성 미디어는 추적 안 함
+*.mp4
+*.srt
+*.txt
+*.json
+curate_*/
+!.gitkeep
+*.jsonl

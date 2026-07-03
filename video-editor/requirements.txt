@@ -1,0 +1,7 @@
+# 한국어 음성 인식(자막 생성). torch 없이 동작하는 가벼운 구현.
+faster-whisper>=1.0.0
+
+# CapCut draft 내보내기(export_capcut.py) — 국제판 CapCut 용 pyJianYingDraft 포크.
+# ⚠️ draft 포맷은 비공식 리버스엔지니어링 산물이라 CapCut 업데이트로 깨질 수 있음.
+#    pre-1.0 라이브러리이므로 반드시 버전 고정(==). 올리기 전 smoke_capcut.py 실행.
+pycapcut==0.0.3

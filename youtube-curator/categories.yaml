@@ -1,0 +1,35 @@
+# 큐레이터 카테고리 — 검색어·길이·자막 언어 등. 여기만 고치면 카테고리가 늘어납니다.
+# query: YouTube 검색어(CC 필터는 자동 적용). lang: 원본/자막 언어. hint: 전사 정확도용 도메인어휘.
+# short_len: 만들 숏츠 길이(초). caption: 숏츠 설명란 머리말. min_dur/max_dur: 원본 롱폼 길이 조건.
+
+categories:
+  - name: 축구 월드컵
+    slug: worldcup
+    query: world cup 2026 highlights
+    lang: en            # 영어 CC 영상이 풍부 → 한국어로 자동 번역
+    translate: true     # 분위기 맞춤 한국어 자막(ANTHROPIC_API_KEY 필요)
+    short_len: 50
+    min_dur: 90
+    max_dur: 1800
+    caption: "⚽ 월드컵 하이라이트 #월드컵 #축구 #shorts"
+
+  - name: 쇼핑 숏츠
+    slug: shopping
+    query: 쿠팡 추천 리뷰 꿀템
+    lang: ko
+    hint: 쿠팡,리뷰,추천,꿀템,가성비,할인,언박싱
+    short_len: 40
+    min_dur: 90
+    max_dur: 1200
+    caption: "🛒 오늘의 꿀템 #쇼핑 #리뷰 #shorts"
+
+  # 새 카테고리 추가 예시(주석 해제):
+  # - name: 먹방
+  #   slug: mukbang
+  #   query: 먹방 asmr
+  #   lang: ko
+  #   hint: 먹방,리뷰,맛집,asmr
+  #   short_len: 45
+  #   min_dur: 120
+  #   max_dur: 1800
+  #   caption: "🍜 #먹방 #shorts"

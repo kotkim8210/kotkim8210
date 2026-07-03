@@ -41,6 +41,13 @@
         "video-skills",
         "my-projects"
       ]
+    },
+    {
+      "file": "brain/inbox/2026-06-14-video-automation-article-review.md",
+      "ingested_at": "2026-06-14T15:30Z",
+      "topics": [
+        "video-editing-automation"
+      ]
     }
   ]
 }

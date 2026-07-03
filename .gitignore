@@ -1,1 +1,11 @@
 .claude/settings.local.json
+
+# 영상 자동 편집기: 입출력 미디어는 버전관리하지 않음 (폴더 구조만 유지)
+input/*
+!input/.gitkeep
+output/*
+!output/.gitkeep
+
+# 파이썬 캐시
+__pycache__/
+*.pyc

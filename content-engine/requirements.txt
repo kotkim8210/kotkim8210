@@ -1,0 +1,11 @@
+# content-engine (증폭기) 의존성 — 로컬·무과금 지향
+edge-tts>=7.2.0        # 한국어 내레이션(프로토타입/개인용). ⚠️ 상업용은 MeloTTS 권장(아래 주석).
+Pillow>=10.0.0         # 캐러셀 슬라이드·썸네일 렌더
+faster-whisper>=1.0.0  # URL 소스 전사(자막) — video-editor 와 공용
+
+# 영상 컷/렌더는 ffmpeg(시스템) + video-editor/ 재사용. yt-dlp 다운로드는 youtube-curator 의존성 사용.
+#
+# ⚠️ 상업/판매 산출물용 TTS(라이선스 안전) — 필요 시 설치:
+#   pip install melotts            # MIT, 한국어 정식, CPU 실시간 → 상업 1순위
+#   (영어 보강) Kokoro-82M          # Apache-2.0
+# edge-tts(온라인·MS 약관)·XTTS·F5 는 상업 사용 제한 → 프로토타입에만.

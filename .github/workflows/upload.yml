@@ -1,0 +1,61 @@
+name: 검수 후 반자동 업로드 (YouTube)
+
+# ⚠️ 일부러 '수동(workflow_dispatch)'만 — 크론 없음. 검수 후 사람이 콕 집어 올린다.
+#    공개범위 기본 unlisted, 'public' 은 confirm=true 일 때만(잘못된 자동 공개 방지).
+# 필요한 secrets:
+#   YT_OAUTH_TOKEN        : 로컬에서 upload.py 로 1회 인증해 만든 youtube_token.json 내용
+#                           (refresh_token 포함 — 데스크톱 OAuth 클라이언트로 생성)
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "올릴 숏츠(파일명 또는 --list 인덱스). 비우면 검수 목록만 출력"
+        required: false
+        default: ""
+      privacy:
+        description: "공개범위"
+        required: true
+        default: "unlisted"
+        type: choice
+        options: ["private", "unlisted", "public"]
+      confirm:
+        description: "공개/비-CC 공개 업로드 의도 확인(public 필수)"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - name: 파이썬 패키지
+        run: pip install -r youtube-curator/requirements.txt
+
+      - name: 업로드 산출물 복원
+        # 큐레이션/쇼츠→쇼츠 워크플로 아티팩트를 받아 output/ 에 풀어둔다.
+        uses: actions/download-artifact@v4
+        with:
+          path: youtube-curator/output
+          merge-multiple: true
+        continue-on-error: true
+
+      - name: OAuth 토큰 주입(secret)
+        if: ${{ secrets.YT_OAUTH_TOKEN != '' }}
+        run: printf '%s' '${{ secrets.YT_OAUTH_TOKEN }}' > youtube-curator/output/youtube_token.json
+
+      - name: 검수 목록 / 업로드
+        env:
+          YT_OAUTH_TOKEN_FILE: youtube-curator/output/youtube_token.json
+        run: |
+          python youtube-curator/upload.py \
+            --no-browser \
+            ${{ github.event.inputs.target != '' && format('--upload "{0}"', github.event.inputs.target) || '--list' }} \
+            ${{ github.event.inputs.target != '' && format('--privacy {0}', github.event.inputs.privacy) || '' }} \
+            ${{ github.event.inputs.confirm == 'true' && '--confirm' || '' }}

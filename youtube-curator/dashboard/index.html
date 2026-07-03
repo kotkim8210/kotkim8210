@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🎯 YouTube 큐레이터 · 채널 분석</title>
+<style>
+  :root{--bg:#0f1216;--card:#171c23;--line:#262d36;--txt:#e8edf2;--mut:#8a95a3;
+        --acc:#ff8c42;--cc:#4ade80;--blue:#5b9dff;--up:#4ade80}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',system-ui,sans-serif}
+  header{padding:26px 24px 6px;max-width:1180px;margin:0 auto}
+  h1{margin:0;font-size:23px;letter-spacing:-.5px}
+  .sub{color:var(--mut);font-size:13px;margin-top:6px}
+  .tabs{display:flex;gap:8px;max-width:1180px;margin:14px auto 0;padding:0 24px}
+  .tab{background:var(--card);border:1px solid var(--line);color:var(--txt);padding:9px 18px;
+       border-radius:11px 11px 0 0;cursor:pointer;font-size:14px;font-weight:600}
+  .tab.on{background:var(--acc);border-color:var(--acc);color:#1a1205}
+  .wrap{max-width:1180px;margin:0 auto;padding:14px 24px 60px}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:8px 0 18px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px 18px}
+  .stat .n{font-size:24px;font-weight:700}
+  .stat .l{color:var(--mut);font-size:12px;margin-top:4px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}
+  .chip{background:var(--card);border:1px solid var(--line);color:var(--txt);padding:7px 14px;border-radius:999px;font-size:13px;cursor:pointer}
+  .chip.on{background:var(--acc);border-color:var(--acc);color:#1a1205;font-weight:700}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}
+  .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .badge{font-size:11px;padding:3px 9px;border-radius:999px;background:#232a33;color:var(--blue);white-space:nowrap}
+  .cc{background:rgba(74,222,128,.12);color:var(--cc);border:1px solid rgba(74,222,128,.3)}
+  .title{font-size:15px;font-weight:600;line-height:1.35}
+  .meta{color:var(--mut);font-size:12.5px;display:flex;gap:10px;flex-wrap:wrap}
+  .score{font-size:22px;font-weight:800;color:var(--acc);line-height:1}
+  .score small{font-size:11px;color:var(--mut);font-weight:500}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{padding:11px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{color:var(--mut);font-weight:600;font-size:12px;text-align:right}
+  th:nth-child(2),td:nth-child(2){text-align:left}
+  td.ch{font-weight:600}td .cat{color:var(--mut);font-size:11px}
+  .rk{display:inline-block;width:26px;height:26px;line-height:26px;text-align:center;border-radius:8px;background:#232a33;font-weight:700;font-size:12px}
+  .rk.g1{background:#ffcf4d;color:#241a00}.rk.g2{background:#cfd6df;color:#1a1f26}.rk.g3{background:#e0a06a;color:#241400}
+  .up{color:var(--up);font-weight:600}.pred{color:var(--acc)}
+  .empty{background:var(--card);border:1px dashed var(--line);border-radius:16px;padding:40px;text-align:center;color:var(--mut)}
+  code{background:#232a33;padding:2px 6px;border-radius:6px;color:#cdd6e0}
+  footer{max-width:1180px;margin:0 auto;padding:0 24px 40px;color:var(--mut);font-size:12px}
+  .hide{display:none}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎯 YouTube 큐레이터 · 채널 분석</h1>
+  <div class="sub">카테고리별 <b>CC 떡상</b> 발굴·숏츠 편집 + <b>채널 랭킹·성장 예측</b> · <span id="updated">—</span></div>
+</header>
+<div class="tabs">
+  <div class="tab on" data-v="shorts">📹 만든 숏츠</div>
+  <div class="tab" data-v="channels">📊 채널 분석</div>
+</div>
+<div class="wrap">
+  <div id="view-shorts"></div>
+  <div id="view-channels" class="hide"></div>
+</div>
+<footer>⚖️ 편집·재유통은 <b>CC</b> 영상으로 한정 · 채널 '분석'은 공개 데이터 기반 · 예측은 누적 스냅샷이 쌓일수록 정확해집니다.</footer>
+
+<script>
+const fmt = n => (n==null?'—':n.toLocaleString('ko-KR'));
+async function loadJSON(paths){
+  for(const p of paths){ try{const r=await fetch(p,{cache:'no-store'}); if(r.ok){const j=await r.json(); if(Array.isArray(j))return j;}}catch(e){} }
+  return null;
+}
+const stat=(n,l)=>`<div class="stat"><div class="n">${n}</div><div class="l">${l}</div></div>`;
+
+/* ---- 숏츠 뷰 ---- */
+function shortCard(m){const s=m.source||{};return `<div class="card">
+  <div class="top"><span class="badge">${m.category||''}</span><span class="badge cc">CC BY</span></div>
+  <div class="title">${s.title||m.short||''}</div>
+  <div class="row"><div class="score">${fmt(s.viral_score)}<small> 떡상/일</small></div>
+    <div class="meta" style="text-align:right">${fmt(s.views)} views<br>${s.channel||''}</div></div>
+  <div class="meta">⏱ ${(m.highlight||[]).join('–')}s · ${(m.created||'').slice(0,10)}</div>
+  <div class="row"><span class="meta">🎬 ${m.short||''}</span><a href="${s.url||'#'}" target="_blank" rel="noopener">원본 ↗</a></div>
+</div>`;}
+async function renderShorts(){
+  const el=document.getElementById('view-shorts');
+  const data=await loadJSON(['manifest.json','../output/manifest.json','manifest.sample.json']);
+  if(!data||!data.length){el.innerHTML=`<div class="empty">아직 만든 숏츠가 없어요.<br><br><code>python youtube-curator/curate.py --only worldcup</code> 또는 Actions 워크플로 실행 후 채워집니다.</div>`;return;}
+  const cats=[...new Set(data.map(d=>d.category))];
+  const avg=Math.round(data.reduce((a,d)=>a+(d.source?.viral_score||0),0)/data.length);
+  const views=data.reduce((a,d)=>a+(d.source?.views||0),0);
+  let active='all';
+  const draw=()=>{ el.innerHTML=
+    `<div class="stats">${stat(fmt(data.length),'만든 숏츠')+stat(cats.length,'카테고리')+stat(fmt(avg),'평균 떡상/일')+stat(fmt(views),'원본 누적 조회수')}</div>`
+    +`<div class="chips" id="sc"></div><div class="grid">`
+    + data.filter(d=>active==='all'||d.category===active).map(shortCard).join('')+`</div>`;
+    const sc=el.querySelector('#sc');
+    [['전체','all'],...cats.map(c=>[c,c])].forEach(([l,v])=>{const c=document.createElement('div');
+      c.className='chip'+(v===active?' on':'');c.textContent=l;c.onclick=()=>{active=v;draw();};sc.appendChild(c);});
+  };
+  draw();
+  document.getElementById('updated').textContent='최근 업데이트 '+(data[0]?.created||'').replace('T',' ').slice(0,16);
+}
+
+/* ---- 채널 분석 뷰 ---- */
+async function renderChannels(){
+  const el=document.getElementById('view-channels');
+  const ch=await loadJSON(['channels.json','../output/channels.json','channels.sample.json']);
+  if(!ch||!ch.length){el.innerHTML=`<div class="empty">채널 데이터가 아직 없어요.<br><br><code>python youtube-curator/channels.py --collect</code> 를 매일 돌리면(크론) 랭킹·예측이 쌓입니다.</div>`;return;}
+  const totalSubs=ch.reduce((a,r)=>a+(r.subs||0),0);
+  const predictable=ch.filter(r=>r.status==='예측 가능').length;
+  const fastest=[...ch].filter(r=>r.daily_growth).sort((a,b)=>b.daily_growth-a.daily_growth)[0];
+  el.innerHTML=`<div class="stats">${
+     stat(fmt(ch.length),'추적 채널')+stat(fmt(totalSubs),'합산 구독자')
+     +stat(predictable+' / '+ch.length,'예측 가능(2일+)')
+     +stat(fastest?('+'+fmt(fastest.daily_growth)+'/일'):'—','최고 성장: '+(fastest?fastest.name:'—'))}</div>
+    <table><thead><tr>
+      <th style="text-align:center">#</th><th>채널</th><th>구독자</th><th>일 성장</th><th>성장률</th>
+      <th>7일 예측</th><th>30일 예측</th><th>최근영상 주간예상</th></tr></thead><tbody>${
+      ch.map(r=>`<tr>
+        <td style="text-align:center"><span class="rk g${r.rank<=3?r.rank:''}">${r.rank}</span></td>
+        <td class="ch"><a href="${r.url}" target="_blank" rel="noopener">${r.name}</a><div class="cat">${r.category||''}</div></td>
+        <td>${fmt(r.subs)}</td>
+        <td class="${r.daily_growth>0?'up':''}">${r.daily_growth?('+'+fmt(r.daily_growth)):'<span style="color:var(--mut)">'+r.status+'</span>'}</td>
+        <td class="${r.growth_pct?'up':''}">${r.growth_pct!=null?r.growth_pct+'%':'—'}</td>
+        <td class="pred">${fmt(r.pred_subs_7d)}</td>
+        <td class="pred">${fmt(r.pred_subs_30d)}</td>
+        <td>${fmt(r.video_pred_7d)}</td></tr>`).join('')}</tbody></table>`;
+}
+
+/* ---- 탭 ---- */
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');
+  const v=t.dataset.v;
+  document.getElementById('view-shorts').classList.toggle('hide',v!=='shorts');
+  document.getElementById('view-channels').classList.toggle('hide',v!=='channels');
+});
+renderShorts(); renderChannels();
+</script>
+</body>
+</html>

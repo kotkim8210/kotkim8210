@@ -1,0 +1,81 @@
+name: YouTube 큐레이터 (CC 떡상 → 숏츠)
+
+# '안 봐도 알아서' — 매일 자동 실행. 수동 실행도 가능.
+on:
+  schedule:
+    - cron: "50 10 * * *"   # 매일 19:50 KST (UTC 10:50)
+  workflow_dispatch:
+    inputs:
+      only:
+        description: "특정 카테고리 slug만 (예: worldcup)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  curate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 준비물 설치 (ffmpeg + 한글폰트)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-nanum
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # YouTube 'n 챌린지' JS 해독에 필요(node20 은 yt-dlp 가 unsupported 로 거부).
+      # 이게 없으면 다운로드가 "Only images are available" 로 통째로 실패한다.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: 파이썬 패키지
+        run: pip install -r youtube-curator/requirements.txt
+
+      - name: (선택) YouTube 쿠키 주입 — 봇 벽 100% 우회
+        if: ${{ secrets.YT_COOKIES != '' }}
+        run: printf '%s' "${{ secrets.YT_COOKIES }}" > /tmp/yt_cookies.txt
+
+      - name: 큐레이션 실행
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}   # 있으면 LLM 하이라이트 선택
+          YT_COOKIES_FILE: ${{ secrets.YT_COOKIES != '' && '/tmp/yt_cookies.txt' || '' }}
+        run: |
+          python youtube-curator/curate.py --per-category 1 \
+            ${{ github.event.inputs.only != '' && format('--only {0}', github.event.inputs.only) || '' }}
+
+      - name: 채널 스냅샷 수집 + 랭킹·예측 갱신 (수동+자동 채널)
+        if: always()
+        env:
+          YT_COOKIES_FILE: ${{ secrets.YT_COOKIES != '' && '/tmp/yt_cookies.txt' || '' }}
+        run: python youtube-curator/channels.py --collect --cookies "${YT_COOKIES_FILE}" || true
+
+      - name: 대시보드에 최신 데이터 반영 (매니페스트 + 채널)
+        if: always()
+        run: |
+          cp -f youtube-curator/output/manifest.json youtube-curator/dashboard/manifest.json 2>/dev/null || true
+          cp -f youtube-curator/output/channels.json youtube-curator/dashboard/channels.json 2>/dev/null || true
+
+      - name: 결과(숏츠 + 대시보드) 업로드 — 아티팩트 받아서 dashboard/index.html 열면 됨
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: curator-${{ github.run_id }}
+          path: |
+            youtube-curator/output/*.mp4
+            youtube-curator/output/*.srt
+            youtube-curator/output/*.txt
+            youtube-curator/output/manifest.json
+            youtube-curator/output/channels.json
+            youtube-curator/output/channels_history.jsonl
+            youtube-curator/output/auto_channels.json
+            youtube-curator/dashboard/index.html
+            youtube-curator/dashboard/manifest.json
+            youtube-curator/dashboard/channels.json
+          if-no-files-found: warn
+          retention-days: 14

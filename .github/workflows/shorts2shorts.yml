@@ -1,0 +1,66 @@
+name: 쇼츠→쇼츠 (틱톡/샤오홍수 → 한국 쇼츠)
+
+# 스피드가 생명 → 떡상 링크를 받으면 '즉시' 처리(workflow_dispatch). 워치리스트는 잦은 크론으로 자동.
+on:
+  workflow_dispatch:
+    inputs:
+      urls:
+        description: "떡상 링크(쉼표구분) — 즉시 처리"
+        required: false
+        default: ""
+      only:
+        description: "카테고리 slug(공식 적용). urls 줄 때 권장 (예: mukbang)"
+        required: false
+        default: ""
+  schedule:
+    - cron: "0 */6 * * *"   # 6시간마다 워치리스트 최신 수집
+
+permissions:
+  contents: read
+
+jobs:
+  s2s:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: 준비물(ffmpeg + 한글폰트)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-nanum
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      # YouTube 'n 챌린지' JS 해독용(node20=unsupported → node22 필요). 없으면 다운로드 실패.
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - name: 파이썬 패키지
+        run: pip install -r youtube-curator/requirements.txt
+
+      - name: 쿠키 주입(틱톡/샤오홍수 봇벽 우회)
+        if: ${{ secrets.TIKTOK_COOKIES != '' || secrets.YT_COOKIES != '' }}
+        run: printf '%s' "${{ secrets.TIKTOK_COOKIES != '' && secrets.TIKTOK_COOKIES || secrets.YT_COOKIES }}" > /tmp/cookies.txt
+
+      - name: 쇼츠→쇼츠 실행
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}   # 카테고리 공식 LLM 편집·번역
+          TIKTOK_COOKIES_FILE: ${{ (secrets.TIKTOK_COOKIES != '' || secrets.YT_COOKIES != '') && '/tmp/cookies.txt' || '' }}
+        run: |
+          python youtube-curator/shorts2shorts.py \
+            ${{ github.event.inputs.urls != '' && format('--urls "{0}"', github.event.inputs.urls) || '' }} \
+            ${{ github.event.inputs.only != '' && format('--only {0}', github.event.inputs.only) || '' }}
+
+      - name: 대시보드 매니페스트 반영
+        if: always()
+        run: cp -f youtube-curator/output/manifest.json youtube-curator/dashboard/manifest.json 2>/dev/null || true
+
+      - name: 결과 업로드
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shorts2shorts-${{ github.run_id }}
+          path: |
+            youtube-curator/output/*.mp4
+            youtube-curator/output/*.txt
+            youtube-curator/output/manifest.json
+            youtube-curator/dashboard/index.html
+            youtube-curator/dashboard/manifest.json
+          if-no-files-found: warn
+          retention-days: 14
