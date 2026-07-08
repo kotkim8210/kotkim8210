@@ -31,7 +31,7 @@ def ensure(k,brand):
     if k not in master:
         master[k]={"brand":brand,"model":"","cap":"","danawaBuy":None,"danawaUrl":"","coupangUrl":"",
                    "coupangPrice":None,"domesticSeller":"","sourcingNote":"","danawaSellers":"",
-                   "reviews":"","winnerShip":"","sellerCountNew":"","signal":"","risk":"","src":set()}
+                   "reviews":"","winnerShip":"","sellerCountNew":"","signal":"","risk":"","src":set(),"priceSrc":""}
     return master[k]
 
 for m in MINE:
@@ -85,7 +85,7 @@ for m in UP["cand"]:
     r=ensure(k,m.get("brand",""))
     if not r["model"]: r["model"]=disp
     r["cap"]=r["cap"] or m.get("cap","")
-    if num(m.get("coupangPrice")): r["coupangPrice"]=num(m.get("coupangPrice"))
+    if num(m.get("coupangPrice")): r["coupangPrice"]=num(m.get("coupangPrice")); r["priceSrc"]="실측(업로드)"
     if m.get("reviews") not in (None,""): r["reviews"]=m.get("reviews")
     if m.get("winnerShip"): r["winnerShip"]=m.get("winnerShip")
     if m.get("coupangUrl"): r["coupangUrl"]=m.get("coupangUrl")
@@ -107,12 +107,30 @@ for r in rows:
     if not r["coupangUrl"] and r["model"] and r["model"]!="(모델미노출)":
         r["coupangUrl"]=f"https://www.coupang.com/np/search?q={r['model']}"
 
+# === 쿠팡 웹검색 결과 오버레이 (URL / 참고가 / 로켓) ===
+try: CP=json.load(open(f"{HERE}/cp_lookup.json",encoding="utf-8"))
+except Exception: CP={}
+for r in rows:
+    c=CP.get(norm(r["model"]))
+    if not c: continue
+    if c.get("coupangUrl") and ((not r["coupangUrl"]) or "np/search" in r["coupangUrl"] or "search.danawa" in r["coupangUrl"]):
+        r["coupangUrl"]=c["coupangUrl"]
+    if (r["coupangPrice"] in (None,"")) and c.get("coupangPrice"):
+        r["coupangPrice"]=num(c["coupangPrice"]); r["priceSrc"]="웹검색근사(캐시)"
+    notes=[]
+    if c.get("rocket") is True: notes.append("🚀로켓추정→제외검토")
+    # 웹검색 근사가가 매입가보다 과도하게 높으면 정가/사전예약/오모델 의심 (역마진이 정상인데 +로 보이면 함정)
+    if r.get("priceSrc","").startswith("웹검색") and r["coupangPrice"] and r["danawaBuy"] and r["coupangPrice"]>r["danawaBuy"]*1.25:
+        notes.append("⚠쿠팡가 과다의심(정가/사전예약/오모델 가능)→마진 신뢰불가")
+    if c.get("priceNote"): notes.append("쿠팡:"+str(c["priceNote"])[:44])
+    if notes: r["risk"]=((r.get("risk","") or "")+" | "+" / ".join(notes)).strip(" |")[:150]
+
 def est(r):
     if r["coupangPrice"] and r["danawaBuy"]:
         return r["coupangPrice"]-r["danawaBuy"]-r["coupangPrice"]*FEE
     return None
 def sk(r):
-    exc=("로켓" in str(r["winnerShip"])) or ("품절" in str(r["risk"])) or ("제외" in str(r["risk"]))
+    exc=("로켓" in str(r["winnerShip"])) or ("로켓" in str(r.get("risk",""))) or ("품절" in str(r["risk"])) or ("제외" in str(r["risk"]))
     e=est(r); has=r["coupangPrice"] is not None
     return (0 if (has and not exc) else (1 if has else 2), -(e if e is not None else -9e9), r["danawaBuy"] or 9e9)
 rows.sort(key=sk)
@@ -146,7 +164,7 @@ b=ws.cell(1,1,"통합 소싱·마진 시트 — 내 다나와 84종 + 업로드 
 b.font=Font(bold=True,color="FFFFFF",size=11,name="맑은 고딕"); b.fill=PatternFill("solid",fgColor=NAVY); b.alignment=lft
 ws.row_dimensions[1].height=24
 ws.merge_cells(start_row=2,start_column=1,end_row=2,end_column=NC)
-b2=ws.cell(2,1,"예상마진 = 쿠팡판매가 − 다나와매입가 − 쿠팡판매가×11.88% − 택배비 | 파란셀 쿠팡가=업로드 실측값, 빈칸은 쿠팡 로그인으로 확인 입력 | 손익분기쿠팡가=매입가/0.8812")
+b2=ws.cell(2,1,"예상마진 = 쿠팡판매가 − 다나와매입가 − 쿠팡판매가×11.88% − 택배비 | 쿠팡가 출처는 '위험/판정'열 [쿠팡가:실측] vs [웹검색근사]. 웹검색근사는 캐시·로켓혼재라 등록 전 로그인으로 정확가·윙여부 확인 필수 | 손익분기쿠팡가=매입가/0.8812")
 b2.font=Font(italic=True,size=9,color="404040",name="맑은 고딕"); b2.alignment=lft
 ws.row_dimensions[2].height=15
 for j,(nm,w,gp) in enumerate(COLS,1):
@@ -172,7 +190,10 @@ for i,r in enumerate(rows):
     ws.cell(rr,13,r["domesticSeller"]); ws.cell(rr,14,r["sourcingNote"]); ws.cell(rr,15,r["cap"])
     ws.cell(rr,16,r["danawaSellers"]); ws.cell(rr,17,r["reviews"]); ws.cell(rr,18,r["winnerShip"])
     ws.cell(rr,19,r["sellerCountNew"]); ws.cell(rr,20," + ".join(sorted(r["src"])))
-    ws.cell(rr,21,r["signal"]); ws.cell(rr,22,r["risk"])
+    risk_txt=r["risk"] or ""
+    if r["coupangPrice"] and r.get("priceSrc"):
+        risk_txt=(f"[쿠팡가:{r['priceSrc']}] "+risk_txt).strip()
+    ws.cell(rr,21,r["signal"]); ws.cell(rr,22,risk_txt)
     for j in range(1,NC+1):
         c=ws.cell(rr,j); c.border=bd
         if j not in (5,6): c.font=cf
