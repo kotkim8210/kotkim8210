@@ -1,0 +1,729 @@
+{
+ "T8": {
+  "brand": "홈플래닛",
+  "model": "T8",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "T8 제습기 미확인(DXH-T8은 서큘레이터). 미니제습기 0.7L 폴센트 32,990 존재하나 동일 불명"
+ },
+ "HD-1500": {
+  "brand": "한경희이지라이프",
+  "model": "HD-1500",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 미확인; 공식몰/SSG 78,880, 오늘의집 59,900"
+ },
+ "SDH-WIN326KP": {
+  "brand": "신일",
+  "model": "SDH-WIN326KP",
+  "coupangUrl": "https://www.coupang.com/vp/products/8694034530",
+  "coupangPrice": 79800,
+  "rocket": true,
+  "priceNote": "로켓배송 확인 80,100원 → 윙경쟁 불가"
+ },
+ "VO-DH004": {
+  "brand": "보아르",
+  "model": "VO-DH004",
+  "coupangUrl": "",
+  "coupangPrice": 91900,
+  "rocket": true,
+  "priceNote": "쿠팡 91,900(5%↓) 로켓 내일도착; vp ID 미확인"
+ },
+ "VO-DH002": {
+  "brand": "보아르",
+  "model": "VO-DH002",
+  "coupangUrl": "https://www.coupang.com/vp/products/8230291250",
+  "coupangPrice": 93000,
+  "rocket": true,
+  "priceNote": "쿠팡 쿠폰가 93,000(10%↓) 내일도착"
+ },
+ "NEK-DH0612L": {
+  "brand": "홈플래닛",
+  "model": "NEK-DH0612L",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 미확인"
+ },
+ "DH-V06201EB": {
+  "brand": "쿠쿠",
+  "model": "DH-V06201EB",
+  "coupangUrl": "",
+  "coupangPrice": 122200,
+  "rocket": true,
+  "priceNote": "쿠팡 122,200 로켓 내일도착; 5.5L"
+ },
+ "HE-D781": {
+  "brand": "한경희생활과학",
+  "model": "HE-D781",
+  "coupangUrl": "https://www.coupang.com/vp/products/8730871060",
+  "coupangPrice": 159000,
+  "rocket": null,
+  "priceNote": "쿠팡 159,000(폴센트 최저 150,000); 12L"
+ },
+ "HE-D780": {
+  "brand": "한경희생활과학",
+  "model": "HE-D780",
+  "coupangUrl": "",
+  "coupangPrice": 151340,
+  "rocket": null,
+  "priceNote": "쿠팡 151,340(2%↓) 12L 저소음; vp ID 미확인"
+ },
+ "HEHD-B0712WTN": {
+  "brand": "한경희생활과학",
+  "model": "HEHD-B0712WTN",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "[확인필요] WTN 정확매칭 불명; WT형 198,000 로켓 언급, 가격 노이즈 큼"
+ },
+ "VO-DE001": {
+  "brand": "보아르",
+  "model": "VO-DE001",
+  "coupangUrl": "",
+  "coupangPrice": 159000,
+  "rocket": true,
+  "priceNote": "쿠팡 159,000 내일도착 로켓; 6~7L, vp ID 미확인"
+ },
+ "JR-DH2001": {
+  "brand": "제니퍼룸",
+  "model": "JR-DH2001",
+  "coupangUrl": "",
+  "coupangPrice": 155730,
+  "rocket": true,
+  "priceNote": "쿠팡 155,730~199,000 로켓배송관; 마카롱 12L"
+ },
+ "SDH-C06SS": {
+  "brand": "신일",
+  "model": "SDH-C06SS",
+  "coupangUrl": "https://www.coupang.com/vp/products/7262554363",
+  "coupangPrice": 188700,
+  "rocket": null,
+  "priceNote": "쿠팡 188,700(12%↓); 상품ID는 추정(검증 필요)"
+ },
+ "PDH-12251W": {
+  "brand": "파세코",
+  "model": "PDH-12251W",
+  "coupangUrl": "",
+  "coupangPrice": 154230,
+  "rocket": true,
+  "priceNote": "쿠팡 쿠폰가 154,230(3%↓) 내일도착 로켓; 미니 12L"
+ },
+ "JRG-DH0801": {
+  "brand": "제니퍼룸",
+  "model": "JRG-DH0801",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 가격 불명확(49,000 스니펫 오인 의심); 공식 13L 249,000"
+ },
+ "NQ12SACNWA": {
+  "brand": "NWT",
+  "model": "NQ12SACNWA",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "다나와 최저 158,000; 쿠팡 직접 미확인"
+ },
+ "PDH-12241W": {
+  "brand": "파세코",
+  "model": "PDH-12241W",
+  "coupangUrl": "",
+  "coupangPrice": 158590,
+  "rocket": true,
+  "priceNote": "다나와 스니펫상 쿠팡 와우할인가 158,590원(와우=로켓와우); 상품ID 미확인"
+ },
+ "PD08A": {
+  "brand": "홈플래닛",
+  "model": "PD08A",
+  "coupangUrl": "",
+  "coupangPrice": 159240,
+  "rocket": true,
+  "priceNote": "쿠팡 로켓배송 159,240원(정가239,000 -33%); 상품ID 미확인"
+ },
+ "HEDH-B1890": {
+  "brand": "한경희생활과학",
+  "model": "HEDH-B1890",
+  "coupangUrl": "",
+  "coupangPrice": 209000,
+  "rocket": null,
+  "priceNote": "쿠팡 209,000원(259,000 -19%), 모레 도착 표기라 로켓 여부 불명확; 상품ID 미확인"
+ },
+ "YCDHM-C016LROW": {
+  "brand": "캐리어",
+  "model": "YCDHM-C016LROW",
+  "coupangUrl": "https://www.coupang.com/vp/products/8180679139",
+  "coupangPrice": 209000,
+  "rocket": null,
+  "priceNote": "fallcent product_id로 URL 구성. 쿠팡 스니펫 249,000, fallcent 최저 209,000(최저값 채택); 로켓 불명확"
+ },
+ "YCDHM-C016LRAW": {
+  "brand": "캐리어",
+  "model": "YCDHM-C016LRAW",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 판매가/상품ID 미확인. 타처 SSG 194,750·11번가 204,630 참고만"
+ },
+ "HEHD-B0712WT": {
+  "brand": "한경희생활과학",
+  "model": "HEHD-B0712WT",
+  "coupangUrl": "",
+  "coupangPrice": 198000,
+  "rocket": true,
+  "priceNote": "쿠팡 로켓배송 약198,000~199,720원(11%할인, 최저값 채택); 상품ID 미확인"
+ },
+ "PDH-2025FW": {
+  "brand": "파세코",
+  "model": "PDH-2025FW",
+  "coupangUrl": "",
+  "coupangPrice": 199000,
+  "rocket": null,
+  "priceNote": "쿠팡 199,000원(정가293,000 -32%), 모레 도착 표기라 로켓 불명확; 상품ID 미확인"
+ },
+ "PDH-16251W": {
+  "brand": "파세코",
+  "model": "PDH-16251W",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 판매가/상품ID 미확인. 타처 롯데온 259,700·SSG 196,560 참고만"
+ },
+ "HE-D720": {
+  "brand": "한경희이지라이프",
+  "model": "HE-D720",
+  "coupangUrl": "",
+  "coupangPrice": 229300,
+  "rocket": true,
+  "priceNote": "쿠팡 로켓배송 확인, 정확 판매가 미노출. 다나와 최저 229,300 근사; 상품ID 미확인"
+ },
+ "CDHC-160AAMWOYH": {
+  "brand": "캐리어",
+  "model": "CDHC-160AAMWOYH",
+  "coupangUrl": "https://www.coupang.com/vp/products/7994205753",
+  "coupangPrice": 349000,
+  "rocket": false,
+  "priceNote": "판매자배송(캐리어 브랜드스토어) 230,000원 정확 일치"
+ },
+ "SDH-PM230": {
+  "brand": "신일",
+  "model": "SDH-PM230",
+  "coupangUrl": "",
+  "coupangPrice": 289000,
+  "rocket": null,
+  "priceNote": "쿠팡 최근 추적가 약289,000원(근사); 상품ID·로켓 미확인"
+ },
+ "DCE118SWJ": {
+  "brand": "위니아",
+  "model": "DCE118SWJ(A)",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 판매가/상품ID 미확인. 타처 11번가 263,000·위니아e샵 309,000 참고만"
+ },
+ "DXAE120-NEK": {
+  "brand": "위닉스",
+  "model": "DXAE120-NEK",
+  "coupangUrl": "",
+  "coupangPrice": 391100,
+  "rocket": null,
+  "priceNote": "쿠팡 스니펫 391,100원(29%할인)이나 타처 222,000대와 큰 차이-확인주의; 상품ID 미확인"
+ },
+ "VO-DH005": {
+  "brand": "보아르",
+  "model": "VO-DH005",
+  "coupangUrl": "https://www.coupang.com/vp/products/1570388917",
+  "coupangPrice": 228000,
+  "rocket": true,
+  "priceNote": "검색결과 coupang.com/vp/products/1570388917 링크. 쿠팡 228,000~239,000(내일도착, 최저값 채택)"
+ },
+ "DXTM100-KWK": {
+  "brand": "위닉스",
+  "model": "DXTM100-KWK",
+  "coupangUrl": "https://www.coupang.com/vp/products/213304798",
+  "coupangPrice": 221610,
+  "rocket": null,
+  "priceNote": "fallcent product_id로 URL 구성. 쿠팡 2개월 역대최저 221,610원; 로켓 불명확"
+ },
+ "DCVE160-PEK": {
+  "brand": "위닉스",
+  "model": "DCVE160-PEK",
+  "coupangUrl": "",
+  "coupangPrice": 379000,
+  "rocket": null,
+  "priceNote": "쿠팡 2026 신상 스니펫 379,000원; 상품ID·로켓 미확인"
+ },
+ "CDHC-160AYLWWYH": {
+  "brand": "캐리어",
+  "model": "CDHC-160AYLWWYH",
+  "coupangUrl": "https://www.coupang.com/vp/products/8177436550",
+  "coupangPrice": null,
+  "rocket": true,
+  "priceNote": "쿠팡 상품페이지 확인, 로켓배송; 판매가 스니펫 미표기(다나와 평균 262,260 참고)"
+ },
+ "CDHC-200AXMWOYH": {
+  "brand": "캐리어",
+  "model": "CDHC-200AXMWOYH",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 링크 미확인"
+ },
+ "SDH-170SS": {
+  "brand": "신일",
+  "model": "SDH-170SS",
+  "coupangUrl": "",
+  "coupangPrice": 249000,
+  "rocket": null,
+  "priceNote": "쿠팡 스니펫 약249,000(근사,216,790~299,000 변동)"
+ },
+ "DH-Y1652FNW": {
+  "brand": "쿠쿠",
+  "model": "DH-Y1652FNW",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 링크 미확인; 다나와 평균 247,560"
+ },
+ "CDHC-160AYLLYYH": {
+  "brand": "캐리어",
+  "model": "CDHC-160AYLLYYH",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "단종 모델; 쿠팡 링크 미확인"
+ },
+ "CDHC-200AYMLOYH": {
+  "brand": "캐리어",
+  "model": "CDHC-200AYMLOYH",
+  "coupangUrl": "https://www.coupang.com/vp/products/8051673375",
+  "coupangPrice": 235000,
+  "rocket": null,
+  "priceNote": "지니얼럿 최저 235,000, product_id로 URL 구성; 배송 미표기"
+ },
+ "DXAH100-JWK": {
+  "brand": "위닉스",
+  "model": "DXAH100-JWK",
+  "coupangUrl": "https://www.coupang.com/vp/products/5465568286",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "365,850원 근접(fallcent)"
+ },
+ "JR-DH0001WH": {
+  "brand": "제니퍼룸",
+  "model": "JR-DH0001WH",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 링크 미확인; 11번가 233,200, 공식몰 219,000"
+ },
+ "DXAH100-IWK": {
+  "brand": "위닉스",
+  "model": "DXAH100-IWK",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 링크 미확인"
+ },
+ "CDHC-200AYMAEYH": {
+  "brand": "캐리어",
+  "model": "CDHC-200AYMAEYH",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 링크 미확인; 블로그상 로켓 26만원대 언급(미확정)"
+ },
+ "DSD-6210W": {
+  "brand": "대성쎌틱",
+  "model": "DSD-6210W",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "신제품; 쿠팡 페이지 미확인"
+ },
+ "CDHM-C020LMOB": {
+  "brand": "캐리어",
+  "model": "CDHM-C020LMOB",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 링크 미확인; SSG/SK스토아"
+ },
+ "CDHC-160AYLLEYH": {
+  "brand": "캐리어",
+  "model": "CDHC-160AYLLEYH",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 링크 미확인; 유사 CDHC-160AYLLOYH 폴센트 최저 249,000(참고)"
+ },
+ "VO-DE002": {
+  "brand": "보아르",
+  "model": "VO-DE002",
+  "coupangUrl": "",
+  "coupangPrice": 258000,
+  "rocket": true,
+  "priceNote": "쿠팡 브랜드샵, 스니펫 258,000(정가279,000)·내일도착; vp링크 미확정"
+ },
+ "PD10A": {
+  "brand": "홈플래닛",
+  "model": "PD10A",
+  "coupangUrl": "",
+  "coupangPrice": 199990,
+  "rocket": null,
+  "priceNote": "쿠팡 PB; 스니펫 PD10A-18 199,990(역대최저163,990) 근사"
+ },
+ "DXAE100-JWK": {
+  "brand": "위닉스",
+  "model": "DXAE100-JWK",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 vp링크 미확인; 스니펫 약333,070(미확정, 타몰 235,000대)"
+ },
+ "JRG-DH1801WH": {
+  "brand": "제니퍼룸",
+  "model": "JRG-DH1801WH",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 특정 실패, 가격 불일치"
+ },
+ "CDHC-200AXLWAYH": {
+  "brand": "캐리어",
+  "model": "CDHC-200AXLWAYH",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 상품ID 미확인(유사 AXLWOYH만)"
+ },
+ "DO2E160-JWK": {
+  "brand": "위닉스",
+  "model": "DO2E160-JWK",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "다나와만 확인, 정가 399,000; 쿠팡 미확인"
+ },
+ "DN2E160-KWK": {
+  "brand": "위닉스",
+  "model": "DN2E160-KWK",
+  "coupangUrl": "https://www.coupang.com/vp/products/5354043642",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 상품링크 확인. 스니펫 캐시가 510,600은 정가399,000보다 높아 확인필요"
+ },
+ "SDH-SD19ERE": {
+  "brand": "신일",
+  "model": "SDH-SD19ERE",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 미확인; 타몰 최저 343,500~519,000"
+ },
+ "DXTC100-MMK": {
+  "brand": "위닉스",
+  "model": "DXTC100-MMK",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 미확인(GS SHOP 299,000)"
+ },
+ "CDHC-200ACLWOYH": {
+  "brand": "캐리어",
+  "model": "CDHC-200ACLWOYH",
+  "coupangUrl": "https://www.coupang.com/vp/products/8008748473",
+  "coupangPrice": 268000,
+  "rocket": null,
+  "priceNote": "폴센트/지니알림 쿠팡 최저 268,000(26.8만~33.8만). 20L 1등급"
+ },
+ "CDHC-200AULLOXH": {
+  "brand": "캐리어",
+  "model": "CDHC-200AULLOXH",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 미확인(변형모델)"
+ },
+ "CDHC-200AOLLOXH": {
+  "brand": "캐리어",
+  "model": "CDHC-200AOLLOXH",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 미확인(변형모델)"
+ },
+ "DN2W160-KWK": {
+  "brand": "위닉스",
+  "model": "DN2W160-KWK",
+  "coupangUrl": "https://www.coupang.com/vp/products/8481203709",
+  "coupangPrice": 359000,
+  "rocket": null,
+  "priceNote": "폴센트 쿠팡 최저 359,000(정가399,000). 16L"
+ },
+ "CDHC-340AAMWOYH": {
+  "brand": "캐리어",
+  "model": "CDHC-340AAMWOYH",
+  "coupangUrl": "",
+  "coupangPrice": 274000,
+  "rocket": null,
+  "priceNote": "쿠팡 최저 274,000(공식몰405,000). 34L; 상품ID 미확인"
+ },
+ "DQ134MWEC": {
+  "brand": "LG전자",
+  "model": "DQ134MWEC",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 스니펫 불일치(36.7만~49.9만); 본체 ID 미확인"
+ },
+ "DXWE210-NGK": {
+  "brand": "위닉스",
+  "model": "DXWE210-NGK",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 미확정(스니펫 591,200 신뢰 낮음). 21L 인버터"
+ },
+ "DN2H160-IWK": {
+  "brand": "위닉스",
+  "model": "DN2H160-IWK",
+  "coupangUrl": "",
+  "coupangPrice": 359000,
+  "rocket": null,
+  "priceNote": "쿠팡 약 359,000~397,000; 본체 ID 미확인"
+ },
+ "DQ205PBBC": {
+  "brand": "LG전자",
+  "model": "DQ205PBBC",
+  "coupangUrl": "",
+  "coupangPrice": 438620,
+  "rocket": null,
+  "priceNote": "쿠팡 약 438,620~489,800(최저값). 20L; ID 미확인"
+ },
+ "DO2E160-HWK": {
+  "brand": "위닉스",
+  "model": "DO2E160-HWK",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 URL 미확인(다른모델 링크). 쿠차 최저 341,100"
+ },
+ "DH-X22721EB": {
+  "brand": "쿠쿠",
+  "model": "DH-X22721EB",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 미확인. 22L. 다나와 최저 410,780"
+ },
+ "DXWE200-OEK": {
+  "brand": "위닉스",
+  "model": "DXWE200-OEK",
+  "coupangUrl": "https://www.coupang.com/vp/products/8653438894",
+  "coupangPrice": 397160,
+  "rocket": null,
+  "priceNote": "추적 product_id로 URL. 최저 397,160(근사)"
+ },
+ "DQ132PWXC": {
+  "brand": "LG전자",
+  "model": "DQ132PWXC",
+  "coupangUrl": "https://www.coupang.com/vp/products/8263699906",
+  "coupangPrice": null,
+  "rocket": false,
+  "priceNote": "판매자배송 리스팅 632,250원(다나와등재 621,740 근접). 별도 리스팅 7155819261=864,000 판매자배송도 존재"
+ },
+ "AY70H18100GTD": {
+  "brand": "삼성전자",
+  "model": "AY70H18100GTD",
+  "coupangUrl": "",
+  "coupangPrice": 408000,
+  "rocket": null,
+  "priceNote": "쿠팡 URL 미확인. 프로모션가 약408,000(근사·미검증)"
+ },
+ "DO2W160-IWK": {
+  "brand": "위닉스",
+  "model": "DO2W160-IWK",
+  "coupangUrl": "https://www.coupang.com/vp/products/201790143",
+  "coupangPrice": 415000,
+  "rocket": null,
+  "priceNote": "교차확인 완료. 리뷰 1,356·평점 4.7"
+ },
+ "DQ202PSUA": {
+  "brand": "LG전자",
+  "model": "DQ202PSUA",
+  "coupangUrl": "",
+  "coupangPrice": 268990,
+  "rocket": null,
+  "priceNote": "쿠팡 URL 미확인. 마켓플레이스 약268,990 추정"
+ },
+ "AY70H18100GVD": {
+  "brand": "삼성전자",
+  "model": "AY70H18100GVD",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 미확인. 11번가 429,000~436,150"
+ },
+ "AY18CG7500GED": {
+  "brand": "삼성전자",
+  "model": "AY18CG7500GED",
+  "coupangUrl": "",
+  "coupangPrice": 347550,
+  "rocket": true,
+  "priceNote": "쿠팡 핫딜 347,550 와우무료(로켓), 단 색상코드 GGD 기준. GED 전용 URL 미확인"
+ },
+ "DQ154MWGA": {
+  "brand": "LG전자",
+  "model": "DQ154MWGA",
+  "coupangUrl": "",
+  "coupangPrice": 461000,
+  "rocket": true,
+  "priceNote": "본품URL 미확정(액세서리 링크만). 근사 461,000 내일도착"
+ },
+ "DQ205PEGA": {
+  "brand": "LG전자",
+  "model": "DQ205PEGA",
+  "coupangUrl": "https://www.coupang.com/vp/products/8607308762",
+  "coupangPrice": 499000,
+  "rocket": true,
+  "priceNote": "쿠팡 직접링크. 근사 499,000 내일도착"
+ },
+ "DQ136MWRA": {
+  "brand": "LG전자",
+  "model": "DQ136MWRA",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 미확인"
+ },
+ "DQ185MEGA": {
+  "brand": "LG전자",
+  "model": "DQ185MEGA",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 본품 미확인. 네이버 424,880~474,000"
+ },
+ "DQ162PBBC": {
+  "brand": "LG전자",
+  "model": "DQ162PBBC",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 본품 URL 미확인(액세서리 링크만)"
+ },
+ "AY70H21100GTD": {
+  "brand": "삼성전자",
+  "model": "AY70H21100GTD",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 미확인. 하이마트 475,370, 11번가 446,340~"
+ },
+ "DQ214MWGA": {
+  "brand": "LG전자",
+  "model": "DQ214MWGA",
+  "coupangUrl": "https://www.coupang.com/vp/products/8176946449",
+  "coupangPrice": 849000,
+  "rocket": null,
+  "priceNote": "쿠팡 직접링크. 849,000(정가100만), 사전예약/무료배송"
+ },
+ "DHD-169OSST": {
+  "brand": "위닉스",
+  "model": "DHD-169OSST",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 링크 미확인. 롯데몰 378,200, 홈쇼핑 289,000 타처만."
+ },
+ "DH-16ZH45FG": {
+  "brand": "쿠쿠",
+  "model": "DH-16ZH45FG",
+  "coupangUrl": "https://www.coupang.com/vp/products/8264748021",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "703,720원 정확 일치(fallcent)"
+ },
+ "AY18BG7500GBD": {
+  "brand": "삼성전자",
+  "model": "AY18BG7500GBD",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 링크는 다른모델. 타처 최저 259,000."
+ },
+ "DQ235MWGA": {
+  "brand": "LG전자",
+  "model": "DQ235MWGA",
+  "coupangUrl": "https://www.coupang.com/vp/products/8750718469",
+  "coupangPrice": 611100,
+  "rocket": null,
+  "priceNote": "쿠팡추적 product_id로 구성. 611,100(방문설치)."
+ },
+ "SDH-BPM600": {
+  "brand": "신일",
+  "model": "SDH-BPM600",
+  "coupangUrl": "https://www.coupang.com/vp/products/8017501359",
+  "coupangPrice": 585000,
+  "rocket": null,
+  "priceNote": "폴센트 product_id로 구성. 585,000(60L 업소용)."
+ },
+ "DQ256MWGA": {
+  "brand": "LG전자",
+  "model": "DQ256MWGA",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 미확인. 신세계 650,330 등 타처."
+ },
+ "AY70H23100GVD": {
+  "brand": "삼성전자",
+  "model": "AY70H23100GVD",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 미확인. SSG 692,884 타처."
+ },
+ "DQ256MWGAS": {
+  "brand": "LG전자",
+  "model": "DQ256MWGAS",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 미확인. LG공식 998,000."
+ },
+ "AY70H23100GTD": {
+  "brand": "삼성전자",
+  "model": "AY70H23100GTD",
+  "coupangUrl": "https://www.coupang.com/vp/products/9447872628",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "960,000원 정확 일치(fallcent)"
+ },
+ "DQ256MEGA": {
+  "brand": "LG전자",
+  "model": "DQ256MEGA",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "쿠팡 미확인. 롯데ON 921,500."
+ },
+ "CDHM-C016LROW": {
+  "brand": "캐리어",
+  "model": "CDHM-C016LROW",
+  "coupangUrl": "",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "정확모델 쿠팡 미확인. 유사변형 YCDHM-C016LROW=폴센트 209,000."
+ },
+ "DXTE100-KWK": {
+  "model": "DXTE100-KWK",
+  "coupangUrl": "https://www.coupang.com/vp/products/5055349698",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "⚠스니펫 249,000·당일출발(로켓 추정) — 다나와등재 399,000과 큰 차이. 옵션/리스팅 상이 가능, 등록 전 확인 필수"
+ }
+}

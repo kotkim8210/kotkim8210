@@ -1,0 +1,13 @@
+[
+{"model":"CRH-TWS0610W","coupangListed":true,"coupangPrice":236000,"coupangRocket":true,"cheapestNonCoupangSeller":"CJ온스타일","cheapestNonCoupangPrice":239000,"secondNonCoupang":"Market Electronics=243220"},
+{"model":"CRH-TWS0610BW","coupangListed":true,"coupangPrice":229000,"coupangRocket":false,"cheapestNonCoupangSeller":"G마켓","cheapestNonCoupangPrice":239960,"secondNonCoupang":"오늘의집=249000","note":"쿠팡이 최저"},
+{"model":"CRT-TWS0630W","coupangListed":true,"coupangPrice":252000,"coupangRocket":false,"cheapestNonCoupangSeller":"11번가","cheapestNonCoupangPrice":255000,"secondNonCoupang":"오늘의집=258950","note":"쿠팡이 최저"},
+{"model":"CRT-RPS0691W","coupangListed":true,"coupangPrice":254920,"coupangRocket":false,"cheapestNonCoupangSeller":"롯데ON","cheapestNonCoupangPrice":254920,"secondNonCoupang":"옥션=269700"},
+{"model":"CRT-RPS0691BW","coupangListed":true,"coupangPrice":254830,"coupangRocket":true,"cheapestNonCoupangSeller":"신세계라이브쇼핑","cheapestNonCoupangPrice":252830,"secondNonCoupang":"11번가=254830"},
+{"model":"CRS-FSWD0640W","coupangListed":true,"coupangPrice":138900,"coupangRocket":false,"cheapestNonCoupangSeller":"G마켓","cheapestNonCoupangPrice":139000,"secondNonCoupang":"옥션=139000","note":"쿠팡이 최저"},
+{"model":"CRT-TWK0370W","coupangListed":true,"coupangPrice":198990,"coupangRocket":false,"cheapestNonCoupangSeller":"하이마트","cheapestNonCoupangPrice":198990,"secondNonCoupang":"G마켓=199000"},
+{"model":"CJE-CD0302","coupangListed":true,"coupangPrice":69000,"coupangRocket":true,"cheapestNonCoupangSeller":"G마켓","cheapestNonCoupangPrice":78010,"secondNonCoupang":"옥션=79000","note":"쿠팡이 최저"},
+{"model":"CRT-WS0340TW","coupangListed":true,"coupangPrice":217000,"coupangRocket":false,"cheapestNonCoupangSeller":"네이버페이","cheapestNonCoupangPrice":241450,"secondNonCoupang":"옥션=319680","note":"쿠팡이 최저"},
+{"model":"CRE-D0401W","coupangListed":true,"coupangPrice":55000,"coupangRocket":false,"cheapestNonCoupangSeller":"옥션","cheapestNonCoupangPrice":55000,"secondNonCoupang":"G마켓=55000"},
+{"model":"CRT-TWK0370CY","coupangListed":true,"coupangPrice":198990,"coupangRocket":true,"cheapestNonCoupangSeller":"하이마트","cheapestNonCoupangPrice":198990,"secondNonCoupang":"오늘의집=213000"}
+]
