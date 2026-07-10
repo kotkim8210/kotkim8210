@@ -1,0 +1,299 @@
+[
+ {
+  "model": "DQ132PWXC",
+  "enuriDetailUrl": "https://www.enuri.com/detail.jsp?modelno=93351483",
+  "sites": {
+   "에누리": {
+    "price": 411140,
+    "url": "https://www.enuri.com/detail.jsp?modelno=93351483",
+    "note": "22개 판매처 최저(G마켓)"
+   },
+   "네이버": {
+    "price": null,
+    "url": "",
+    "note": "직접 URL 미확인"
+   },
+   "G마켓": {
+    "price": 411140,
+    "url": "https://item.gmarket.co.kr/Item?goodscode=2483174800",
+    "note": "스니펫 '최대 혜택가 34만'(조건부) — 직진입 확인"
+   },
+   "옥션": {
+    "price": 419070,
+    "url": "http://itempage3.auction.co.kr/detailview.aspx?ItemNo=C703354267",
+    "note": "★스니펫 쿠폰가 353,950(정상가 358,950) 리스팅 존재 — 직진입 확인 필수. 동일모델 리스팅 다수(C642694275, D474592589)"
+   },
+   "하이마트": {
+    "price": null,
+    "url": "http://www.e-himart.co.kr/app/goods/goodsDetail?goodsNo=0020477674",
+    "note": "상품페이지 확인, 가격 미표시"
+   }
+  },
+  "limitNote": "",
+  "note": "LG 공식 단종(생산종료) — 재고 소진형. SSG 396,274는 KB카드가. 쿠팡가 621,740 대비 옥션 쿠폰가 353,950이면 마진 19만원대 가능성"
+ },
+ {
+  "model": "DXAH100-JWK",
+  "enuriDetailUrl": "https://www.enuri.com/detail.jsp?modelno=50503111",
+  "sites": {
+   "에누리": {
+    "price": 245250,
+    "url": "https://www.enuri.com/detail.jsp?modelno=50503111",
+    "note": "44개 판매처"
+   },
+   "네이버": {
+    "price": null,
+    "url": "",
+    "note": ""
+   },
+   "G마켓": {
+    "price": 249600,
+    "url": "",
+    "note": "244,600은 삼성카드가(제외). 스니펫상 쿠폰가 211,760~239,000 존재 — 직진입 확인"
+   },
+   "옥션": {
+    "price": 245250,
+    "url": "http://itempage3.auction.co.kr/DetailView.aspx?itemno=B619479712",
+    "note": "제목에 모델 명시"
+   },
+   "하이마트": {
+    "price": null,
+    "url": "",
+    "note": ""
+   }
+  },
+  "limitNote": "",
+  "note": "배송비별도 30,000원 조건 186,020 리스팅 언급(함정주의). 11번가 293,800 오늘출발"
+ },
+ {
+  "model": "AY70H23100GTD",
+  "enuriDetailUrl": "https://www.enuri.com/detail.jsp?modelno=142928396",
+  "sites": {
+   "에누리": {
+    "price": 499390,
+    "url": "https://www.enuri.com/detail.jsp?modelno=142928396",
+    "note": "상세페이지 최저(신세계몰) — 검색결과 779,000과 불일치 주의"
+   },
+   "네이버": {
+    "price": null,
+    "url": "",
+    "note": ""
+   },
+   "G마켓": {
+    "price": 559000,
+    "url": "",
+    "note": ""
+   },
+   "옥션": {
+    "price": 579720,
+    "url": "",
+    "note": "스니펫 쿠폰가 491,920~ 언급"
+   },
+   "하이마트": {
+    "price": null,
+    "url": "",
+    "note": "에누리 1,105,000 vs 스니펫 575,360 상충 — 직진입 확인"
+   }
+  },
+  "limitNote": "",
+  "note": "공식몰 https://www.samsung.com/sec/dehumidifier/dehumidifier-ay70h23100gd-d2c/AY70H23100GTD/ . 에누리 상세 499,390이면 쿠팡 960,000 대비 마진 커짐 — 단 가격 불일치 커서 직진입 검증 필수"
+ },
+ {
+  "model": "DO2W160-IWK",
+  "enuriDetailUrl": "https://www.enuri.com/detail.jsp?modelno=35952977",
+  "sites": {
+   "에누리": {
+    "price": 421000,
+    "url": "https://www.enuri.com/detail.jsp?modelno=35952977",
+    "note": "5개 판매처"
+   },
+   "네이버": {
+    "price": 421000,
+    "url": "",
+    "note": "최저가=네이버쇼핑 경유 하이마트 판매분(N+적립 14,420)"
+   },
+   "G마켓": {
+    "price": 539750,
+    "url": "",
+    "note": "삼성카드 할인 가능"
+   },
+   "옥션": {
+    "price": 535700,
+    "url": "",
+    "note": "배송비 5,000 별도"
+   },
+   "하이마트": {
+    "price": null,
+    "url": "",
+    "note": "자사몰 정확일치 미확인(유사 DN2H160-IWK만)"
+   }
+  },
+  "limitNote": "",
+  "note": "매입은 사실상 네이버 경유 하이마트 단일(421,000) — 물량 소진 시 매입가 53만대로 점프하는 리스크. 쿠팡 549,330 대비 마진 유지되는 동안만 유효"
+ },
+ {
+  "model": "CDHC-160AAMWOYH",
+  "enuriDetailUrl": "https://www.enuri.com/detail.jsp?modelno=126385368",
+  "sites": {
+   "에누리": {
+    "price": 199680,
+    "url": "https://www.enuri.com/detail.jsp?modelno=126385368",
+    "note": "27개 판매처, 다나와(201,300)보다 저렴!"
+   },
+   "네이버": {
+    "price": null,
+    "url": "",
+    "note": "에누리 목록에 네이버 계열 미확인"
+   },
+   "G마켓": {
+    "price": 199680,
+    "url": "",
+    "note": "일반 최저. 카드최저 187,200(옥션 현대스마일)"
+   },
+   "옥션": {
+    "price": 201300,
+    "url": "",
+    "note": "스니펫 219,000 언급"
+   },
+   "하이마트": {
+    "price": null,
+    "url": "https://www.e-himart.co.kr/app/goods/goodsDetail?goodsNo=0029136414",
+    "note": "미취급 — 유사모델에 [단종/후속모델 제작중] 표기"
+   }
+  },
+  "limitNote": "에누리 일부 링크 '(주문전 재고확인 필수)'·'0개 판매처' 표시 — 재고 리스크",
+  "note": "에누리 199,680 매입 시 쿠팡 230,000 대비 마진 +2,996(1.3%)로 개선. 단종 진행 정황 — 재고 확보전 성격"
+ },
+ {
+  "model": "CRP-DHP0610FW",
+  "enuriDetailUrl": "https://www.enuri.com/detail.jsp?modelno=89620413",
+  "sites": {
+   "에누리": {
+    "price": 199750,
+    "url": "https://www.enuri.com/detail.jsp?modelno=89620413",
+    "note": "검색표기 최저 199,750~(264곳) — 상세기준 일반최저는 옥션 210,350. 199,750 리스팅 실체 직진입 확인 필요"
+   },
+   "네이버": {
+    "price": 249000,
+    "url": "",
+    "note": "네이버페이 플러스(BEST COMPANY)"
+   },
+   "G마켓": {
+    "price": 213800,
+    "url": "http://mg.gmarket.co.kr/Item?goodscode=2450160967",
+    "note": "URL은 쿠쿠 공식스토어(285,800) — ★ID당 3개 구매제한. 에누리상 G마켓 208,800(삼성카드)/213,800"
+   },
+   "옥션": {
+    "price": 210350,
+    "url": "",
+    "note": "일반 최저"
+   },
+   "하이마트": {
+    "price": 287640,
+    "url": "https://www.e-himart.co.kr/app/goods/goodsDetail?goodsNo=0018653026",
+    "note": "직접확인. 최대혜택가 267,500. '매장 동시판매로 품절 가능' 문구"
+   }
+  },
+  "limitNote": "G마켓 쿠쿠공식 ID당 3개 제한(1일 3개까지 발주 가능 — 대량 불가)",
+  "note": "★오늘의집 최종가 21.8만 확인: https://store.ohou.se/goods/1741955 → 쿠팡 263,990 대비 마진 +14,628. SSG https://www.ssg.com/item/itemView.ssg?itemId=1000404479780 · 쿠쿠몰 235,000 · 동원몰도 존재"
+ },
+ {
+  "model": "CRP-JHPNL1010GPS",
+  "enuriDetailUrl": "https://www.enuri.com/detail.jsp?modelno=133877145",
+  "sites": {
+   "에누리": {
+    "price": 272570,
+    "url": "https://www.enuri.com/detail.jsp?modelno=133877145",
+    "note": "검색표기 최저. 상세기준 옥션 277,440"
+   },
+   "네이버": {
+    "price": 284780,
+    "url": "https://smartstore.naver.com/main/products/13622568505",
+    "note": "디어스몰. N+멤버십 273,086"
+   },
+   "G마켓": {
+    "price": 281690,
+    "url": "https://item.gmarket.co.kr/Item?goodscode=4777191533",
+    "note": "에누리 아웃링크 실상품번호"
+   },
+   "옥션": {
+    "price": 277440,
+    "url": "https://itempage3.auction.co.kr/ip.aspx?itemno=F585220188",
+    "note": "★재고 8개(사장님 확인) → 제외, 대체처 사용"
+   },
+   "하이마트": {
+    "price": null,
+    "url": "",
+    "note": "취급 미확인"
+   }
+  },
+  "limitNote": "옥션 재고 8개(사용자 확인) → 옥션 제외",
+  "note": "대체 매입처: 11번가 본사직영 283,500 https://www.11st.co.kr/products/8210968663 · 롯데홈쇼핑 274,770(삼성카드가—카드전용이면 제외) · 쿠쿠몰 https://www.cuckoo.co.kr/mall/productView?productNo=7596 · 쿠팡 위너 공석(윙 단독 320,000)"
+ },
+ {
+  "model": "CRP-MHTR0310FW",
+  "enuriDetailUrl": "https://www.enuri.com/detail.jsp?modelno=63033246",
+  "sites": {
+   "에누리": {
+    "price": 232910,
+    "url": "https://www.enuri.com/detail.jsp?modelno=63033246",
+    "note": "최저=11번가. 판매처 303곳 수급여유"
+   },
+   "네이버": {
+    "price": 243090,
+    "url": "https://smartstore.naver.com/main/products/7832453612",
+    "note": "또또와쇼핑. N+멤버십 232,230"
+   },
+   "G마켓": {
+    "price": 233080,
+    "url": "https://item.gmarket.co.kr/Item?goodscode=4785016782",
+    "note": "실상품번호"
+   },
+   "옥션": {
+    "price": 234240,
+    "url": "https://itempage3.auction.co.kr/ip.aspx?itemno=F593003062",
+    "note": "실상품번호"
+   },
+   "하이마트": {
+    "price": null,
+    "url": "http://www.e-himart.co.kr/app/goods/goodsDetail?goodsNo=0014178362",
+    "note": "메인 리다이렉트 — 판매종료 의심"
+   }
+  },
+  "limitNote": "구매제한 미발견",
+  "note": "쿠쿠몰 270,000(42%↓) · SSG 287,508 · 마켓컬리 존재. 쿠팡 297,400(사장님 실측) 대비 최유력"
+ },
+ {
+  "model": "KRC-BS9906",
+  "enuriDetailUrl": "https://www.enuri.com/detail.jsp?modelno=133620033",
+  "sites": {
+   "에누리": {
+    "price": 24450,
+    "url": "https://www.enuri.com/detail.jsp?modelno=133620033",
+    "note": "검색표기 최저. 상세기준 11번가 24,720"
+   },
+   "네이버": {
+    "price": null,
+    "url": "",
+    "note": "미확인"
+   },
+   "G마켓": {
+    "price": 26920,
+    "url": "https://item.gmarket.co.kr/Item?goodscode=4378186534",
+    "note": "실상품번호"
+   },
+   "옥션": {
+    "price": 27640,
+    "url": "https://itempage3.auction.co.kr/ip.aspx?itemno=F560499610",
+    "note": "실상품번호"
+   },
+   "하이마트": {
+    "price": null,
+    "url": "",
+    "note": "미확인"
+   }
+  },
+  "limitNote": "구매제한 미발견",
+  "note": "판매처 81곳. 마진 얇음(수백원대) — 참고용"
+ }
+]
