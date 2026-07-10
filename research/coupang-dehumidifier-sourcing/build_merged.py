@@ -153,6 +153,28 @@ for r in rows:
     if r.get("priceSrc","").startswith("웹검색") and r["coupangPrice"] and r["danawaBuy"] and r["coupangPrice"]>r["danawaBuy"]*1.25:
         r["risk"]=("⚠쿠팡가 과다의심(정가/사전예약/오모델)→마진 신뢰불가 | "+(r.get("risk","") or ""))[:150]
 
+# === 판매상태 검증(7/10 폴센트/사용자 확인) — 품절·판매중지·사전예약은 후보에서 완전 제외 ===
+SALE_STATUS={
+ "DQ214MWGA":  ("제외","사용자 확인: 쿠팡 리스팅(8176946449) 품절/판매중지 — 후보 제외"),
+ "DO2W160-IWK":("판매중","폴센트 7/10: 549,330원 재고있음·판매자배송 확인"),
+ "DQ132PWXC":  ("판매중","폴센트 7/10: 632,250원 리스팅 활성(판매자배송), 864,000원 리스팅 별도"),
+ "DXAH100-JWK":("판매중·급등","폴센트 7/10: 365,850원 재고있음, 단 평소가 대비 ▲42% 급등 상태 — 스프레드 일시적일 수 있음"),
+ "AY70H23100GTD":("판매중·급등","폴센트 7/10: 960,000원, 평소가 대비 ▲57% 급등·삼성 제습기 라인 품절 다수 — 품절발 일시 급등 가능"),
+ "DH-16ZH45FG":("판매중·로켓의심","폴센트 7/10: 703,720원 활성, 단 로켓배송 옵션 언급 — 윙 여부 클릭 확인 필요"),
+}
+for r in rows:
+    st=SALE_STATUS.get(str(r["model"]).strip())
+    if st:
+        r["saleStatus"]=st[0]
+        r["risk"]=(f"[판매상태:{st[0]}] "+st[1]+" | "+(r.get("risk","") or ""))[:170]
+
+SOLDOUT_PAT=re.compile(r"품절|판매중지|사전예약|단종|판매 불가|판매불가")
+def is_excluded_soldout(r):
+    ss=r.get("saleStatus")
+    if ss=="제외": return True
+    if ss: return False   # 7/10 판매중 확인된 모델은 패턴검사 생략
+    return bool(SOLDOUT_PAT.search(str(r.get("risk",""))+str(r.get("winnerShip",""))+str(r.get("sourcingNote",""))))
+
 def est(r):
     if r["coupangPrice"] and r["danawaBuy"]:
         return r["coupangPrice"]-r["danawaBuy"]-r["coupangPrice"]*FEE
@@ -248,6 +270,7 @@ pos=[]
 for r in rows:
     e=est(r)
     if e is None or e<10: continue
+    if is_excluded_soldout(r): continue   # 품절/판매중지/사전예약/단종 → 후보표에서 완전 제외
     rocket=("로켓" in str(r["winnerShip"])) or ("로켓" in str(r.get("risk","")))
     suspect="과다의심" in str(r.get("risk",""))
     pos.append((e,r,rocket,suspect))
@@ -255,6 +278,7 @@ pos.sort(key=lambda x:(x[2] or x[3], -x[0]))   # 정상 후보 먼저, 마진 �
 ri=2
 for e,r,rocket,suspect in pos:
     warn=[]
+    if r.get("saleStatus"): warn.append(f"판매상태:{r['saleStatus']}(7/10 확인)")
     if rocket: warn.append("🚀로켓(윙경쟁 불가→제외)")
     if suspect: warn.append("⚠쿠팡가 과다의심(정가/오모델)")
     if r.get("priceSrc","").startswith("웹검색"): warn.append("가격=웹검색근사, 등록 전 재확인")
