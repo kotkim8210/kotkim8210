@@ -118,12 +118,40 @@ for r in rows:
     if (r["coupangPrice"] in (None,"")) and c.get("coupangPrice"):
         r["coupangPrice"]=num(c["coupangPrice"]); r["priceSrc"]="웹검색근사(캐시)"
     notes=[]
-    if c.get("rocket") is True: notes.append("🚀로켓추정→제외검토")
-    # 웹검색 근사가가 매입가보다 과도하게 높으면 정가/사전예약/오모델 의심 (역마진이 정상인데 +로 보이면 함정)
-    if r.get("priceSrc","").startswith("웹검색") and r["coupangPrice"] and r["danawaBuy"] and r["coupangPrice"]>r["danawaBuy"]*1.25:
-        notes.append("⚠쿠팡가 과다의심(정가/사전예약/오모델 가능)→마진 신뢰불가")
+    if c.get("rocket") is True: notes.append("🚀로켓확인→윙경쟁 불가·제외")
     if c.get("priceNote"): notes.append("쿠팡:"+str(c["priceNote"])[:44])
-    if notes: r["risk"]=((r.get("risk","") or "")+" | "+" / ".join(notes)).strip(" |")[:150]
+    if notes: r["risk"]=(" / ".join(notes)+" | "+(r.get("risk","") or "")).strip(" |")[:150]
+
+# === 오늘(2026-07-10) 다나와 재스캔 오버레이 — 최우선 가격원 ===
+# 다나와 판매처 목록에 등재된 '쿠팡' 가격 = 쿠팡 판매가(신뢰 높음).
+# 비쿠팡 국내최저 = 오늘의 매입가(신선). 로켓배송관 표기도 반영.
+try: TODAY=json.load(open(f"{HERE}/today_lookup.json",encoding="utf-8"))
+except Exception: TODAY={}
+for r in rows:
+    t=TODAY.get(norm(r["model"]))
+    if not t: continue
+    if num(t.get("cheapestNonCoupangPrice")):
+        nb=num(t["cheapestNonCoupangPrice"])
+        r["danawaBuy"]=nb
+        r["domesticSeller"]=t.get("cheapestNonCoupangSeller","") or r["domesticSeller"]
+        note2=f"2위:{t.get('secondNonCoupang','')}" if t.get("secondNonCoupang") else ""
+        card="카드전용가 더싼곳 있음" if t.get("cardOnlyCheaperExists") else ""
+        r["sourcingNote"]=" / ".join(x for x in [note2,card] if x) or r["sourcingNote"]
+    if t.get("coupangListed") and num(t.get("coupangPrice")):
+        r["coupangPrice"]=num(t["coupangPrice"]); r["priceSrc"]="다나와등재(7/10 오늘)"
+        rn=str(t.get("coupangRocketNote","") or "")
+        # '로켓배송관 표기는 확인되지 않음' 같은 부정문은 로켓 아님
+        is_rocket=("로켓" in rn) and ("않" not in rn) and ("없" not in rn)
+        if is_rocket:
+            r["winnerShip"]=r["winnerShip"] or "로켓형(다나와표기)"
+            r["risk"]=("[🚀쿠팡=로켓표기→윙경쟁 불가] "+(r.get("risk","") or ""))[:150]
+    elif t.get("coupangListed") is False and not r["coupangPrice"]:
+        r["risk"]=("[다나와에 쿠팡 미등재(7/10)] "+(r.get("risk","") or ""))[:150]
+
+# 웹검색 근사가 과다의심 플래그 (오늘 등재가에는 미적용)
+for r in rows:
+    if r.get("priceSrc","").startswith("웹검색") and r["coupangPrice"] and r["danawaBuy"] and r["coupangPrice"]>r["danawaBuy"]*1.25:
+        r["risk"]=("⚠쿠팡가 과다의심(정가/사전예약/오모델)→마진 신뢰불가 | "+(r.get("risk","") or ""))[:150]
 
 def est(r):
     if r["coupangPrice"] and r["danawaBuy"]:
@@ -147,7 +175,7 @@ wb=Workbook(); ws=wb.active; ws.title="통합_소싱마진"
 COLS=[("브랜드",10,"ID"),("키워드",18,"ID"),("모델명",20,"ID"),
  ("다나와 매입가\n(국내최저,원)",13,"BUY"),("다나와 URL",22,"URL"),("쿠팡 URL",22,"URL"),
  ("쿠팡 판매가\n(실측/입력)",12,"CP"),("예상마진(원)\n수수료11.88%",13,"MG"),("마진율\n(%)",8,"MG"),
- ("마진≥10원?",10,"MG"),("손익분기\n쿠팡가",11,"MG"),("택배비\n(입력)",9,"IN"),
+ ("마진≥10원?",10,"MG"),("손익분기\n쿠팡가",11,"MG"),("쿠팡가 출처",15,"CP"),("택배비\n(입력)",9,"IN"),
  ("국내최저\n소싱처",13,"SRC"),("소싱 비고",20,"SRC"),("용량\n(L)",6,"ID"),("다나와\n판매처수",8,"DN"),
  ("쿠팡\n리뷰수",8,"CP"),("위너\n배송형태",12,"CP"),("신품판매자수\n(입력)",10,"IN"),
  ("데이터출처",16,"REF"),("쿠팡 인기신호/비고",26,"REF"),("위험/판정",26,"REF")]
@@ -157,14 +185,14 @@ NC=len(COLS)
 # 위치 기반 컬럼 문자 (백슬래시 회피)
 Cbuy=get_column_letter(4); Cdurl=get_column_letter(5); Ccurl=get_column_letter(6); Ccp=get_column_letter(7)
 Cmg=get_column_letter(8); Cmr=get_column_letter(9); Cjd=get_column_letter(10); Cbep=get_column_letter(11)
-Ctb=get_column_letter(12); Cws=get_column_letter(18)
+Csrcp=get_column_letter(12); Ctb=get_column_letter(13); Cws=get_column_letter(19)
 
 ws.merge_cells(start_row=1,start_column=1,end_row=1,end_column=NC)
 b=ws.cell(1,1,"통합 소싱·마진 시트 — 내 다나와 84종 + 업로드 2개 파일 병합 | 쿠팡 판매수수료 11.88% 적용, 예상마진 ≥10원만 '✅마진OK'")
 b.font=Font(bold=True,color="FFFFFF",size=11,name="맑은 고딕"); b.fill=PatternFill("solid",fgColor=NAVY); b.alignment=lft
 ws.row_dimensions[1].height=24
 ws.merge_cells(start_row=2,start_column=1,end_row=2,end_column=NC)
-b2=ws.cell(2,1,"예상마진 = 쿠팡판매가 − 다나와매입가 − 쿠팡판매가×11.88% − 택배비 | 쿠팡가 출처는 '위험/판정'열 [쿠팡가:실측] vs [웹검색근사]. 웹검색근사는 캐시·로켓혼재라 등록 전 로그인으로 정확가·윙여부 확인 필수 | 손익분기쿠팡가=매입가/0.8812")
+b2=ws.cell(2,1,"기준일 2026-07-10(KST) | 예상마진 = 쿠팡판매가 − 다나와매입가 − 쿠팡판매가×11.88% − 택배비 | 쿠팡가 출처 열 참조: '다나와등재(7/10)'=다나와 판매처목록의 쿠팡 실등재가(신뢰↑) > 실측(업로드) > 웹검색근사(재확인 필수) | 손익분기쿠팡가=매입가/0.8812 | 마진 양수만 모은 '오늘기준_마진후보' 탭 먼저 보세요")
 b2.font=Font(italic=True,size=9,color="404040",name="맑은 고딕"); b2.alignment=lft
 ws.row_dimensions[2].height=15
 for j,(nm,w,gp) in enumerate(COLS,1):
@@ -186,21 +214,19 @@ for i,r in enumerate(rows):
     ws.cell(rr,9,f'=IF(OR({Gc}="",{Gc}=0),"",ROUND({Mc}/{Gc}*100,1))')
     ws.cell(rr,10,f'=IF({Gc}="","위너가필요",IF({Mc}>=10,"✅마진OK","❌미달"))')
     ws.cell(rr,11,round(r["danawaBuy"]/(1-FEE)) if r["danawaBuy"] else None)
-    ws.cell(rr,12,0)
-    ws.cell(rr,13,r["domesticSeller"]); ws.cell(rr,14,r["sourcingNote"]); ws.cell(rr,15,r["cap"])
-    ws.cell(rr,16,r["danawaSellers"]); ws.cell(rr,17,r["reviews"]); ws.cell(rr,18,r["winnerShip"])
-    ws.cell(rr,19,r["sellerCountNew"]); ws.cell(rr,20," + ".join(sorted(r["src"])))
-    risk_txt=r["risk"] or ""
-    if r["coupangPrice"] and r.get("priceSrc"):
-        risk_txt=(f"[쿠팡가:{r['priceSrc']}] "+risk_txt).strip()
-    ws.cell(rr,21,r["signal"]); ws.cell(rr,22,risk_txt)
+    ws.cell(rr,12,r.get("priceSrc","") if r["coupangPrice"] else "")
+    ws.cell(rr,13,0)
+    ws.cell(rr,14,r["domesticSeller"]); ws.cell(rr,15,r["sourcingNote"]); ws.cell(rr,16,r["cap"])
+    ws.cell(rr,17,r["danawaSellers"]); ws.cell(rr,18,r["reviews"]); ws.cell(rr,19,r["winnerShip"])
+    ws.cell(rr,20,r["sellerCountNew"]); ws.cell(rr,21," + ".join(sorted(r["src"])))
+    ws.cell(rr,22,r["signal"]); ws.cell(rr,23,r["risk"] or "")
     for j in range(1,NC+1):
         c=ws.cell(rr,j); c.border=bd
         if j not in (5,6): c.font=cf
         c.fill=PatternFill("solid",fgColor=FILL[COLS[j-1][2]])
         if j in (4,7,8,11): c.alignment=rgt; c.number_format='#,##0'
         elif j==9: c.alignment=rgt; c.number_format='0.0'
-        elif j in (3,5,6,13,14,20,21,22): c.alignment=lft
+        elif j in (3,5,6,12,14,15,21,22,23): c.alignment=lft
         else: c.alignment=ctr
     ws.row_dimensions[rr].height=28
 last=r0+len(rows)-1
@@ -210,6 +236,46 @@ ws.conditional_formatting.add(f"{Cmg}{r0}:{Cmg}{last}",CellIsRule(operator="less
 ws.conditional_formatting.add(f"{Cjd}{r0}:{Cjd}{last}",FormulaRule(formula=[f'{Cjd}{r0}="✅마진OK"'],fill=PatternFill("solid",fgColor="63BE7B"),font=Font(bold=True,color="FFFFFF",name="맑은 고딕")))
 ws.conditional_formatting.add(f"{Cjd}{r0}:{Cjd}{last}",FormulaRule(formula=[f'{Cjd}{r0}="❌미달"'],fill=PatternFill("solid",fgColor="FFC7CE"),font=Font(color="9C0006",name="맑은 고딕")))
 ws.conditional_formatting.add(f"{Cws}{r0}:{Cws}{last}",FormulaRule(formula=[f'ISNUMBER(SEARCH("로켓",{Cws}{r0}))'],fill=PatternFill("solid",fgColor="FFC7CE"),font=Font(color="9C0006",bold=True,name="맑은 고딕")))
+
+# ---- Sheet: 오늘기준 마진후보 (마진 양수만, 큰 순) ----
+cand=wb.create_sheet("오늘기준_마진후보", 1)
+ch=["순위","브랜드","모델명","다나와 매입가\n(비쿠팡 국내최저)","쿠팡 판매가","쿠팡가 출처","예상마진(원)\n11.88%공제","마진율(%)","국내최저 소싱처","다나와 URL","쿠팡 URL","주의/확인사항"]
+for j,h in enumerate(ch,1):
+    c=cand.cell(1,j,h); c.font=hdrf; c.fill=PatternFill("solid",fgColor="375623"); c.alignment=ctr; c.border=bd
+for j,w in enumerate([5,9,18,14,11,15,12,9,13,30,30,40],1): cand.column_dimensions[get_column_letter(j)].width=w
+cand.row_dimensions[1].height=30
+pos=[]
+for r in rows:
+    e=est(r)
+    if e is None or e<10: continue
+    rocket=("로켓" in str(r["winnerShip"])) or ("로켓" in str(r.get("risk","")))
+    suspect="과다의심" in str(r.get("risk",""))
+    pos.append((e,r,rocket,suspect))
+pos.sort(key=lambda x:(x[2] or x[3], -x[0]))   # 정상 후보 먼저, 마진 큰 순
+ri=2
+for e,r,rocket,suspect in pos:
+    warn=[]
+    if rocket: warn.append("🚀로켓(윙경쟁 불가→제외)")
+    if suspect: warn.append("⚠쿠팡가 과다의심(정가/오모델)")
+    if r.get("priceSrc","").startswith("웹검색"): warn.append("가격=웹검색근사, 등록 전 재확인")
+    if "다나와등재" in r.get("priceSrc",""): warn.append("가격=다나와 등재 쿠팡가(7/10)")
+    if str(r.get("reviews","")) in ("","0","None"): warn.append("쿠팡 리뷰수 미확인")
+    vals=[ri-1, r["brand"], r["model"], r["danawaBuy"], r["coupangPrice"], r.get("priceSrc",""),
+          round(e), round(e/r["coupangPrice"]*100,1), r["domesticSeller"], r["danawaUrl"], r["coupangUrl"], " / ".join(warn)]
+    for j,v in enumerate(vals,1):
+        c=cand.cell(ri,j,v); c.font=cf; c.border=bd
+        if j in (4,5,7): c.number_format='#,##0'; c.alignment=rgt
+        elif j==8: c.number_format='0.0'; c.alignment=rgt
+        elif j in (10,11): c.alignment=lft; c.hyperlink=(v or None); c.font=link
+        elif j in (3,9,12): c.alignment=lft
+        else: c.alignment=ctr
+        if rocket or suspect: c.fill=PatternFill("solid",fgColor="FFC7CE")
+        elif j==7: c.fill=PatternFill("solid",fgColor="C6EFCE")
+    cand.row_dimensions[ri].height=26
+    ri+=1
+cand.freeze_panes="A2"
+if ri==2:
+    cand.cell(2,1,"(오늘 기준 마진 ≥10원 후보 없음)")
 
 # ---- Sheet2 ----
 g=wb.create_sheet("사용법_및_판정"); g.column_dimensions["A"].width=3; g.column_dimensions["B"].width=112

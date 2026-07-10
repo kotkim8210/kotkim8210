@@ -18,10 +18,10 @@
  "SDH-WIN326KP": {
   "brand": "신일",
   "model": "SDH-WIN326KP",
-  "coupangUrl": "",
+  "coupangUrl": "https://www.coupang.com/vp/products/8694034530",
   "coupangPrice": 79800,
-  "rocket": null,
-  "priceNote": "쿠팡 스니펫 79,800(범위 62,940~89,000); 미니 펠티어"
+  "rocket": true,
+  "priceNote": "로켓배송 확인 80,100원 → 윙경쟁 불가"
  },
  "VO-DH004": {
   "brand": "보아르",
@@ -202,10 +202,10 @@
  "CDHC-160AAMWOYH": {
   "brand": "캐리어",
   "model": "CDHC-160AAMWOYH",
-  "coupangUrl": "",
+  "coupangUrl": "https://www.coupang.com/vp/products/7994205753",
   "coupangPrice": 349000,
-  "rocket": null,
-  "priceNote": "쿠팡 스니펫 349,000원; 상품ID·로켓 미확인"
+  "rocket": false,
+  "priceNote": "판매자배송(캐리어 브랜드스토어) 230,000원 정확 일치"
  },
  "SDH-PM230": {
   "brand": "신일",
@@ -306,10 +306,10 @@
  "DXAH100-JWK": {
   "brand": "위닉스",
   "model": "DXAH100-JWK",
-  "coupangUrl": "",
+  "coupangUrl": "https://www.coupang.com/vp/products/5465568286",
   "coupangPrice": null,
   "rocket": null,
-  "priceNote": "쿠팡 링크 미확인; G마켓 211,760~239,000"
+  "priceNote": "365,850원 근접(fallcent)"
  },
  "JR-DH0001WH": {
   "brand": "제니퍼룸",
@@ -530,10 +530,10 @@
  "DQ132PWXC": {
   "brand": "LG전자",
   "model": "DQ132PWXC",
-  "coupangUrl": "",
+  "coupangUrl": "https://www.coupang.com/vp/products/8263699906",
   "coupangPrice": null,
-  "rocket": null,
-  "priceNote": "쿠팡 미확인. 13L, 다나와 약33만"
+  "rocket": false,
+  "priceNote": "판매자배송 리스팅 632,250원(다나와등재 621,740 근접). 별도 리스팅 7155819261=864,000 판매자배송도 존재"
  },
  "AY70H18100GTD": {
   "brand": "삼성전자",
@@ -549,7 +549,7 @@
   "coupangUrl": "https://www.coupang.com/vp/products/201790143",
   "coupangPrice": 415000,
   "rocket": null,
-  "priceNote": "쿠팡 직접링크. 근사 415,000(리뷰1,356 별점4.7)"
+  "priceNote": "교차확인 완료. 리뷰 1,356·평점 4.7"
  },
  "DQ202PSUA": {
   "brand": "LG전자",
@@ -642,10 +642,10 @@
  "DH-16ZH45FG": {
   "brand": "쿠쿠",
   "model": "DH-16ZH45FG",
-  "coupangUrl": "",
+  "coupangUrl": "https://www.coupang.com/vp/products/8264748021",
   "coupangPrice": null,
   "rocket": null,
-  "priceNote": "쿠쿠 공식몰/렌탈 위주. 쿠팡 미확인. 다나와 정가 498,000."
+  "priceNote": "703,720원 정확 일치(fallcent)"
  },
  "AY18BG7500GBD": {
   "brand": "삼성전자",
@@ -698,10 +698,10 @@
  "AY70H23100GTD": {
   "brand": "삼성전자",
   "model": "AY70H23100GTD",
-  "coupangUrl": "",
+  "coupangUrl": "https://www.coupang.com/vp/products/9447872628",
   "coupangPrice": null,
   "rocket": null,
-  "priceNote": "쿠팡 미확인. 11번가 566,400 타처."
+  "priceNote": "960,000원 정확 일치(fallcent)"
  },
  "DQ256MEGA": {
   "brand": "LG전자",
@@ -718,5 +718,12 @@
   "coupangPrice": null,
   "rocket": null,
   "priceNote": "정확모델 쿠팡 미확인. 유사변형 YCDHM-C016LROW=폴센트 209,000."
+ },
+ "DXTE100-KWK": {
+  "model": "DXTE100-KWK",
+  "coupangUrl": "https://www.coupang.com/vp/products/5055349698",
+  "coupangPrice": null,
+  "rocket": null,
+  "priceNote": "⚠스니펫 249,000·당일출발(로켓 추정) — 다나와등재 399,000과 큰 차이. 옵션/리스팅 상이 가능, 등록 전 확인 필수"
  }
 }
