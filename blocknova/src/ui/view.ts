@@ -76,6 +76,8 @@ export interface GameOverData {
   highlights?: string[];
   /** Nearest weekly quest teaser line (Zeigarnik at the session seam). */
   questLine?: string;
+  /** Cosmic-egg progress line ("Next friend in N cells"). */
+  petLine?: string;
   /** Show the ticking next-daily countdown line. */
   countdown?: boolean;
   /** Tag the daily button with NEW (today's daily unplayed). */
@@ -132,8 +134,12 @@ export class View {
   private overNextLabel!: HTMLElement;
   private overNextRow!: HTMLElement;
   private overQuest!: HTMLElement;
+  private overPet!: HTMLElement;
   private overCountdown!: HTMLElement;
   private dailyDot!: HTMLElement;
+  eggBtn!: HTMLButtonElement;
+  private eggRing!: HTMLElement;
+  private eggCore!: HTMLElement;
   private modeChip!: HTMLElement;
   private bestRow!: HTMLElement;
   private sublineEl!: HTMLElement;
@@ -256,6 +262,14 @@ export class View {
       board.appendChild(cell);
     }
     this.boardEl = board;
+    // cosmic egg — fills as cells clear, hatches into collectible pets
+    this.eggBtn = el('button', 'egg') as HTMLButtonElement;
+    this.eggBtn.setAttribute('aria-label', t('pets_title'));
+    this.eggRing = el('span', 'egg-ring');
+    this.eggCore = el('span', 'egg-core', '🥚');
+    this.eggRing.appendChild(this.eggCore);
+    this.eggBtn.appendChild(this.eggRing);
+    board.appendChild(this.eggBtn);
     wrap.appendChild(board);
 
     // Tray
@@ -322,6 +336,7 @@ export class View {
     this.overNextLabel = el('div', 'text-xs text-dim mt-2 hidden', t('coming_next'));
     this.overNextRow = el('div', 'next-row hidden');
     this.overQuest = el('div', 'text-sm text-dim mb-1 hidden', '');
+    this.overPet = el('div', 'text-sm text-dim mb-1 hidden', '');
     this.overCountdown = el('div', 'text-sm font-bold text-nova mb-2 tabular-nums hidden', '');
     this.overNote = el('div', 'text-xs text-dim mb-3', '');
     this.reviveBtn = el('button', 'btn gold mb-2', `▶ ${t('revive')}`) as HTMLButtonElement;
@@ -342,6 +357,7 @@ export class View {
       this.overNextLabel,
       this.overNextRow,
       this.overQuest,
+      this.overPet,
       this.overCountdown,
       this.overNote,
       this.reviveBtn,
@@ -480,7 +496,25 @@ export class View {
 
   setMuted(muted: boolean): void {
     this.muteBtn.textContent = muted ? '🔇' : '🔊';
+    this.muteBtn.classList.toggle('muted', muted);
     this.soundToggleBtn.textContent = `${t('mute')}: ${muted ? 'OFF' : 'ON'}`;
+  }
+
+  /* ---------- cosmic pets ---------- */
+
+  setEgg(ratio: number, near: boolean, complete: boolean): void {
+    this.eggRing.style.setProperty('--p', ratio.toFixed(3));
+    this.eggCore.textContent = complete ? '🌟' : '🥚';
+    this.eggBtn.classList.toggle('near', near && !complete);
+  }
+
+  hatchFx(emoji: string, caption: string): void {
+    this.eggBtn.classList.remove('hatch');
+    void this.eggBtn.offsetWidth;
+    this.eggBtn.classList.add('hatch');
+    setTimeout(() => this.eggBtn.classList.remove('hatch'), 600);
+    this.wordPunch(emoji, 56);
+    this.floatScore(caption, true, { px: 17, topPct: 0.6 });
   }
 
   setFxLite(lite: boolean): void {
@@ -725,6 +759,8 @@ export class View {
     this.overNewBest.classList.toggle('hidden', !data.isNewBest);
     this.overQuest.textContent = data.questLine ?? '';
     this.overQuest.classList.toggle('hidden', !data.questLine);
+    this.overPet.textContent = data.petLine ?? '';
+    this.overPet.classList.toggle('hidden', !data.petLine);
     this.overCountdown.classList.toggle('hidden', !data.countdown);
 
     // exactly ONE gold CTA per sheet (ui-spec §3: gold = the primary action)
@@ -826,7 +862,10 @@ export class View {
     }
   }
 
-  showStats(rows: { label: string; value: string }[] | null): void {
+  showStats(
+    rows: { label: string; value: string }[] | null,
+    pets?: { emoji: string; name: string; unlocked: boolean; fresh: boolean }[],
+  ): void {
     if (!rows) {
       this.statsOverlay.classList.remove('on');
       return;
@@ -836,6 +875,24 @@ export class View {
       const tile = el('div', 'stat-tile');
       tile.append(el('div', 'v', r.value), el('div', 'k', r.label));
       this.statsGrid.appendChild(tile);
+    }
+    if (pets && pets.length > 0) {
+      const title = el(
+        'div',
+        'pets-span text-xs font-black text-dim tracking-widest mt-2',
+        `🥚 ${t('pets_title').toUpperCase()}`,
+      );
+      const grid = el('div', 'pets-grid pets-span');
+      for (const p of pets) {
+        const cell = el(
+          'div',
+          'pet-cell' + (p.unlocked ? (p.fresh ? ' fresh' : '') : ' locked'),
+          p.unlocked ? p.emoji : '❓',
+        );
+        cell.title = p.unlocked ? p.name : '???';
+        grid.appendChild(cell);
+      }
+      this.statsGrid.append(title, grid);
     }
     this.statsOverlay.classList.add('on');
   }

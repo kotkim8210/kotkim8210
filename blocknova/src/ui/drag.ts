@@ -13,6 +13,10 @@ export interface DragCallbacks {
   getSelected(): number | null;
   invalidFeedback(): void;
   isLocked(): boolean;
+  /** Piece lifted off the tray (cute pickup blip). */
+  onPickup(): void;
+  /** Ghost snapped onto a new valid anchor (tiny tick). */
+  onSnap(): void;
 }
 
 const TAP_SLOP_PX = 8;
@@ -74,10 +78,30 @@ export class DragController {
     this.cloneW = w * cell + (w - 1) * gap;
     this.cloneH = h * cell + (h - 1) * gap;
     const clone = renderPieceGrid(piece, cell, gap);
-    clone.classList.add('drag-clone');
+    clone.classList.add('drag-clone', 'pop-in');
     document.body.appendChild(clone);
     this.clone = clone;
     this.view.slots[this.trayIndex].classList.add('drag-src');
+    this.cb.onPickup();
+  }
+
+  private lastTrail = 0;
+
+  /** Sparkle trail behind the dragged piece (skipped in lite/reduced modes). */
+  private dropTrail(x: number, y: number): void {
+    const doc = document.documentElement;
+    if (doc.classList.contains('fx-lite') || doc.classList.contains('reduced-motion')) return;
+    const now = performance.now();
+    if (now - this.lastTrail < 90) return;
+    this.lastTrail = now;
+    const star = document.createElement('div');
+    star.className = 'trail-star';
+    star.textContent = '✦';
+    star.style.color = 'var(--color-nova-hi)';
+    star.style.left = `${x + (Math.random() * 14 - 7)}px`;
+    star.style.top = `${y + 6}px`;
+    document.body.appendChild(star);
+    setTimeout(() => star.remove(), 600);
   }
 
   private onMove(e: PointerEvent): void {
@@ -92,6 +116,7 @@ export class DragController {
     const left = e.clientX - this.cloneW / 2;
     const top = e.clientY - this.cloneH - lift;
     if (this.clone) this.clone.style.transform = `translate(${left}px, ${top}px)`;
+    this.dropTrail(left + this.cloneW / 2, top + this.cloneH);
     this.updateGhost(left, top);
   }
 
@@ -113,8 +138,10 @@ export class DragController {
     }
     const r = Math.max(0, Math.min(SIZE - h, row));
     const c = Math.max(0, Math.min(SIZE - w, col));
+    const moved = !this.anchor || this.anchor.row !== r || this.anchor.col !== c;
     this.anchor = { row: r, col: c };
     this.anchorValid = game.canPlaceTray(this.trayIndex, r, c);
+    if (moved && this.anchorValid) this.cb.onSnap();
     const cells: number[] = [];
     for (let sr = 0; sr < h; sr++) {
       for (let sc = 0; sc < w; sc++) {

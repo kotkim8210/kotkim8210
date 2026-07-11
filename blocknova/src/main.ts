@@ -14,6 +14,7 @@ import {
 import { applyXp, rankFor, xpProgress } from './engine/meta';
 import { advanceStreak, reconcileStreak, MAX_SHIELDS } from './engine/streak';
 import { isoWeekId, weeklyQuests } from './engine/quests';
+import { PETS, petProgress } from './engine/pets';
 import { store, type QuestsStore } from './core/storage';
 import { SoundEngine } from './core/audio';
 import { vibrate } from './core/device';
@@ -45,6 +46,8 @@ let runRecorded = { any: false, score: 0, nova: 0, lines: 0 };
 let gameOverCount = 0;
 /** Pending game-over timer — cancelled when a new run replaces the game. */
 let finishTimer: number | null = null;
+/** Most recently hatched pet (highlighted in the gallery this session). */
+let freshPet = -1;
 
 /* ---------- golden first move (game-design §11) ---------- */
 
@@ -288,6 +291,20 @@ function handleMove(move: MoveResult, prevBoard: number[], pieceColor: number): 
     view.setLevel(xpRes.meta.level, rankFor(xpRes.meta.level), xpProgress(xpRes.meta));
     questProgress(0, move.clearedRows.length + move.clearedCols.length);
     if (move.nova) questProgress(1, 1);
+
+    // cosmic egg: fills in real time, hatches mid-game (collection goal)
+    const petsBefore = petProgress(store.pets().cells);
+    store.addPetCells(removed.length);
+    const petsAfter = petProgress(store.pets().cells);
+    if (petsAfter.unlocked > petsBefore.unlocked) {
+      const pet = PETS[petsAfter.unlocked - 1];
+      freshPet = petsAfter.unlocked - 1;
+      view.hatchFx(pet.emoji, `${t('new_friend')} ${t(pet.key)}`);
+      sound.hatch();
+      view.confetti();
+      view.toast(`${pet.emoji} ${t(pet.key)}`);
+    }
+    view.setEgg(petsAfter.ratio, petsAfter.ratio >= 0.85, petsAfter.complete);
     // colors as they were before removal (placed cells take the piece color)
     const colorLookup = new Map<number, number>();
     for (const i of removed) {
@@ -444,10 +461,17 @@ function finishGame(): void {
     highlights: highlightChips(),
     nextPieces: game.upcomingPieces(3),
     questLine: questTeaser(),
+    petLine: petLine(),
     buttons: { playAgain: true, revive: !reviveUsed, daily: true },
     dailyNew: dailyUnplayed(),
   });
   maybeInterstitial();
+}
+
+function petLine(): string | undefined {
+  const p = petProgress(store.pets().cells);
+  if (p.complete) return t('pets_done');
+  return t('next_pet', { n: p.needed });
 }
 
 function restart(): void {
@@ -574,6 +598,7 @@ function toggleMute(): void {
   sound.setMuted(muted);
   store.setFlags({ mute: muted });
   view.setMuted(muted);
+  view.toast(muted ? t('sound_off') : t('sound_on'));
 }
 
 /* ---------- input controllers ---------- */
@@ -585,6 +610,8 @@ const inputCallbacks = {
   getSelected: () => selected,
   invalidFeedback: () => sound.invalid(),
   isLocked: () => paused || game.over,
+  onPickup: () => sound.pickup(),
+  onSnap: () => sound.snapTick(),
 };
 
 const drag = new DragController(view, inputCallbacks);
@@ -646,23 +673,42 @@ view.dailyCardBtn.addEventListener('click', () => {
   view.showGameOver(null);
   enterDaily();
 });
-view.statsBtn.addEventListener('click', () => {
+function showStatsModal(): void {
   const s = store.stats();
   const meta = store.meta();
   const streak = store.streak();
   const daily = store.daily();
-  view.showStats([
-    { label: t('st_best'), value: String(store.best().classic) },
-    { label: t('st_games'), value: String(s.games) },
-    { label: t('st_total'), value: String(s.totalScore) },
-    { label: t('st_lines'), value: String(s.linesTotal) },
-    { label: t('st_nova'), value: String(s.novaTotal) },
-    { label: t('st_level'), value: `Lv.${meta.level} ${rankFor(meta.level)}` },
-    { label: t('st_streak'), value: `🔥${streak.current} (max ${streak.max})` },
-    { label: t('st_shields'), value: '🛡'.repeat(streak.shields) || '—' },
-    { label: t('st_daily'), value: daily.day > -9000 ? `${'⭐'.repeat(daily.stars) || '0⭐'} ${daily.score}` : '—' },
-  ]);
+  const unlocked = petProgress(store.pets().cells).unlocked;
+  view.showStats(
+    [
+      { label: t('st_best'), value: String(store.best().classic) },
+      { label: t('st_games'), value: String(s.games) },
+      { label: t('st_total'), value: String(s.totalScore) },
+      { label: t('st_lines'), value: String(s.linesTotal) },
+      { label: t('st_nova'), value: String(s.novaTotal) },
+      { label: t('st_level'), value: `Lv.${meta.level} ${rankFor(meta.level)}` },
+      { label: t('st_streak'), value: `🔥${streak.current} (max ${streak.max})` },
+      { label: t('st_shields'), value: '🛡'.repeat(streak.shields) || '—' },
+      { label: t('st_daily'), value: daily.day > -9000 ? `${'⭐'.repeat(daily.stars) || '0⭐'} ${daily.score}` : '—' },
+    ],
+    PETS.map((p, i) => ({
+      emoji: p.emoji,
+      name: t(p.key),
+      unlocked: i < unlocked,
+      fresh: i === freshPet,
+    })),
+  );
+}
+view.statsBtn.addEventListener('click', showStatsModal);
+view.eggBtn.addEventListener('click', () => {
+  // mid-play: just whisper the progress; gallery opens from pause/game over
+  if (!paused && !game.over) {
+    view.toast(petLine() ?? '');
+    return;
+  }
+  showStatsModal();
 });
+view.eggBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
 view.statsCloseBtn.addEventListener('click', () => view.showStats(null));
 view.soundToggleBtn.addEventListener('click', toggleMute);
 view.fxToggleBtn.addEventListener('click', () => {
@@ -675,11 +721,17 @@ view.fxToggleBtn.addEventListener('click', () => {
 document.body.tabIndex = -1;
 window.addEventListener('pointerdown', () => window.focus(), { passive: true });
 
-// visual QA hook: ?bnfx exposes the nova effect for automated screenshots
+// visual QA hook: ?bnfx exposes the nova effect + audio state for automation
 if (new URLSearchParams(location.search).has('bnfx')) {
-  (window as unknown as Record<string, unknown>).__bnNovaFx = () => {
+  const w = window as unknown as Record<string, unknown>;
+  w.__bnNovaFx = () => {
     view.novaFx(40);
     sound.nova();
+  };
+  w.__bnAudio = () => sound.debug();
+  w.__bnHatch = () => {
+    view.hatchFx('🐶', `${t('new_friend')} ${t('pet_0')}`);
+    sound.hatch();
   };
 }
 
@@ -728,6 +780,10 @@ store.setStreak(bootStreak.state);
 refreshMetaChips();
 currentQuests(); // week rollover check
 view.setDailyBadge(dailyUnplayed());
+{
+  const p = petProgress(store.pets().cells);
+  view.setEgg(p.ratio, p.ratio >= 0.85, p.complete);
+}
 
 renderAll();
 requestAnimationFrame(() => {

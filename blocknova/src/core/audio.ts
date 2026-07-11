@@ -21,6 +21,42 @@ export class SoundEngine {
       if (document.hidden) void this.ctx.suspend();
       else if (!this.muted) void this.ctx.resume();
     });
+    // Bulletproof unlock: iOS Safari and sandboxed iframes only start audio
+    // from specific gesture events (touchend/click), and our first sound can
+    // land in a pointerup that doesn't qualify. Create + resume the context
+    // on the very first qualifying gesture and play a silent blip.
+    const unlock = () => {
+      if (this.muted) return;
+      const ctx = this.ensure();
+      if (ctx) {
+        void ctx.resume().then(() => {
+          try {
+            const buf = ctx.createBuffer(1, 1, 22050);
+            const src = ctx.createBufferSource();
+            src.buffer = buf;
+            src.connect(ctx.destination);
+            src.start(0);
+          } catch {
+            /* already unlocked */
+          }
+        });
+      }
+      if (ctx && ctx.state === 'running') {
+        window.removeEventListener('pointerdown', unlock);
+        window.removeEventListener('touchend', unlock);
+        window.removeEventListener('keydown', unlock);
+        window.removeEventListener('click', unlock);
+      }
+    };
+    window.addEventListener('pointerdown', unlock, { passive: true });
+    window.addEventListener('touchend', unlock, { passive: true });
+    window.addEventListener('keydown', unlock);
+    window.addEventListener('click', unlock);
+  }
+
+  /** QA hook: current audio pipeline state. */
+  debug(): { state: string; muted: boolean } {
+    return { state: this.ctx?.state ?? 'no-context', muted: this.muted };
   }
 
   /** Must be called from a user gesture at least once. */
@@ -149,6 +185,33 @@ export class SoundEngine {
 
   invalid(): void {
     this.tone(150, 0.09, 0, 'square', 0.22, 120);
+  }
+
+  /** Cute pickup blip when a piece is lifted from the tray. */
+  pickup(): void {
+    this.tone(330, 0.07, 0, 'sine', 0.4, 560);
+  }
+
+  private lastSnap = 0;
+
+  /** Tiny snap tick as the ghost lands on a new valid cell (throttled). */
+  snapTick(): void {
+    const now = performance.now();
+    if (now - this.lastSnap < 70) return;
+    this.lastSnap = now;
+    this.tone(950, 0.03, 0, 'sine', 0.14);
+  }
+
+  /** Egg hatch: crack-crack → sparkle → happy major triad. */
+  hatch(): void {
+    this.noise(0.05, 0, 3000, 3, 0.3);
+    this.noise(0.05, 0.12, 2600, 3, 0.32);
+    this.tone(880, 0.1, 0.24, 'sine', 0.3);
+    this.tone(1174, 0.1, 0.3, 'sine', 0.3);
+    this.tone(523, 0.22, 0.38, 'triangle', 0.8);
+    this.tone(659, 0.22, 0.38, 'triangle', 0.7);
+    this.tone(784, 0.3, 0.38, 'triangle', 0.7);
+    this.tone(1568, 0.25, 0.46, 'sine', 0.3);
   }
 
   gameOver(): void {

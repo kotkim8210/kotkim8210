@@ -41,6 +41,10 @@ export interface QuestsStore {
   progress: [number, number, number];
   done: [boolean, boolean, boolean];
 }
+export interface PetsStore {
+  /** Cumulative cleared cells feeding the cosmic egg. */
+  cells: number;
+}
 
 function read<T extends object>(key: string, fallback: T): T {
   try {
@@ -97,6 +101,12 @@ export const store = {
   },
   setQuests(patch: Partial<QuestsStore>): void {
     write('quests', { ...store.quests(), ...patch });
+  },
+  pets(): PetsStore {
+    return read('pets', { cells: 0 });
+  },
+  addPetCells(n: number): void {
+    write('pets', { cells: store.pets().cells + n });
   },
   stats(): StatsState {
     return read('stats', { games: 0, totalScore: 0, novaTotal: 0, linesTotal: 0 });
