@@ -21,16 +21,18 @@ export class SoundEngine {
       if (document.hidden) void this.ctx.suspend();
       else if (!this.muted) void this.ctx.resume();
     });
-    // Bulletproof unlock: iOS Safari and sandboxed iframes only start audio
-    // from specific gesture events (touchend/click), and our first sound can
-    // land in a pointerup that doesn't qualify. Create + resume the context
-    // on the very first qualifying gesture and play a silent blip.
-    const unlock = () => {
+    // Audio watchdog (permanent): mobile browsers kill or interrupt the
+    // context mid-session (calls, app switches, screen lock — iOS reports a
+    // non-standard 'interrupted' state, and can even 'close' the context).
+    // Every qualifying gesture nudges it back to 'running'; a closed context
+    // is recreated on the next sound. This also covers the initial unlock.
+    const poke = () => {
       if (this.muted) return;
-      const ctx = this.ensure();
-      if (ctx) {
+      const ctx = this.ensure(); // ensure() resumes any non-running state
+      if (ctx && ctx.state !== 'running') {
         void ctx.resume().then(() => {
           try {
+            // silent one-sample blip fully unlocks iOS output
             const buf = ctx.createBuffer(1, 1, 22050);
             const src = ctx.createBufferSource();
             src.buffer = buf;
@@ -41,17 +43,12 @@ export class SoundEngine {
           }
         });
       }
-      if (ctx && ctx.state === 'running') {
-        window.removeEventListener('pointerdown', unlock);
-        window.removeEventListener('touchend', unlock);
-        window.removeEventListener('keydown', unlock);
-        window.removeEventListener('click', unlock);
-      }
     };
-    window.addEventListener('pointerdown', unlock, { passive: true });
-    window.addEventListener('touchend', unlock, { passive: true });
-    window.addEventListener('keydown', unlock);
-    window.addEventListener('click', unlock);
+    window.addEventListener('pointerdown', poke, { passive: true });
+    window.addEventListener('touchend', poke, { passive: true });
+    window.addEventListener('keydown', poke);
+    window.addEventListener('click', poke);
+    window.addEventListener('pageshow', poke); // back-forward cache restore
   }
 
   /** QA hook: current audio pipeline state. */
@@ -63,13 +60,22 @@ export class SoundEngine {
   private ensure(): AudioContext | null {
     if (this.muted) return null;
     try {
+      // a context the browser force-closed is dead — rebuild from scratch
+      if (this.ctx && (this.ctx.state as string) === 'closed') {
+        this.ctx = null;
+        this.master = null;
+        this.noiseBuf = null;
+      }
       if (!this.ctx) {
         this.ctx = new AudioContext();
         this.master = this.ctx.createGain();
         this.master.gain.value = 0.32; // single master level for consistency
         this.master.connect(this.ctx.destination);
       }
-      if (this.ctx.state === 'suspended' && !document.hidden) void this.ctx.resume();
+      // recover from ANY non-running state ('suspended', iOS 'interrupted')
+      if ((this.ctx.state as string) !== 'running' && !document.hidden) {
+        void this.ctx.resume().catch(() => {});
+      }
       return this.ctx;
     } catch {
       return null;
