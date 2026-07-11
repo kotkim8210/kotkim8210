@@ -1,0 +1,605 @@
+@import 'tailwindcss';
+
+/* ui-spec.md §1 — Cosmic Glass tokens */
+@theme {
+  --color-bg: #17171c;
+  --color-deep: #232041;
+  --color-ink: #edeaf7;
+  --color-dim: #9a97ac;
+  --color-nova: #f5c518;
+  --color-nova-hi: #ffe9a0;
+  --color-danger: #f87171;
+  --radius-cell: 7px;
+  --radius-panel: 18px;
+  --font-sans: Pretendard, system-ui, sans-serif;
+}
+
+:root {
+  --gem-0: #22d3ee;
+  --gem-1: #8b5cf6;
+  --gem-2: #34d399;
+  --gem-3: #f472b6;
+  --gem-4: #f59e0b;
+  --gem-5: #60a5fa;
+  --cell-gap: 3px;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(120% 90% at 50% -10%, #232041 0%, #17171c 55%);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  /* portal rule: no long-press selection/zoom */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---- starfield (2 layers of box-shadow dots, GPU-cheap drift) ---- */
+.stars {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+.stars.a {
+  animation: drift 120s linear infinite;
+}
+.stars.b {
+  width: 3px;
+  height: 3px;
+  animation: drift 200s linear infinite;
+}
+@keyframes drift {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50vh);
+  }
+}
+.fx-lite .stars.b,
+.reduced-motion .stars.a,
+.reduced-motion .stars.b {
+  animation: none;
+}
+.fx-lite .stars.b {
+  display: none;
+}
+
+/* ---- glass panel ---- */
+.panel {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-panel);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* ---- app column ---- */
+.app-col {
+  position: relative;
+  z-index: 1;
+  height: 100dvh;
+  max-width: 26.5rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  padding: 0 16px calc(8px + env(safe-area-inset-bottom));
+  gap: 8px;
+}
+
+.logo-nova {
+  background: linear-gradient(90deg, var(--color-nova), var(--color-nova-hi));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---- board ---- */
+.board-wrap {
+  flex: 1 1 0;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+}
+.board {
+  position: relative;
+  width: min(100%, calc(100dvh - 296px));
+  max-width: 26.5rem;
+  aspect-ratio: 1;
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+  gap: var(--cell-gap);
+  padding: 8px;
+  touch-action: none;
+}
+
+.cell {
+  position: relative;
+  border-radius: var(--radius-cell);
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.45); /* recessed socket */
+}
+
+.cell.gem,
+.mini-cell.gem,
+.pop-cell {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.28), transparent 42%), var(--gem);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 12px -3px var(--gem);
+}
+.cell.gem::after,
+.mini-cell.gem::after {
+  content: '';
+  position: absolute;
+  top: 18%;
+  left: 18%;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+}
+.mini-cell {
+  position: relative;
+  border-radius: 4px;
+}
+
+/* ghost preview + invalid state */
+.cell.ghost-ok {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.22), transparent 42%), var(--gem);
+  opacity: 0.55;
+  border: 1px dashed rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 14px -2px var(--gem);
+}
+.cell.ghost-bad {
+  background: color-mix(in srgb, var(--color-danger) 38%, transparent);
+  border: 1px dashed color-mix(in srgb, var(--color-danger) 80%, transparent);
+  box-shadow: none;
+  opacity: 0.8;
+}
+/* occupied cell under an invalid footprint: keep the gem visible, flag in red */
+.cell.gem.ghost-bad {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.28), transparent 42%), var(--gem);
+  border: 1px dashed color-mix(in srgb, var(--color-danger) 90%, transparent);
+  box-shadow: 0 0 10px -2px var(--color-danger);
+  opacity: 0.7;
+}
+
+/* keyboard cursor */
+.cell.kb-cursor {
+  outline: 2px solid var(--color-nova);
+  outline-offset: 1px;
+  z-index: 1;
+}
+
+/* ---- tray ---- */
+.tray {
+  flex: none;
+  height: 96px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  touch-action: none;
+}
+.slot {
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-panel);
+  transition: transform 0.15s ease;
+  position: relative;
+}
+.slot.selected {
+  outline: 2px solid var(--color-nova);
+  outline-offset: -2px;
+}
+.slot .mini {
+  display: grid;
+  gap: 2px;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.slot.dim .mini {
+  opacity: 0.3;
+  filter: grayscale(1);
+}
+.slot.drag-src .mini {
+  opacity: 0.25;
+}
+/* idle pulse — affordance for placeable pieces only (ui-spec §5) */
+.slot.pulse .mini {
+  animation: idle-pulse 1.8s ease-in-out infinite;
+}
+@keyframes idle-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+.fx-lite .slot.pulse .mini,
+.reduced-motion .slot.pulse .mini {
+  animation: none;
+}
+
+/* desktop hover lift */
+@media (pointer: fine) {
+  .slot {
+    cursor: grab;
+  }
+  .slot:active {
+    cursor: grabbing;
+  }
+  .slot:not(.dim):hover {
+    transform: translateY(-2px);
+  }
+  .slot:not(.dim):hover .mini {
+    filter: drop-shadow(0 0 10px rgba(245, 197, 24, 0.35));
+  }
+}
+
+/* device-branched UI (CLAUDE.md absolute rules) */
+@media (pointer: coarse) {
+  .fine-only {
+    display: none !important;
+  }
+}
+@media (pointer: fine) {
+  .coarse-only {
+    display: none !important;
+  }
+}
+
+/* ---- drag clone ---- */
+.drag-clone {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 50;
+  display: grid;
+  gap: var(--cell-gap);
+  pointer-events: none;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.45));
+}
+.drag-clone .mini-cell {
+  border-radius: var(--radius-cell);
+}
+.drag-clone.bad .mini-cell {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-danger) 80%, transparent);
+}
+
+/* ---- HUD ---- */
+.hud-score {
+  font-size: 2.25rem;
+  line-height: 1;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+.combo-badge {
+  transform: scale(0);
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.combo-badge.on {
+  transform: scale(1);
+}
+
+/* nova meter */
+.nova-track {
+  position: relative;
+  height: 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+.nova-fill {
+  height: 100%;
+  width: 100%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--color-nova), var(--color-nova-hi));
+  /* transform-only animation (ui-spec §5) */
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+.nova-track.ready .nova-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 80%
+  );
+  transform: translateX(-100%);
+  animation: shimmer 1.6s linear infinite;
+}
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+.nova-ready-label {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.nova-track.ready ~ .nova-ready-label,
+.nova-ready-label.on {
+  opacity: 1;
+  animation: gold-pulse 1.2s ease-in-out infinite;
+}
+@keyframes gold-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+.reduced-motion .nova-track.ready .nova-fill::after,
+.reduced-motion .nova-ready-label.on {
+  animation: none;
+}
+
+/* ---- effects overlays ---- */
+.pop-cell {
+  position: absolute;
+  z-index: 10;
+  border-radius: var(--radius-cell);
+  pointer-events: none;
+  animation: cell-pop 0.22s ease forwards;
+}
+@keyframes cell-pop {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  45% {
+    transform: scale(1.25);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+.spark {
+  position: absolute;
+  z-index: 11;
+  width: 5px;
+  height: 5px;
+  border-radius: 2px;
+  pointer-events: none;
+  animation: spark-fly 0.5s ease-out forwards;
+}
+@keyframes spark-fly {
+  from {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translate(var(--dx), var(--dy)) scale(0.3);
+    opacity: 0;
+  }
+}
+
+.float-score {
+  position: absolute;
+  z-index: 12;
+  font-weight: 900;
+  pointer-events: none;
+  animation: float-up 0.7s ease-out forwards;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+@keyframes float-up {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-34px);
+    opacity: 0;
+  }
+}
+
+/* nova blast: white flash → gold ring → shake */
+.flash {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: white;
+  pointer-events: none;
+  animation: flash-out 0.24s ease-out forwards;
+}
+@keyframes flash-out {
+  0% {
+    opacity: 0.85;
+  }
+  25% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.nova-ring {
+  position: absolute;
+  z-index: 12;
+  border: 3px solid var(--color-nova);
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: 0 0 24px var(--color-nova), inset 0 0 18px rgba(245, 197, 24, 0.5);
+  animation: ring-out 0.48s ease-out forwards;
+}
+@keyframes ring-out {
+  from {
+    transform: scale(0.1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+.shake {
+  animation: shake 0.14s linear;
+}
+@keyframes shake {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(3px, -3px);
+  }
+  50% {
+    transform: translate(-3px, 2px);
+  }
+  75% {
+    transform: translate(2px, 3px);
+  }
+}
+.reduced-motion .shake {
+  animation: none;
+}
+
+/* edge glow flash on multi-line clears */
+.edge-glow {
+  position: fixed;
+  inset: 0;
+  z-index: 39;
+  pointer-events: none;
+  box-shadow: inset 0 0 60px 10px rgba(245, 197, 24, 0.45);
+  animation: flash-out 0.12s ease-out forwards;
+}
+
+/* ---- overlays ---- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  background: rgba(23, 23, 28, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.overlay.on {
+  opacity: 1;
+  pointer-events: auto;
+}
+.overlay .sheet {
+  width: min(88vw, 22rem);
+  padding: 24px;
+  text-align: center;
+}
+
+.btn {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-ink);
+  transition: transform 0.12s ease, background 0.12s ease;
+}
+.btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.btn:active {
+  transform: scale(0.97);
+}
+.btn.gold {
+  background: linear-gradient(90deg, var(--color-nova), var(--color-nova-hi));
+  color: #201a05;
+  border: none;
+}
+.btn:focus-visible,
+.icon-btn:focus-visible {
+  outline: 2px solid var(--color-nova);
+  outline-offset: 2px;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-ink);
+  font-size: 15px;
+}
+/* 44px+ touch targets on touch devices (ui-spec §6) */
+@media (pointer: coarse) {
+  .icon-btn {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* ---- desktop ambient sides (ui-spec §2) ---- */
+.ambient {
+  display: none;
+}
+@media (min-width: 768px) {
+  .ambient {
+    display: block;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: calc(50vw - 13.25rem);
+    z-index: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(35, 32, 65, 0.9), rgba(23, 23, 28, 0.2));
+  }
+  .ambient.left {
+    left: 0;
+  }
+  .ambient.right {
+    right: 0;
+  }
+  .ambient .gem-sil {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 36px;
+    opacity: 0.1;
+    filter: blur(2px);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.35), transparent 45%), var(--gem);
+  }
+}
+
+/* new-best gold flash on the score */
+.gold-flash {
+  animation: gold-flash 0.25s ease-in-out 2;
+}
+@keyframes gold-flash {
+  50% {
+    color: var(--color-nova);
+    text-shadow: 0 0 18px rgba(245, 197, 24, 0.8);
+  }
+}
