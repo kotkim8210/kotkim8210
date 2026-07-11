@@ -18,6 +18,14 @@ export interface StatsState {
   novaTotal: number;
   linesTotal: number;
 }
+export interface DailyState {
+  /** kstDayNumber of the recorded run; -9999 = never played. */
+  day: number;
+  score: number;
+  stars: number;
+  novaCount: number;
+  retried: boolean;
+}
 
 function read<T extends object>(key: string, fallback: T): T {
   try {
@@ -49,6 +57,12 @@ export const store = {
   },
   setFlags(patch: Partial<FlagsState>): void {
     write('flags', { ...store.flags(), ...patch });
+  },
+  daily(): DailyState {
+    return read('daily', { day: -9999, score: 0, stars: 0, novaCount: 0, retried: false });
+  },
+  setDaily(patch: Partial<DailyState>): void {
+    write('daily', { ...store.daily(), ...patch });
   },
   stats(): StatsState {
     return read('stats', { games: 0, totalScore: 0, novaTotal: 0, linesTotal: 0 });

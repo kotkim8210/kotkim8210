@@ -58,6 +58,12 @@ export interface GameOptions {
   /** Preset board / tray (used by tests and the Phase 2 golden first move). */
   board?: Board;
   tray?: (PieceDef | null)[];
+  /** Nova gauge pre-charge (golden first move: 50%). */
+  gauge?: number;
+  /** Daily mode (game-design §6): a fixed piece sequence consumed in order.
+   *  Refills take the next pieces verbatim — no bag constraints — so a given
+   *  day's run is identical for every player. */
+  queue?: PieceDef[];
 }
 
 export class Game {
@@ -70,7 +76,10 @@ export class Game {
   linesTotal = 0;
   novaCount = 0;
   maxCombo = 0;
+  piecesPlaced = 0;
   over = false;
+  readonly queue: PieceDef[] | null;
+  private queueIndex = 0;
   private readonly rng: Rng;
   private readonly pieces: PieceDef[];
   private lastRefillIds: number[] | null = null;
@@ -81,6 +90,8 @@ export class Game {
     this.pieces = opts.pieces ?? PIECES;
     this.best = opts.best ?? 0;
     this.board = opts.board ? [...opts.board] : emptyBoard();
+    this.queue = opts.queue ? [...opts.queue] : null;
+    this.gauge = Math.max(0, Math.min(NOVA_FULL, opts.gauge ?? 0));
     if (opts.tray) {
       this.tray = [...opts.tray];
       this.lastRefillIds = opts.tray.filter((p): p is PieceDef => !!p).map((p) => p.id);
@@ -90,7 +101,14 @@ export class Game {
     this.over = !this.anyMoves();
   }
 
-  private refill(): PieceDef[] {
+  private refill(): (PieceDef | null)[] {
+    if (this.queue) {
+      const next: (PieceDef | null)[] = [];
+      for (let i = 0; i < TRAY_SIZE; i++) {
+        next.push(this.queueIndex < this.queue.length ? this.queue[this.queueIndex++] : null);
+      }
+      return next;
+    }
     const draw = refillTray({
       pieces: this.pieces,
       rng: this.rng,
@@ -100,6 +118,16 @@ export class Game {
     });
     this.lastRefillIds = draw.map((p) => p.id);
     return draw;
+  }
+
+  /** Daily mode: pieces not yet placed out of the fixed sequence. */
+  remainingPieces(): number {
+    return this.queue ? this.queue.length - this.piecesPlaced : Infinity;
+  }
+
+  /** Daily survival: the run ended because all queued pieces were placed. */
+  get survived(): boolean {
+    return !!this.queue && this.over && this.piecesPlaced === this.queue.length;
   }
 
   gaugeIsFull(): boolean {
@@ -190,11 +218,12 @@ export class Game {
       }
     }
 
+    this.piecesPlaced += 1;
     this.tray[trayIndex] = null;
     let refilled = false;
     if (this.tray.every((p) => p === null)) {
       this.tray = this.refill();
-      refilled = true;
+      refilled = this.tray.some((p) => p !== null);
     }
 
     this.over = !this.anyMoves();

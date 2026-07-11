@@ -57,9 +57,24 @@ export function renderPieceGrid(piece: PieceDef, cellPx: number, gapPx = 2): HTM
 }
 
 export interface GameOverData {
+  title: string;
   score: number;
-  best: number;
+  /** Secondary line under the score (e.g. "BEST 384" or "NOVA ×2"). */
+  metaLine: string;
   isNewBest: boolean;
+  /** Daily: 0-5 stars; null hides the row. */
+  stars?: number | null;
+  /** Extra gold line (e.g. "SURVIVED ALL 50!"); empty hides it. */
+  banner?: string;
+  /** Small dim note (e.g. "기록은 첫 판만 인정"). */
+  note?: string;
+  buttons: {
+    playAgain?: boolean;
+    share?: boolean;
+    retry?: boolean;
+    retryDisabled?: boolean;
+    classic?: boolean;
+  };
 }
 
 export class View {
@@ -75,6 +90,7 @@ export class View {
   private novaLabel!: HTMLElement;
   pauseBtn!: HTMLButtonElement;
   muteBtn!: HTMLButtonElement;
+  dailyBtn!: HTMLButtonElement;
   private pauseOverlay!: HTMLElement;
   private overOverlay!: HTMLElement;
   resumeBtn!: HTMLButtonElement;
@@ -82,10 +98,22 @@ export class View {
   soundToggleBtn!: HTMLButtonElement;
   fxToggleBtn!: HTMLButtonElement;
   playAgainBtn!: HTMLButtonElement;
+  shareBtn!: HTMLButtonElement;
+  retryBtn!: HTMLButtonElement;
+  classicBtn!: HTMLButtonElement;
   private overTitle!: HTMLElement;
   private overScore!: HTMLElement;
   private overBest!: HTMLElement;
   private overNewBest!: HTMLElement;
+  private overStars!: HTMLElement;
+  private overBanner!: HTMLElement;
+  private overNote!: HTMLElement;
+  private modeChip!: HTMLElement;
+  private bestRow!: HTMLElement;
+  private sublineEl!: HTMLElement;
+  private bonusChip!: HTMLElement;
+  private toastEl: HTMLElement | null = null;
+  private toastTimer: number | null = null;
   private ghostCells: number[] = [];
   private cursorIdx: number | null = null;
   private displayedScore = 0;
@@ -121,16 +149,22 @@ export class View {
 
     // Header (48px)
     const header = el('header', 'flex items-center justify-between h-12 flex-none');
-    const logo = el('div', 'text-lg font-black tracking-wide');
+    const logoWrap = el('div', 'flex items-center gap-2 min-w-0');
+    const logo = el('div', 'text-lg font-black tracking-wide whitespace-nowrap');
     logo.append('BLOCK ', Object.assign(el('span', 'logo-nova'), { textContent: 'NOVA' }));
+    this.modeChip = el('span', 'mode-chip hidden');
+    logoWrap.append(logo, this.modeChip);
     const btns = el('div', 'flex gap-2');
+    this.dailyBtn = el('button', 'icon-btn') as HTMLButtonElement;
+    this.dailyBtn.textContent = '📅';
+    this.dailyBtn.setAttribute('aria-label', t('daily'));
     this.muteBtn = el('button', 'icon-btn') as HTMLButtonElement;
     this.muteBtn.setAttribute('aria-label', t('mute'));
     this.pauseBtn = el('button', 'icon-btn') as HTMLButtonElement;
     this.pauseBtn.textContent = '⏸';
     this.pauseBtn.setAttribute('aria-label', t('pause'));
-    btns.append(this.muteBtn, this.pauseBtn);
-    header.append(logo, btns);
+    btns.append(this.dailyBtn, this.muteBtn, this.pauseBtn);
+    header.append(logoWrap, btns);
 
     // HUD
     const hud = el('div', 'panel flex items-center gap-3 px-4 py-2 flex-none');
@@ -142,10 +176,11 @@ export class View {
       'combo-badge text-xs font-bold px-2 py-0.5 rounded-full bg-white/10 border border-white/15',
     );
     scoreRow.append(this.scoreEl, this.comboEl);
-    const bestRow = el('div', 'text-xs text-dim font-semibold tracking-wider');
+    this.bestRow = el('div', 'text-xs text-dim font-semibold tracking-wider');
     this.bestEl = el('span', 'tabular-nums', '0');
-    bestRow.append(`${t('best')} `, this.bestEl);
-    scoreBox.append(scoreRow, bestRow);
+    this.bestRow.append(`${t('best')} `, this.bestEl);
+    this.sublineEl = el('div', 'text-xs text-nova font-bold tracking-wider hidden');
+    scoreBox.append(scoreRow, this.bestRow, this.sublineEl);
 
     const novaBox = el('div', 'w-28 flex-none');
     const novaHead = el('div', 'flex items-center justify-between');
@@ -154,7 +189,8 @@ export class View {
     );
     this.novaLabel = el('span', 'nova-ready-label text-[10px] font-bold text-nova');
     this.novaLabel.textContent = t('nova_ready');
-    novaHead.appendChild(this.novaLabel);
+    this.bonusChip = el('span', 'bonus-chip hidden', t('bonus_charge'));
+    novaHead.append(this.novaLabel, this.bonusChip);
     this.novaTrack = el('div', 'nova-track mt-1');
     this.novaFill = el('div', 'nova-fill');
     this.novaTrack.appendChild(this.novaFill);
@@ -217,11 +253,29 @@ export class View {
     const overlay = el('div', 'overlay');
     const sheet = el('div', 'sheet panel');
     this.overTitle = el('h2', 'text-2xl font-black mb-1', t('game_over'));
+    this.overBanner = el('div', 'logo-nova font-black text-base', '');
     this.overNewBest = el('div', 'logo-nova font-black text-sm h-5', '');
+    this.overStars = el('div', 'stars-row my-1 hidden');
     this.overScore = el('div', 'hud-score my-2', '0');
-    this.overBest = el('div', 'text-xs text-dim font-semibold mb-4', '');
-    this.playAgainBtn = el('button', 'btn gold', t('play_again')) as HTMLButtonElement;
-    sheet.append(this.overTitle, this.overNewBest, this.overScore, this.overBest, this.playAgainBtn);
+    this.overBest = el('div', 'text-sm text-dim font-semibold mb-1', '');
+    this.overNote = el('div', 'text-xs text-dim mb-3', '');
+    this.playAgainBtn = el('button', 'btn gold mb-2', t('play_again')) as HTMLButtonElement;
+    this.shareBtn = el('button', 'btn gold mb-2', t('share')) as HTMLButtonElement;
+    this.retryBtn = el('button', 'btn mb-2', t('retry_ad')) as HTMLButtonElement;
+    this.classicBtn = el('button', 'btn', t('classic')) as HTMLButtonElement;
+    sheet.append(
+      this.overTitle,
+      this.overBanner,
+      this.overNewBest,
+      this.overStars,
+      this.overScore,
+      this.overBest,
+      this.overNote,
+      this.playAgainBtn,
+      this.shareBtn,
+      this.retryBtn,
+      this.classicBtn,
+    );
     overlay.appendChild(sheet);
     return overlay;
   }
@@ -421,27 +475,35 @@ export class View {
   }
 
   novaFx(centerIndex: number): void {
-    if (!this.reducedMotion) {
-      const flash = el('div', 'flash');
-      document.body.appendChild(flash);
-      setTimeout(() => flash.remove(), 300);
+    if (this.reducedMotion) {
+      // ui-spec §5: reduced-motion fallback is a gentle gold fade only
+      const fade = el('div', 'nova-fade');
+      document.body.appendChild(fade);
+      setTimeout(() => fade.remove(), 700);
+      this.floatScore(t('nova_boom'), true);
+      return;
+    }
+    const flash = el('div', 'flash');
+    document.body.appendChild(flash);
+    setTimeout(() => flash.remove(), 300);
 
-      const rect = this.cellRect(centerIndex);
-      const boardRect = this.boardEl.getBoundingClientRect();
-      const size = boardRect.width * 1.1;
-      const ring = el('div', 'nova-ring');
+    const rect = this.cellRect(centerIndex);
+    const boardRect = this.boardEl.getBoundingClientRect();
+    const size = boardRect.width * 1.1;
+    for (const cls of ['nova-ring', 'nova-ring late']) {
+      const ring = el('div', cls);
       ring.style.width = `${size}px`;
       ring.style.height = `${size}px`;
       ring.style.left = `${rect.left - boardRect.left + rect.width / 2 - size / 2}px`;
       ring.style.top = `${rect.top - boardRect.top + rect.height / 2 - size / 2}px`;
       this.boardEl.appendChild(ring);
-      setTimeout(() => ring.remove(), 520);
-
-      this.appCol.classList.remove('shake');
-      void this.appCol.offsetWidth;
-      this.appCol.classList.add('shake');
-      setTimeout(() => this.appCol.classList.remove('shake'), 200);
+      setTimeout(() => ring.remove(), 760);
     }
+
+    this.appCol.classList.remove('shake');
+    void this.appCol.offsetWidth;
+    this.appCol.classList.add('shake');
+    setTimeout(() => this.appCol.classList.remove('shake'), 200);
     this.floatScore(t('nova_boom'), true);
   }
 
@@ -460,9 +522,95 @@ export class View {
       this.overOverlay.classList.remove('on');
       return;
     }
+    this.overTitle.textContent = data.title;
     this.overScore.textContent = String(data.score);
-    this.overBest.textContent = `${t('best')} ${data.best}`;
+    this.overBest.textContent = data.metaLine;
     this.overNewBest.textContent = data.isNewBest ? t('new_best') : '';
+    this.overBanner.textContent = data.banner ?? '';
+    this.overBanner.classList.toggle('hidden', !data.banner);
+    this.overNote.textContent = data.note ?? '';
+    this.overNote.classList.toggle('hidden', !data.note);
+    if (data.stars !== undefined && data.stars !== null) {
+      this.overStars.textContent = '';
+      for (let i = 0; i < 5; i++) {
+        this.overStars.appendChild(el('span', i < data.stars ? '' : 'off', '⭐'));
+      }
+      this.overStars.classList.remove('hidden');
+    } else {
+      this.overStars.classList.add('hidden');
+    }
+    this.playAgainBtn.classList.toggle('hidden', !data.buttons.playAgain);
+    this.shareBtn.classList.toggle('hidden', !data.buttons.share);
+    this.retryBtn.classList.toggle('hidden', !data.buttons.retry);
+    this.retryBtn.disabled = !!data.buttons.retryDisabled;
+    this.retryBtn.textContent = data.buttons.retryDisabled ? t('retry_used') : t('retry_ad');
+    this.classicBtn.classList.toggle('hidden', !data.buttons.classic);
     this.overOverlay.classList.add('on');
+  }
+
+  /* ---------- Phase 2 additions ---------- */
+
+  /** Squash & stretch on freshly placed cells (ui-spec §5). */
+  markPlaced(indices: number[]): void {
+    for (const i of indices) {
+      const cell = this.cells[i];
+      if (!cell) continue;
+      cell.classList.remove('placed');
+      void cell.offsetWidth;
+      cell.classList.add('placed');
+    }
+  }
+
+  /** Confetti burst — gold + gem mix, capped at 24 (12 in lite mode). */
+  confetti(): void {
+    if (this.reducedMotion) return;
+    const count = this.fxLiteActive() ? 12 : 24;
+    const palette = ['var(--color-nova)', 'var(--color-nova-hi)', ...GEM_VARS.map((v) => `var(${v})`)];
+    const rng = mulberry32((performance.now() | 0) >>> 0);
+    for (let i = 0; i < count; i++) {
+      const c = el('div', 'confetto');
+      c.style.left = `${5 + rng() * 90}vw`;
+      c.style.background = palette[i % palette.length];
+      c.style.setProperty('--dur', `${1.1 + rng() * 0.9}s`);
+      c.style.setProperty('--spin', `${Math.round(360 + rng() * 540)}deg`);
+      c.style.animationDelay = `${rng() * 0.25}s`;
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 2400);
+    }
+  }
+
+  toast(text: string): void {
+    if (!this.toastEl) {
+      this.toastEl = el('div', 'toast');
+      document.body.appendChild(this.toastEl);
+    }
+    this.toastEl.textContent = text;
+    this.toastEl.classList.add('on');
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.toastTimer = window.setTimeout(() => this.toastEl?.classList.remove('on'), 1800);
+  }
+
+  setBonusChip(show: boolean): void {
+    this.bonusChip.classList.toggle('hidden', !show);
+  }
+
+  setModeChip(label: string | null): void {
+    this.modeChip.textContent = label ?? '';
+    this.modeChip.classList.toggle('hidden', !label);
+  }
+
+  /** Daily HUD line (replaces the BEST row while in daily mode). */
+  setSubline(text: string | null): void {
+    this.sublineEl.textContent = text ?? '';
+    this.sublineEl.classList.toggle('hidden', !text);
+    this.bestRow.classList.toggle('hidden', !!text);
+  }
+
+  novaTrackRect(): DOMRect {
+    return this.novaTrack.getBoundingClientRect();
+  }
+
+  slotRect(i: number): DOMRect {
+    return this.slots[i].getBoundingClientRect();
   }
 }

@@ -603,3 +603,178 @@ body {
     text-shadow: 0 0 18px rgba(245, 197, 24, 0.8);
   }
 }
+
+/* ---- Phase 2 juice ---- */
+
+/* placement squash & stretch (ui-spec §5): scale .92 → 1.05 → 1, 120ms */
+.cell.placed {
+  animation: squash 0.12s ease-out;
+}
+@keyframes squash {
+  0% {
+    transform: scale(0.92);
+  }
+  60% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.reduced-motion .cell.placed {
+  animation: none;
+}
+
+/* confetti (new best / perfect / daily survived) — ≤24, 12 in lite mode */
+.confetto {
+  position: fixed;
+  top: -12px;
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  z-index: 65;
+  pointer-events: none;
+  animation: confetti-fall var(--dur, 1.4s) ease-in forwards;
+}
+@keyframes confetti-fall {
+  from {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(105vh) rotate(var(--spin, 540deg));
+    opacity: 0.7;
+  }
+}
+
+/* second nova ring for a beefier detonation */
+.nova-ring.late {
+  animation-duration: 0.62s;
+  animation-delay: 0.08s;
+  border-width: 2px;
+  opacity: 0;
+  animation-fill-mode: both;
+}
+/* reduced-motion nova fallback: gold fade only (ui-spec §5) */
+.nova-fade {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(245, 197, 24, 0.28);
+  pointer-events: none;
+  animation: flash-out 0.6s ease-out forwards;
+}
+
+/* ---- coach marks (game-design §11) ---- */
+.coach {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+}
+.coach .spot {
+  position: absolute;
+  border-radius: 16px;
+  box-shadow: 0 0 0 9999px rgba(10, 9, 20, 0.62);
+  border: 2px solid var(--color-nova);
+  transition: all 0.25s ease;
+}
+.coach .tip {
+  position: absolute;
+  max-width: 220px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(35, 32, 65, 0.95);
+  border: 1px solid rgba(245, 197, 24, 0.5);
+  color: var(--color-ink);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  transition: all 0.25s ease;
+}
+.coach .arrow {
+  position: absolute;
+  font-size: 26px;
+  color: var(--color-nova);
+  text-shadow: 0 0 12px rgba(245, 197, 24, 0.8);
+  animation: bounce 0.8s ease-in-out infinite;
+  transition: all 0.25s ease;
+}
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(8px);
+  }
+}
+.reduced-motion .coach .arrow {
+  animation: none;
+}
+.coach .skip {
+  position: absolute;
+  top: calc(10px + env(safe-area-inset-top));
+  right: 12px;
+  pointer-events: auto;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-ink);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* bonus pre-charge chip on the nova meter */
+.bonus-chip {
+  font-size: 11px;
+  font-weight: 800;
+  color: #201a05;
+  background: linear-gradient(90deg, var(--color-nova), var(--color-nova-hi));
+  border-radius: 8px;
+  padding: 1px 6px;
+  animation: gold-pulse 1.2s ease-in-out infinite;
+}
+
+/* ---- daily ---- */
+.stars-row {
+  font-size: 26px;
+  letter-spacing: 4px;
+}
+.stars-row .off {
+  opacity: 0.25;
+  filter: grayscale(1);
+}
+.mode-chip {
+  font-size: 12px;
+  font-weight: 800;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgba(245, 197, 24, 0.14);
+  border: 1px solid rgba(245, 197, 24, 0.45);
+  color: var(--color-nova);
+}
+
+/* ---- toast ---- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  transform: translateX(-50%) translateY(20px);
+  z-index: 80;
+  padding: 10px 18px;
+  border-radius: 14px;
+  background: rgba(35, 32, 65, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: var(--color-ink);
+  font-size: 14px;
+  font-weight: 700;
+  opacity: 0;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  pointer-events: none;
+}
+.toast.on {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}

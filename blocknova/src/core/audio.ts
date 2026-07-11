@@ -1,10 +1,17 @@
 /** WebAudio synth only (no assets). One master gain node keeps levels
  *  consistent; the context suspends when the tab goes to background and
- *  resumes on return (CLAUDE.md absolute rules). */
+ *  resumes on return (CLAUDE.md absolute rules).
+ *
+ *  Sound design (ui-spec §4 + "dopamine layer"): placement = cute pluck with
+ *  a tiny upward pitch bend, clear = rising arpeggio + noise sparkle with the
+ *  combo pitch-up (440Hz × 2^(combo/12), capped at 12), nova = sub boom +
+ *  riser + glitter cascade, new best = 3-note fanfare. */
 
 export class SoundEngine {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
+  private noiseBuf: AudioBuffer | null = null;
+  private placeAlt = 0;
   muted: boolean;
 
   constructor(muted = false) {
@@ -23,7 +30,7 @@ export class SoundEngine {
       if (!this.ctx) {
         this.ctx = new AudioContext();
         this.master = this.ctx.createGain();
-        this.master.gain.value = 0.35; // single master level for consistency
+        this.master.gain.value = 0.32; // single master level for consistency
         this.master.connect(this.ctx.destination);
       }
       if (this.ctx.state === 'suspended' && !document.hidden) void this.ctx.resume();
@@ -47,6 +54,7 @@ export class SoundEngine {
     at = 0,
     type: OscillatorType = 'sine',
     gain = 1,
+    bendTo?: number,
   ): void {
     const ctx = this.ensure();
     if (!ctx || !this.master) return;
@@ -55,6 +63,7 @@ export class SoundEngine {
     const g = ctx.createGain();
     osc.type = type;
     osc.frequency.setValueAtTime(freq, t0);
+    if (bendTo) osc.frequency.exponentialRampToValueAtTime(bendTo, t0 + dur * 0.7);
     g.gain.setValueAtTime(0, t0);
     g.gain.linearRampToValueAtTime(gain, t0 + 0.008);
     g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
@@ -63,43 +72,82 @@ export class SoundEngine {
     osc.stop(t0 + dur + 0.02);
   }
 
-  /** Placement: short woodblock-ish tick (~120ms). */
-  place(): void {
-    this.tone(660, 0.09, 0, 'triangle', 0.9);
-    this.tone(1320, 0.05, 0, 'sine', 0.25);
+  /** Short filtered-noise burst (sparkle/crash). */
+  private noise(dur: number, at = 0, freq = 4000, q = 1, gain = 0.3): void {
+    const ctx = this.ensure();
+    if (!ctx || !this.master) return;
+    if (!this.noiseBuf) {
+      const len = Math.floor(ctx.sampleRate * 0.5);
+      this.noiseBuf = ctx.createBuffer(1, len, ctx.sampleRate);
+      const data = this.noiseBuf.getChannelData(0);
+      for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+    }
+    const t0 = ctx.currentTime + at;
+    const src = ctx.createBufferSource();
+    src.buffer = this.noiseBuf;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = freq;
+    filter.Q.value = q;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(gain, t0);
+    g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+    src.connect(filter).connect(g).connect(this.master);
+    src.start(t0);
+    src.stop(t0 + dur + 0.02);
   }
 
-  /** Clear: rising arpeggio; combo pitch-up 440Hz × 2^(combo/12), capped at 12. */
+  /** Placement: cute two-alternating pluck with a tiny upward bend. */
+  place(): void {
+    this.placeAlt = (this.placeAlt + 1) % 4;
+    const base = [523, 587, 659, 587][this.placeAlt]; // C5 D5 E5 D5 — playful
+    this.tone(base * 0.75, 0.1, 0, 'sine', 0.9, base * 1.1);
+    this.tone(base * 2, 0.05, 0.01, 'triangle', 0.22);
+    this.noise(0.04, 0, 5200, 2, 0.1); // soft tick
+  }
+
+  /** Clear: rising arpeggio + sparkle; combo pitch-up 440 × 2^(combo/12), cap 12. */
   clear(combo: number): void {
     const base = 440 * Math.pow(2, Math.min(combo, 12) / 12);
-    this.tone(base, 0.12, 0, 'triangle', 0.8);
-    this.tone(base * 1.26, 0.12, 0.06, 'triangle', 0.8);
-    this.tone(base * 1.5, 0.16, 0.12, 'triangle', 0.8);
+    this.tone(base, 0.14, 0, 'triangle', 0.85);
+    this.tone(base * 1.26, 0.14, 0.055, 'triangle', 0.85);
+    this.tone(base * 1.5, 0.2, 0.11, 'triangle', 0.9);
+    this.tone(base * 2, 0.24, 0.165, 'sine', 0.55);
+    this.noise(0.22, 0.05, 6500, 1.2, 0.22); // glittery sweep
   }
 
-  /** Nova: low boom + glitter. */
+  /** Big multi-line clear accent (2+ lines). */
+  bigClear(): void {
+    this.tone(196, 0.3, 0, 'sawtooth', 0.25, 392);
+    this.noise(0.3, 0, 2400, 0.8, 0.28);
+  }
+
+  /** Nova: sub boom + riser + glitter cascade. */
   nova(): void {
-    this.tone(70, 0.5, 0, 'sine', 1.2);
-    this.tone(140, 0.35, 0.02, 'sine', 0.6);
-    for (let i = 0; i < 5; i++) {
-      this.tone(1200 + i * 320, 0.1, 0.1 + i * 0.05, 'sine', 0.2);
-    }
+    this.tone(55, 0.7, 0, 'sine', 1.35);
+    this.tone(110, 0.5, 0.02, 'sine', 0.7);
+    this.tone(220, 0.5, 0.02, 'sawtooth', 0.18, 880); // riser
+    this.noise(0.5, 0.02, 1800, 0.7, 0.4); // crash
+    const glitter = [1046, 1318, 1568, 2093, 2637];
+    glitter.forEach((f, i) => this.tone(f, 0.14, 0.16 + i * 0.055, 'sine', 0.28));
   }
 
-  /** New best: 3-note fanfare. */
+  /** New best / perfect: 3-note fanfare + shimmer. */
   fanfare(): void {
-    this.tone(523, 0.14, 0, 'triangle', 0.9);
-    this.tone(659, 0.14, 0.12, 'triangle', 0.9);
-    this.tone(784, 0.28, 0.24, 'triangle', 0.9);
+    this.tone(523, 0.15, 0, 'triangle', 0.95);
+    this.tone(659, 0.15, 0.12, 'triangle', 0.95);
+    this.tone(784, 0.34, 0.24, 'triangle', 1.0);
+    this.tone(1046, 0.3, 0.3, 'sine', 0.5);
+    this.noise(0.35, 0.24, 7000, 1, 0.2);
   }
 
   invalid(): void {
-    this.tone(160, 0.1, 0, 'square', 0.25);
+    this.tone(150, 0.09, 0, 'square', 0.22, 120);
   }
 
   gameOver(): void {
     this.tone(392, 0.18, 0, 'triangle', 0.8);
     this.tone(311, 0.18, 0.16, 'triangle', 0.8);
-    this.tone(233, 0.32, 0.32, 'triangle', 0.8);
+    this.tone(233, 0.36, 0.32, 'triangle', 0.8);
   }
 }
