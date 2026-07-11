@@ -34,6 +34,8 @@ let movesThisRun = 0;
 let reviveUsed = false;
 /** Stats already credited for the current run (revive keeps the run going). */
 let runRecorded = { any: false, score: 0, nova: 0, lines: 0 };
+/** monetization §2: interstitial on every 2nd game over, result screen only. */
+let gameOverCount = 0;
 
 /* ---------- golden first move (game-design §11) ---------- */
 
@@ -293,6 +295,12 @@ function highlightChips(): string[] {
   return chips;
 }
 
+/** Never during play — only once the result sheet is already up. */
+function maybeInterstitial(): void {
+  gameOverCount += 1;
+  if (gameOverCount % 2 === 0) ads.showInterstitial();
+}
+
 function finishGame(): void {
   ads.gameplayStop();
   recordRunStats();
@@ -337,6 +345,7 @@ function finishGame(): void {
       nextPieces: game.survived ? [] : game.upcomingPieces(3),
       buttons: { share: true, retry: true, retryDisabled: recNow.retried, classic: true },
     });
+    maybeInterstitial();
     return;
   }
 
@@ -363,6 +372,7 @@ function finishGame(): void {
     nextPieces: game.upcomingPieces(3),
     buttons: { playAgain: true, revive: !reviveUsed, daily: true },
   });
+  maybeInterstitial();
 }
 
 function restart(): void {
