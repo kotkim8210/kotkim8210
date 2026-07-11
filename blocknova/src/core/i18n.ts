@@ -65,6 +65,14 @@ const en: Dict = {
   st_level: 'Level',
   st_daily: 'Daily best',
   highlights: 'Highlights',
+  praise_2: 'Great!',
+  praise_3: 'Amazing!',
+  praise_4: 'Unstoppable!',
+  praise_5: 'COSMIC!',
+  next_daily: 'Next Daily in {t}',
+  new_tag: 'NEW',
+  streak_risk: '🔥 {n}-day streak — one game today keeps it!',
+  first_best: 'Your first record!',
 };
 
 const ko: Dict = {
@@ -127,6 +135,14 @@ const ko: Dict = {
   st_level: '레벨',
   st_daily: '데일리 최고',
   highlights: '하이라이트',
+  praise_2: '좋아요!',
+  praise_3: '굉장해요!',
+  praise_4: '멈출 수 없어!',
+  praise_5: '코스믹!!',
+  next_daily: '다음 데일리까지 {t}',
+  new_tag: 'NEW',
+  streak_risk: '🔥 {n}일 스트릭 — 오늘 한 판이면 유지!',
+  first_best: '첫 기록 달성!',
 };
 
 function currentLang(): 'en' | 'ko' {

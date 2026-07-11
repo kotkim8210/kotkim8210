@@ -3,7 +3,14 @@ import { Game, type MoveResult } from './engine/game';
 import { randomSeed } from './engine/rng';
 import { idx } from './engine/board';
 import { goldenBoard, goldenTray, GOLDEN_PRECHARGE } from './engine/golden';
-import { kstDayNumber, dailyPieces, dailySeed, starsFor, shareText } from './engine/daily';
+import {
+  kstDayNumber,
+  kstStartOfDay,
+  dailyPieces,
+  dailySeed,
+  starsFor,
+  shareText,
+} from './engine/daily';
 import { applyXp, rankFor, xpProgress } from './engine/meta';
 import { advanceStreak, reconcileStreak, MAX_SHIELDS } from './engine/streak';
 import { isoWeekId, weeklyQuests } from './engine/quests';
@@ -189,6 +196,45 @@ function refreshMetaChips(): void {
   view.setStreak(s.current, s.shields);
 }
 
+function dailyUnplayed(): boolean {
+  return store.daily().day !== kstDayNumber();
+}
+
+/** Zeigarnik teaser: the weekly quest closest to completion. */
+function questTeaser(): string | undefined {
+  const open = questLabels().filter((q) => !q.done);
+  if (open.length === 0) return undefined;
+  const q = open.reduce((a, b) => (a.target - a.progress <= b.target - b.progress ? a : b));
+  return `🎯 ${q.label} · ${q.progress}/${q.target}`;
+}
+
+/* next-daily countdown (appointment mechanic) */
+let countdownTimer: number | null = null;
+
+function fmtCountdown(): string {
+  const now = Date.now();
+  const next = kstStartOfDay(now) + 86_400_000;
+  const s = Math.max(0, Math.floor((next - now) / 1000));
+  const h = String(Math.floor(s / 3600)).padStart(2, '0');
+  const m = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+  const sec = String(s % 60).padStart(2, '0');
+  return `${h}:${m}:${sec}`;
+}
+
+function startCountdown(): void {
+  stopCountdown();
+  const update = () => view.setCountdown(t('next_daily', { t: fmtCountdown() }));
+  update();
+  countdownTimer = window.setInterval(update, 1000);
+}
+
+function stopCountdown(): void {
+  if (countdownTimer) {
+    clearInterval(countdownTimer);
+    countdownTimer = null;
+  }
+}
+
 function setSelected(i: number | null): void {
   selected = i;
   if (i !== null) advanceCoach(2);
@@ -228,10 +274,16 @@ function handleMove(move: MoveResult, prevBoard: number[], pieceColor: number): 
   if (removed.length > 0) {
     view.setBonusChip(false);
     // §12: 1 cleared cell = 1 XP (level-ups roll over)
-    const xpRes = applyXp(store.meta(), removed.length);
+    const metaBefore = store.meta();
+    const xpRes = applyXp(metaBefore, removed.length);
     store.setMeta(xpRes.meta);
     if (xpRes.levelsGained > 0) {
       view.toast(t('level_up', { n: xpRes.meta.level, rank: rankFor(xpRes.meta.level) }));
+      // rank-tier promotions get a board-level moment, not just a toast
+      if (rankFor(xpRes.meta.level) !== rankFor(metaBefore.level)) {
+        view.wordPunch(`${rankFor(xpRes.meta.level)}!`, 34);
+        view.confetti();
+      }
     }
     view.setLevel(xpRes.meta.level, rankFor(xpRes.meta.level), xpProgress(xpRes.meta));
     questProgress(0, move.clearedRows.length + move.clearedCols.length);
@@ -242,10 +294,16 @@ function handleMove(move: MoveResult, prevBoard: number[], pieceColor: number): 
       const v = prevBoard[i];
       colorLookup.set(i, v > 0 ? v - 1 : pieceColor);
     }
-    view.popCells(removed, colorLookup);
+    view.popCells(removed, colorLookup, !move.nova);
     sound.clear(move.combo);
     vibrate(30);
     view.floatScore(`+${move.gained}`, move.nova);
+    // combo praise ladder — the visual arousal escalation to match the
+    // pitch-up sound (Great! → Amazing! → Unstoppable! → COSMIC!)
+    if (move.combo >= 2) {
+      const tier = Math.min(5, move.combo);
+      view.floatScore(t(`praise_${tier}`), tier >= 4, { px: 12 + tier * 4, topPct: 0.46 });
+    }
     const lines = move.clearedRows.length + move.clearedCols.length;
     if (lines >= 2 && !move.nova) {
       view.edgeGlow();
@@ -339,6 +397,7 @@ function finishGame(): void {
       sound.gameOver();
     }
     const recNow = store.daily();
+    view.setDailyBadge(false);
     view.showGameOver({
       title: t('daily_title', { n: dailyDay }),
       score: game.score,
@@ -349,16 +408,23 @@ function finishGame(): void {
       note: first ? '' : t('daily_recorded'),
       highlights: highlightChips(),
       nextPieces: game.survived ? [] : game.upcomingPieces(3),
+      countdown: true,
       buttons: { share: true, retry: true, retryDisabled: recNow.retried, classic: true },
     });
+    startCountdown();
     maybeInterstitial();
     return;
   }
 
-  sound.gameOver();
   store.setBest({ classic: game.best });
   const isNewBest = game.score > startingBest;
-  if (isNewBest && startingBest > 0) view.confetti();
+  // celebrate every new record — including the very first one (peak-end)
+  if (isNewBest) {
+    sound.fanfare();
+    view.confetti();
+  } else {
+    sound.gameOver();
+  }
 
   // §12 near-miss: distance to best + reveal of the upcoming pieces
   const gap = startingBest - game.score;
@@ -373,10 +439,13 @@ function finishGame(): void {
     score: game.score,
     metaLine: `${t('best')} ${game.best}`,
     isNewBest,
+    banner: isNewBest && startingBest === 0 ? t('first_best') : '',
     gapText,
     highlights: highlightChips(),
     nextPieces: game.upcomingPieces(3),
+    questLine: questTeaser(),
     buttons: { playAgain: true, revive: !reviveUsed, daily: true },
+    dailyNew: dailyUnplayed(),
   });
   maybeInterstitial();
 }
@@ -386,6 +455,7 @@ function restart(): void {
     backToClassic();
     return;
   }
+  stopCountdown();
   game = newClassicGame();
   selected = null;
   paused = false;
@@ -402,6 +472,7 @@ function restart(): void {
 /* ---------- daily mode (game-design §6) ---------- */
 
 function beginDailyRun(): void {
+  stopCountdown();
   mode = 'daily';
   dailyDay = kstDayNumber();
   movesThisRun = 0;
@@ -434,17 +505,21 @@ function enterDaily(): void {
       isNewBest: false,
       stars: rec.stars,
       note: t('daily_recorded'),
+      countdown: true,
       buttons: { share: true, retry: true, retryDisabled: rec.retried, classic: true },
     });
+    startCountdown();
     return;
   }
   beginDailyRun();
 }
 
 function backToClassic(): void {
+  stopCountdown();
   mode = 'classic';
   view.setModeChip(null);
   view.setSubline(null);
+  view.setDailyBadge(dailyUnplayed());
   view.showGameOver(null);
   restart();
 }
@@ -484,6 +559,11 @@ function setPaused(next: boolean): void {
   if (paused === next) return;
   paused = next;
   if (next) view.renderQuests(questLabels());
+  // coach overlay sits above the pause sheet — hide it while paused
+  if (coach) {
+    if (next) coach.hide();
+    else if (coachStep > 0) positionCoach();
+  }
   view.showPause(next);
   if (next) ads.gameplayStop();
   else ads.gameplayStart();
@@ -538,6 +618,7 @@ view.retryBtn.addEventListener('click', () => {
 view.classicBtn.addEventListener('click', () => {
   if (mode === 'daily') backToClassic();
   else {
+    stopCountdown();
     view.showGameOver(null);
     view.setModeChip(null);
   }
@@ -646,6 +727,7 @@ const bootStreak = reconcileStreak(store.streak(), kstDayNumber());
 store.setStreak(bootStreak.state);
 refreshMetaChips();
 currentQuests(); // week rollover check
+view.setDailyBadge(dailyUnplayed());
 
 renderAll();
 requestAnimationFrame(() => {
@@ -657,6 +739,14 @@ requestAnimationFrame(() => {
     document.body.focus();
     if (isGoldenRun()) startCoach();
     if (bootStreak.shieldsUsed > 0) view.toast(t('streak_kept'));
+    // streak-risk cue: a live streak with today unplayed is worth protecting
+    const st = bootStreak.state;
+    if (st.current > 0 && st.lastDay < kstDayNumber()) {
+      setTimeout(
+        () => view.toast(t('streak_risk', { n: st.current })),
+        bootStreak.shieldsUsed > 0 ? 2300 : 700,
+      );
+    }
     startFrameSampler();
   });
 });

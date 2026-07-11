@@ -14,7 +14,7 @@ CLAUDE.md "절대 규칙" 전 항목 자체 점검 결과. 측정치는 Playwrig
 | 7 | 입력 3종: 키보드 (화살표 커서·1/2/3·Enter·**P 일시정지**·M 음소거, ESC 단독 금지) | ✅ | `src/ui/keyboard.ts` — P가 기본 일시정지, ESC는 보조 바인딩 |
 | 8 | 기기별 분기: 터치 전용 UI 숨김 · Tap↔Click 자동 전환 | ✅ | `src/style.css` `@media(pointer:…)` `.coarse-only/.fine-only`, `src/core/i18n.ts` `{action}` 치환 |
 | 9 | 데스크톱: 중앙 세로 컬럼 + 측면 앰비언트 배경 | ✅ | `src/style.css` `.ambient`, `src/ui/view.ts` — 1280px 스모크 검증 |
-| 10 | 저사양: transform/opacity만 · 파티클 ≤24(라이트 12) · 프레임 샘플링 자동 이펙트 축소 | ✅ | `src/style.css`(전 애니메이션 transform/opacity), `src/ui/view.ts` 파티클 상한, `src/main.ts` `startFrameSampler`(45fps 미만 2회→라이트) + 일시정지 수동 토글 |
+| 10 | 저사양: transform/opacity만 · 파티클 ≤24(라이트 12) · 프레임 샘플링 자동 이펙트 축소 | ✅ | `src/style.css`(전 애니메이션 transform/opacity), `src/ui/view.ts` 파티클 상한(노바 턴은 클리어 스파크 생략으로 예산 공유), `src/main.ts` `startFrameSampler`(45fps 미만 2회→라이트, 백그라운드 탭 윈도 폐기) + 라이트 모드에서 backdrop-blur 해제 + 일시정지 수동 토글 |
 | 11 | `user-select:none` 계열 (롱프레스/확대 방지) | ✅ | `src/style.css` body + `-webkit-touch-callout:none`, `src/ui/drag.ts` contextmenu 차단, viewport `user-scalable=no` |
 | 12 | iframe 내 정상 동작 · 전체화면 API 미호출 | ✅ | 크로스오리진 iframe 하네스에서 렌더+키보드 배치 실측 통과. `requestFullscreen` grep **0건**. 포인터 다운 시 `window.focus()` |
 | 13 | 오디오: WebAudio 합성음만 · 단일 마스터 게인(레벨 일정) · 백그라운드 정지/복귀 | ✅ | `src/core/audio.ts` — master GainNode 1개, `visibilitychange` suspend/resume |
@@ -36,6 +36,11 @@ CLAUDE.md "절대 규칙" 전 항목 자체 점검 결과. 측정치는 Playwrig
 | 모바일 뷰포트 390×844 | ✅ 무스크롤·트레이 가시 | |
 | 모바일 뷰포트 412×915 | ✅ 무스크롤·트레이 가시 | |
 | 380×660 (기준 스펙) | ✅ 무스크롤 + 터치 드래그/탭-탭 배치 | Phase 1부터 회귀 검증 |
+
+## 문서화된 스펙 편차 (조정 시 문서화 규칙)
+- 노바 셰이크: ui-spec §5의 ±3px/140ms → **±5px+0.4° 회전/220ms** (발주자 "도파민" 강화 요청, 2026-07-11)
+- 폰트 최소 14px: 본문·힌트·버튼·퀘스트/칩 등 가독 텍스트는 13px+ 적용. NOVA 워드마크(11px)·통계 라벨(12px)은 그래픽 성격의 마이크로 캡션으로 예외 처리
+- 게임오버 시트에 max-height + 스크롤 안전장치 추가 (짧은 포털 iframe 대비)
 
 ## SDK 활성화 절차 (발주자용 요약 — monetization.md §SDK)
 1. `npm run build:portal` → `blocknova-portal.zip`을 developer.crazygames.com에 업로드

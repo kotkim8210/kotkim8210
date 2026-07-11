@@ -74,6 +74,12 @@ export interface GameOverData {
   nextPieces?: PieceDef[];
   /** Peak-end highlight chips (e.g. "NOVA ×3", "COMBO 5"). */
   highlights?: string[];
+  /** Nearest weekly quest teaser line (Zeigarnik at the session seam). */
+  questLine?: string;
+  /** Show the ticking next-daily countdown line. */
+  countdown?: boolean;
+  /** Tag the daily button with NEW (today's daily unplayed). */
+  dailyNew?: boolean;
   buttons: {
     playAgain?: boolean;
     share?: boolean;
@@ -96,6 +102,7 @@ export class View {
   private novaTrack!: HTMLElement;
   private novaFill!: HTMLElement;
   private novaLabel!: HTMLElement;
+  private novaLogo!: HTMLElement;
   pauseBtn!: HTMLButtonElement;
   muteBtn!: HTMLButtonElement;
   dailyBtn!: HTMLButtonElement;
@@ -124,6 +131,9 @@ export class View {
   private overHl!: HTMLElement;
   private overNextLabel!: HTMLElement;
   private overNextRow!: HTMLElement;
+  private overQuest!: HTMLElement;
+  private overCountdown!: HTMLElement;
+  private dailyDot!: HTMLElement;
   private modeChip!: HTMLElement;
   private bestRow!: HTMLElement;
   private sublineEl!: HTMLElement;
@@ -219,15 +229,15 @@ export class View {
     this.sublineEl = el('div', 'text-xs text-nova font-bold tracking-wider hidden');
     scoreBox.append(scoreRow, this.paceTrack, this.bestRow, this.sublineEl);
 
-    const novaBox = el('div', 'w-28 flex-none');
+    const novaBox = el('div', 'w-28 flex-none relative');
     const novaHead = el('div', 'flex items-center justify-between');
-    novaHead.append(
-      el('span', 'text-[11px] font-black tracking-widest logo-nova', 'NOVA ⚡'),
-    );
-    this.novaLabel = el('span', 'nova-ready-label text-[10px] font-bold text-nova');
+    this.novaLogo = el('span', 'nova-logo text-[11px] font-black tracking-widest logo-nova', 'NOVA ⚡');
+    novaHead.appendChild(this.novaLogo);
+    this.novaLabel = el('span', 'nova-ready-label text-[11px] font-black text-nova');
     this.novaLabel.textContent = t('nova_ready');
     this.bonusChip = el('span', 'bonus-chip hidden', t('bonus_charge'));
-    novaHead.append(this.novaLabel, this.bonusChip);
+    novaHead.append(this.novaLabel);
+    novaBox.appendChild(this.bonusChip);
     this.novaTrack = el('div', 'nova-track mt-1');
     this.novaFill = el('div', 'nova-fill');
     this.novaTrack.appendChild(this.novaFill);
@@ -311,6 +321,8 @@ export class View {
     this.overHl = el('div', 'hl-row hidden');
     this.overNextLabel = el('div', 'text-xs text-dim mt-2 hidden', t('coming_next'));
     this.overNextRow = el('div', 'next-row hidden');
+    this.overQuest = el('div', 'text-sm text-dim mb-1 hidden', '');
+    this.overCountdown = el('div', 'text-sm font-bold text-nova mb-2 tabular-nums hidden', '');
     this.overNote = el('div', 'text-xs text-dim mb-3', '');
     this.reviveBtn = el('button', 'btn gold mb-2', `▶ ${t('revive')}`) as HTMLButtonElement;
     this.playAgainBtn = el('button', 'btn gold mb-2', t('play_again')) as HTMLButtonElement;
@@ -329,6 +341,8 @@ export class View {
       this.overHl,
       this.overNextLabel,
       this.overNextRow,
+      this.overQuest,
+      this.overCountdown,
       this.overNote,
       this.reviveBtn,
       this.playAgainBtn,
@@ -459,7 +473,9 @@ export class View {
   setNova(gauge: number, full: boolean): void {
     this.novaFill.style.transform = `scaleX(${(gauge / NOVA_FULL).toFixed(3)})`;
     this.novaTrack.classList.toggle('ready', full);
+    // READY replaces the wordmark — the 112px head row can't fit both
     this.novaLabel.classList.toggle('on', full);
+    this.novaLogo.classList.toggle('off', full);
   }
 
   setMuted(muted: boolean): void {
@@ -495,9 +511,10 @@ export class View {
     return document.documentElement.classList.contains('fx-lite');
   }
 
-  popCells(indices: number[], colorLookup: Map<number, number>): void {
+  popCells(indices: number[], colorLookup: Map<number, number>, withSparks = true): void {
     const boardRect = this.boardEl.getBoundingClientRect();
-    const sparkBudget = this.fxLiteActive() ? 12 : 24;
+    // a nova turn owns the particle budget — the blast brings its own sparks
+    const sparkBudget = withSparks ? (this.fxLiteActive() ? 12 : 24) : 0;
     let sparks = 0;
     indices.forEach((i) => {
       const rect = this.cellRect(i);
@@ -528,15 +545,25 @@ export class View {
     });
   }
 
-  floatScore(text: string, gold = false): void {
-    const node = el('div', 'float-score' + (gold ? ' logo-nova text-xl' : ' text-base'));
+  floatScore(text: string, gold = false, opts: { px?: number; topPct?: number } = {}): void {
+    const node = el('div', 'float-score' + (gold ? ' logo-nova' : ''));
     node.textContent = text;
+    node.style.fontSize = `${opts.px ?? (gold ? 20 : 16)}px`;
     const rect = this.boardEl.getBoundingClientRect();
     node.style.left = '50%';
-    node.style.top = `${rect.height * 0.28}px`;
-    node.style.transform = 'translateX(-50%)';
+    node.style.top = `${rect.height * (opts.topPct ?? 0.28)}px`;
+    // centering lives in the keyframes — an inline transform would be
+    // overridden by the animation
     this.boardEl.appendChild(node);
     setTimeout(() => node.remove(), 800);
+  }
+
+  /** Big center word punch (nova, rank-ups). */
+  wordPunch(text: string, px = 44): void {
+    const word = el('div', 'nova-word', text);
+    word.style.fontSize = `${px}px`;
+    this.boardEl.appendChild(word);
+    setTimeout(() => word.remove(), 950);
   }
 
   edgeGlow(): void {
@@ -632,9 +659,7 @@ export class View {
     }
 
     // 5) big NOVA word punch
-    const word = el('div', 'nova-word', t('nova_boom'));
-    this.boardEl.appendChild(word);
-    setTimeout(() => word.remove(), 950);
+    this.wordPunch(t('nova_boom'));
 
     // 6) meter detonation flash + harder shake
     this.novaTrack.classList.add('detonate');
@@ -697,15 +722,40 @@ export class View {
     this.overNextLabel.classList.toggle('hidden', !showNext);
     this.overNextRow.classList.toggle('hidden', !showNext);
 
-    this.reviveBtn.classList.toggle('hidden', !data.buttons.revive);
-    this.playAgainBtn.classList.toggle('hidden', !data.buttons.playAgain);
-    this.shareBtn.classList.toggle('hidden', !data.buttons.share);
+    this.overNewBest.classList.toggle('hidden', !data.isNewBest);
+    this.overQuest.textContent = data.questLine ?? '';
+    this.overQuest.classList.toggle('hidden', !data.questLine);
+    this.overCountdown.classList.toggle('hidden', !data.countdown);
+
+    // exactly ONE gold CTA per sheet (ui-spec §3: gold = the primary action)
+    const hiddenIf = (show: boolean | undefined) => (show ? '' : ' hidden');
+    this.reviveBtn.className = 'btn gold mb-2' + hiddenIf(data.buttons.revive);
+    this.playAgainBtn.className =
+      (data.buttons.revive ? 'btn mb-2' : 'btn gold mb-2') + hiddenIf(data.buttons.playAgain);
+    this.shareBtn.className =
+      (!data.buttons.revive && !data.buttons.playAgain ? 'btn gold mb-2' : 'btn mb-2') +
+      hiddenIf(data.buttons.share);
     this.retryBtn.classList.toggle('hidden', !data.buttons.retry);
     this.retryBtn.disabled = !!data.buttons.retryDisabled;
     this.retryBtn.textContent = data.buttons.retryDisabled ? t('retry_used') : t('retry_ad');
     this.classicBtn.classList.toggle('hidden', !data.buttons.classic);
     this.dailyCardBtn.classList.toggle('hidden', !data.buttons.daily);
+    this.dailyCardBtn.textContent = `📅 ${t('daily')}${data.dailyNew ? ` · ${t('new_tag')}` : ''}`;
     this.overOverlay.classList.add('on');
+  }
+
+  setCountdown(text: string): void {
+    this.overCountdown.textContent = text;
+  }
+
+  /** Gold dot on the header daily button while today's daily is unplayed. */
+  setDailyBadge(show: boolean): void {
+    if (!this.dailyDot) {
+      this.dailyDot = el('span', 'badge-dot hidden');
+      this.dailyBtn.style.position = 'relative';
+      this.dailyBtn.appendChild(this.dailyDot);
+    }
+    this.dailyDot.classList.toggle('hidden', !show);
   }
 
   /* ---------- Phase 3: retention meta ---------- */
