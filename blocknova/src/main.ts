@@ -254,7 +254,7 @@ function handleMove(move: MoveResult, prevBoard: number[], pieceColor: number): 
   if (move.nova && move.novaCenter) {
     view.novaFx(move.novaCenter.row * 9 + move.novaCenter.col);
     sound.nova();
-    vibrate([20, 30, 60]);
+    vibrate([30, 40, 90]);
     ads.happytime(); // §adapter: happytime on nova explosion
   }
 
@@ -585,6 +585,14 @@ view.fxToggleBtn.addEventListener('click', () => {
 // keyboard focus inside portal iframes
 document.body.tabIndex = -1;
 window.addEventListener('pointerdown', () => window.focus(), { passive: true });
+
+// visual QA hook: ?bnfx exposes the nova effect for automated screenshots
+if (new URLSearchParams(location.search).has('bnfx')) {
+  (window as unknown as Record<string, unknown>).__bnNovaFx = () => {
+    view.novaFx(40);
+    sound.nova();
+  };
+}
 
 /* ---------- perf guard (ui-spec §6) ----------
    Sample frame times for the first seconds; two consecutive sub-45fps windows

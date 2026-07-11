@@ -428,6 +428,12 @@ body {
   pointer-events: none;
   animation: flash-out 0.24s ease-out forwards;
 }
+.flash.gold {
+  background: radial-gradient(circle at 50% 45%, rgba(255, 233, 160, 0.9), rgba(245, 197, 24, 0.35) 55%, transparent 80%);
+  animation-duration: 0.5s;
+  animation-delay: 0.05s;
+  animation-fill-mode: both;
+}
 @keyframes flash-out {
   0% {
     opacity: 0.85;
@@ -438,6 +444,163 @@ body {
   100% {
     opacity: 0;
   }
+}
+
+/* board punch on detonation */
+.board-punch {
+  animation: board-punch 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes board-punch {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.035);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* expanding gold bloom from the blast center */
+.nova-bloom {
+  position: absolute;
+  z-index: 11;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(255, 233, 160, 0.85) 0%, rgba(245, 197, 24, 0.4) 45%, transparent 70%);
+  animation: bloom-out 0.6s ease-out forwards;
+}
+@keyframes bloom-out {
+  from {
+    transform: scale(0.15);
+    opacity: 1;
+  }
+  to {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+/* radial sparks + light streaks flying out of the center */
+.nova-spark {
+  position: absolute;
+  z-index: 13;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: var(--gem, var(--color-nova));
+  box-shadow: 0 0 8px var(--gem, var(--color-nova));
+  animation: nova-spark-fly var(--dur, 0.7s) cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+@keyframes nova-spark-fly {
+  from {
+    transform: translate(0, 0) scale(1.2);
+    opacity: 1;
+  }
+  to {
+    transform: translate(var(--dx), var(--dy)) scale(0.2);
+    opacity: 0;
+  }
+}
+.nova-streak {
+  position: absolute;
+  z-index: 12;
+  width: 46%;
+  height: 3px;
+  border-radius: 2px;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(255, 233, 160, 0.95), transparent);
+  transform-origin: left center;
+  animation: streak-out 0.45s ease-out forwards;
+}
+@keyframes streak-out {
+  0% {
+    transform: rotate(var(--ang)) scaleX(0.1);
+    opacity: 1;
+  }
+  60% {
+    transform: rotate(var(--ang)) scaleX(1.05);
+    opacity: 0.9;
+  }
+  100% {
+    transform: rotate(var(--ang)) scaleX(1.15);
+    opacity: 0;
+  }
+}
+
+/* big NOVA word punch */
+.nova-word {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  z-index: 14;
+  pointer-events: none;
+  font-size: 44px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  background: linear-gradient(90deg, var(--color-nova), var(--color-nova-hi), var(--color-nova));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 18px rgba(245, 197, 24, 0.9));
+  animation: word-punch 0.9s cubic-bezier(0.2, 1.4, 0.4, 1) forwards;
+}
+@keyframes word-punch {
+  0% {
+    transform: translateX(-50%) scale(0.3) rotate(-6deg);
+    opacity: 0;
+  }
+  18% {
+    transform: translateX(-50%) scale(1.35) rotate(2deg);
+    opacity: 1;
+  }
+  32% {
+    transform: translateX(-50%) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  75% {
+    transform: translateX(-50%) scale(1.02);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-50%) scale(1.1);
+    opacity: 0;
+  }
+}
+
+/* stronger detonation shake (upgraded from ±3px on publisher request) */
+.shake-hard {
+  animation: shake-hard 0.22s linear;
+}
+@keyframes shake-hard {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0);
+  }
+  20% {
+    transform: translate(5px, -4px) rotate(0.4deg);
+  }
+  40% {
+    transform: translate(-5px, 3px) rotate(-0.4deg);
+  }
+  60% {
+    transform: translate(4px, 4px) rotate(0.3deg);
+  }
+  80% {
+    transform: translate(-3px, -3px) rotate(-0.2deg);
+  }
+}
+.reduced-motion .shake-hard,
+.reduced-motion .board-punch {
+  animation: none;
+}
+
+/* nova meter detonation flash before the drain */
+.nova-track.detonate .nova-fill {
+  background: white;
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.9);
 }
 .nova-ring {
   position: absolute;

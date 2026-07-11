@@ -555,28 +555,94 @@ export class View {
       this.floatScore(t('nova_boom'), true);
       return;
     }
-    const flash = el('div', 'flash');
-    document.body.appendChild(flash);
-    setTimeout(() => flash.remove(), 300);
-
+    const lite = this.fxLiteActive();
     const rect = this.cellRect(centerIndex);
     const boardRect = this.boardEl.getBoundingClientRect();
-    const size = boardRect.width * 1.1;
-    for (const cls of ['nova-ring', 'nova-ring late']) {
+    const cx = rect.left - boardRect.left + rect.width / 2;
+    const cy = rect.top - boardRect.top + rect.height / 2;
+    const rng = mulberry32((performance.now() | 0) >>> 0);
+
+    // 1) impact: white flash + gold afterglow + board punch
+    for (const cls of ['flash', 'flash gold']) {
+      const flash = el('div', cls);
+      document.body.appendChild(flash);
+      setTimeout(() => flash.remove(), 700);
+    }
+    this.boardEl.classList.remove('board-punch');
+    void this.boardEl.offsetWidth;
+    this.boardEl.classList.add('board-punch');
+    setTimeout(() => this.boardEl.classList.remove('board-punch'), 320);
+
+    // 2) gold bloom wave from the blast center
+    const bloomSize = boardRect.width * 0.8;
+    const bloom = el('div', 'nova-bloom');
+    bloom.style.width = `${bloomSize}px`;
+    bloom.style.height = `${bloomSize}px`;
+    bloom.style.left = `${cx - bloomSize / 2}px`;
+    bloom.style.top = `${cy - bloomSize / 2}px`;
+    this.boardEl.appendChild(bloom);
+    setTimeout(() => bloom.remove(), 650);
+
+    // 3) triple shockwave rings
+    const size = boardRect.width * 1.15;
+    for (const cls of ['nova-ring', 'nova-ring late', 'nova-ring late violet']) {
       const ring = el('div', cls);
+      if (cls.endsWith('violet')) {
+        ring.style.borderColor = 'var(--gem-1)';
+        ring.style.boxShadow = '0 0 24px var(--gem-1)';
+        ring.style.animationDelay = '0.16s';
+      }
       ring.style.width = `${size}px`;
       ring.style.height = `${size}px`;
-      ring.style.left = `${rect.left - boardRect.left + rect.width / 2 - size / 2}px`;
-      ring.style.top = `${rect.top - boardRect.top + rect.height / 2 - size / 2}px`;
+      ring.style.left = `${cx - size / 2}px`;
+      ring.style.top = `${cy - size / 2}px`;
       this.boardEl.appendChild(ring);
-      setTimeout(() => ring.remove(), 760);
+      setTimeout(() => ring.remove(), 900);
     }
 
-    this.appCol.classList.remove('shake');
+    // 4) radial sparks + light streaks (gold-heavy with gem accents)
+    const sparkCount = lite ? 10 : 20;
+    const reach = boardRect.width * 0.72;
+    for (let i = 0; i < sparkCount; i++) {
+      const spark = el('div', 'nova-spark');
+      const angle = (i / sparkCount) * Math.PI * 2 + rng() * 0.5;
+      const dist = reach * (0.45 + rng() * 0.55);
+      spark.style.left = `${cx - 3}px`;
+      spark.style.top = `${cy - 3}px`;
+      spark.style.setProperty(
+        '--gem',
+        i % 3 === 0 ? `var(${GEM_VARS[Math.floor(rng() * 6)]})` : 'var(--color-nova)',
+      );
+      spark.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
+      spark.style.setProperty('--dy', `${Math.sin(angle) * dist}px`);
+      spark.style.setProperty('--dur', `${0.55 + rng() * 0.4}s`);
+      this.boardEl.appendChild(spark);
+      setTimeout(() => spark.remove(), 1100);
+    }
+    if (!lite) {
+      for (let i = 0; i < 6; i++) {
+        const streak = el('div', 'nova-streak');
+        streak.style.left = `${cx}px`;
+        streak.style.top = `${cy - 1.5}px`;
+        streak.style.setProperty('--ang', `${Math.round(i * 60 + rng() * 30)}deg`);
+        streak.style.animationDelay = `${i * 0.02}s`;
+        this.boardEl.appendChild(streak);
+        setTimeout(() => streak.remove(), 600);
+      }
+    }
+
+    // 5) big NOVA word punch
+    const word = el('div', 'nova-word', t('nova_boom'));
+    this.boardEl.appendChild(word);
+    setTimeout(() => word.remove(), 950);
+
+    // 6) meter detonation flash + harder shake
+    this.novaTrack.classList.add('detonate');
+    setTimeout(() => this.novaTrack.classList.remove('detonate'), 250);
+    this.appCol.classList.remove('shake-hard');
     void this.appCol.offsetWidth;
-    this.appCol.classList.add('shake');
-    setTimeout(() => this.appCol.classList.remove('shake'), 200);
-    this.floatScore(t('nova_boom'), true);
+    this.appCol.classList.add('shake-hard');
+    setTimeout(() => this.appCol.classList.remove('shake-hard'), 260);
   }
 
   /* ---------- overlays ---------- */

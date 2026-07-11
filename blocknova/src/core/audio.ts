@@ -122,14 +122,20 @@ export class SoundEngine {
     this.noise(0.3, 0, 2400, 0.8, 0.28);
   }
 
-  /** Nova: sub boom + riser + glitter cascade. */
+  /** Nova: sub drop + impact crash + riser + long glitter cascade + ting. */
   nova(): void {
-    this.tone(55, 0.7, 0, 'sine', 1.35);
-    this.tone(110, 0.5, 0.02, 'sine', 0.7);
-    this.tone(220, 0.5, 0.02, 'sawtooth', 0.18, 880); // riser
-    this.noise(0.5, 0.02, 1800, 0.7, 0.4); // crash
-    const glitter = [1046, 1318, 1568, 2093, 2637];
-    glitter.forEach((f, i) => this.tone(f, 0.14, 0.16 + i * 0.055, 'sine', 0.28));
+    // pitch-dropping sub hits harder than a flat boom
+    this.tone(130, 0.8, 0, 'sine', 1.5, 42);
+    this.tone(65, 0.55, 0.02, 'sine', 0.9);
+    this.tone(220, 0.5, 0.02, 'sawtooth', 0.22, 1100); // riser
+    this.noise(0.55, 0.0, 1600, 0.6, 0.5); // main crash
+    this.noise(0.35, 0.12, 5200, 0.9, 0.3); // bright splash
+    // cascading gold glitter (major pentatonic climb)
+    const glitter = [1046, 1318, 1568, 1760, 2093, 2637, 3136];
+    glitter.forEach((f, i) => this.tone(f, 0.16, 0.14 + i * 0.05, 'sine', 0.3 - i * 0.02));
+    // finishing high "ting"
+    this.tone(4186, 0.3, 0.55, 'sine', 0.22);
+    this.noise(0.25, 0.55, 8000, 1.4, 0.12);
   }
 
   /** New best / perfect: 3-note fanfare + shimmer. */
