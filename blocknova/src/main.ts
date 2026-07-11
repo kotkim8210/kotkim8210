@@ -32,6 +32,7 @@ type Mode = 'classic' | 'daily';
 
 const sound = new SoundEngine(store.flags().mute);
 const view = new View(document.getElementById('app')!);
+sound.onBlocked = () => view.toast(t('audio_blocked'));
 
 let mode: Mode = 'classic';
 let dailyDay = 0;

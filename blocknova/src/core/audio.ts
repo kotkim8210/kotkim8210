@@ -11,7 +11,13 @@ export class SoundEngine {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private noiseBuf: AudioBuffer | null = null;
+  private analyser: AnalyserNode | null = null;
   private placeAlt = 0;
+  private blockedGestures = 0;
+  private blockedNotified = false;
+  /** Called once when the environment refuses to start audio (autoplay
+   *  policy in an embedding iframe) so the UI can tell the player. */
+  onBlocked: (() => void) | null = null;
   muted: boolean;
 
   constructor(muted = false) {
@@ -42,6 +48,23 @@ export class SoundEngine {
             /* already unlocked */
           }
         });
+        // A policy-blocked environment rejects resume() forever. Startup
+        // resumes are async, so judge only after they had time to settle —
+        // otherwise the very first taps false-positive as "blocked".
+        setTimeout(() => {
+          if (this.muted || !this.ctx) return;
+          if ((this.ctx.state as string) !== 'running') {
+            this.blockedGestures += 1;
+            if (this.blockedGestures >= 2 && !this.blockedNotified) {
+              this.blockedNotified = true;
+              this.onBlocked?.();
+            }
+          } else {
+            this.blockedGestures = 0;
+          }
+        }, 400);
+      } else if (ctx) {
+        this.blockedGestures = 0;
       }
     };
     window.addEventListener('pointerdown', poke, { passive: true });
@@ -51,9 +74,15 @@ export class SoundEngine {
     window.addEventListener('pageshow', poke); // back-forward cache restore
   }
 
-  /** QA hook: current audio pipeline state. */
-  debug(): { state: string; muted: boolean } {
-    return { state: this.ctx?.state ?? 'no-context', muted: this.muted };
+  /** QA hook: pipeline state + live output level (proof the graph emits). */
+  debug(): { state: string; muted: boolean; level: number } {
+    let level = 0;
+    if (this.analyser) {
+      const data = new Uint8Array(this.analyser.fftSize);
+      this.analyser.getByteTimeDomainData(data);
+      for (const v of data) level = Math.max(level, Math.abs(v - 128));
+    }
+    return { state: this.ctx?.state ?? 'no-context', muted: this.muted, level };
   }
 
   /** Must be called from a user gesture at least once. */
@@ -71,6 +100,10 @@ export class SoundEngine {
         this.master = this.ctx.createGain();
         this.master.gain.value = 0.32; // single master level for consistency
         this.master.connect(this.ctx.destination);
+        // measurement tap for QA (proves signal actually flows)
+        this.analyser = this.ctx.createAnalyser();
+        this.analyser.fftSize = 256;
+        this.master.connect(this.analyser);
       }
       // recover from ANY non-running state ('suspended', iOS 'interrupted')
       if ((this.ctx.state as string) !== 'running' && !document.hidden) {
