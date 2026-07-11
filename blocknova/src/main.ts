@@ -36,6 +36,8 @@ let reviveUsed = false;
 let runRecorded = { any: false, score: 0, nova: 0, lines: 0 };
 /** monetization §2: interstitial on every 2nd game over, result screen only. */
 let gameOverCount = 0;
+/** Pending game-over timer — cancelled when a new run replaces the game. */
+let finishTimer: number | null = null;
 
 /* ---------- golden first move (game-design §11) ---------- */
 
@@ -284,7 +286,8 @@ function handleMove(move: MoveResult, prevBoard: number[], pieceColor: number): 
   }
 
   if (move.gameOver) {
-    setTimeout(finishGame, 450);
+    if (finishTimer) clearTimeout(finishTimer);
+    finishTimer = window.setTimeout(finishGame, 450);
   }
 }
 
@@ -302,6 +305,9 @@ function maybeInterstitial(): void {
 }
 
 function finishGame(): void {
+  finishTimer = null;
+  // guard against a stale timer firing after a new run already started
+  if (!game.over) return;
   ads.gameplayStop();
   recordRunStats();
 
@@ -414,6 +420,8 @@ function beginDailyRun(): void {
 
 function enterDaily(): void {
   const day = kstDayNumber();
+  // mid-run re-entry would be a free restart of the deterministic sequence
+  if (mode === 'daily' && !game.over && dailyDay === day) return;
   const rec = store.daily();
   if (rec.day === day) {
     // official run already recorded today — show the result card
@@ -605,8 +613,17 @@ function startFrameSampler(): void {
   let samples = 0;
   const tick = (now: number) => {
     frames++;
-    if (now - windowStart >= 1000) {
-      const fps = (frames * 1000) / (now - windowStart);
+    const elapsed = now - windowStart;
+    if (elapsed >= 1000) {
+      // rAF pauses in background tabs — discard stretched windows instead of
+      // misreading them as low fps
+      if (document.hidden || elapsed > 1500) {
+        frames = 0;
+        windowStart = now;
+        requestAnimationFrame(tick);
+        return;
+      }
+      const fps = (frames * 1000) / elapsed;
       badWindows = fps < 45 ? badWindows + 1 : 0;
       frames = 0;
       windowStart = now;

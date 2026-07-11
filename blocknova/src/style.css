@@ -673,6 +673,8 @@ body {
 }
 .overlay .sheet {
   width: min(88vw, 22rem);
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
   padding: 24px;
   text-align: center;
 }
