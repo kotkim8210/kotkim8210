@@ -68,12 +68,20 @@ export interface GameOverData {
   banner?: string;
   /** Small dim note (e.g. "기록은 첫 판만 인정"). */
   note?: string;
+  /** Near-miss line ("Best −N"); gold when within 15% of best. */
+  gapText?: { text: string; gold: boolean };
+  /** Reveal of the upcoming pieces ("these were coming next"). */
+  nextPieces?: PieceDef[];
+  /** Peak-end highlight chips (e.g. "NOVA ×3", "COMBO 5"). */
+  highlights?: string[];
   buttons: {
     playAgain?: boolean;
     share?: boolean;
     retry?: boolean;
     retryDisabled?: boolean;
     classic?: boolean;
+    revive?: boolean;
+    daily?: boolean;
   };
 }
 
@@ -101,6 +109,10 @@ export class View {
   shareBtn!: HTMLButtonElement;
   retryBtn!: HTMLButtonElement;
   classicBtn!: HTMLButtonElement;
+  reviveBtn!: HTMLButtonElement;
+  dailyCardBtn!: HTMLButtonElement;
+  statsBtn!: HTMLButtonElement;
+  statsCloseBtn!: HTMLButtonElement;
   private overTitle!: HTMLElement;
   private overScore!: HTMLElement;
   private overBest!: HTMLElement;
@@ -108,10 +120,24 @@ export class View {
   private overStars!: HTMLElement;
   private overBanner!: HTMLElement;
   private overNote!: HTMLElement;
+  private overGap!: HTMLElement;
+  private overHl!: HTMLElement;
+  private overNextLabel!: HTMLElement;
+  private overNextRow!: HTMLElement;
   private modeChip!: HTMLElement;
   private bestRow!: HTMLElement;
   private sublineEl!: HTMLElement;
   private bonusChip!: HTMLElement;
+  private lvChip!: HTMLElement;
+  private lvRing!: HTMLElement;
+  private lvText!: HTMLElement;
+  private lvRank!: HTMLElement;
+  private streakChip!: HTMLElement;
+  private paceTrack!: HTMLElement;
+  private paceFill!: HTMLElement;
+  private questsBox!: HTMLElement;
+  private statsOverlay!: HTMLElement;
+  private statsGrid!: HTMLElement;
   private toastEl: HTMLElement | null = null;
   private toastTimer: number | null = null;
   private ghostCells: number[] = [];
@@ -153,7 +179,13 @@ export class View {
     const logo = el('div', 'text-lg font-black tracking-wide whitespace-nowrap');
     logo.append('BLOCK ', Object.assign(el('span', 'logo-nova'), { textContent: 'NOVA' }));
     this.modeChip = el('span', 'mode-chip hidden');
-    logoWrap.append(logo, this.modeChip);
+    // LevelChip (ui-spec §3): header-left capsule with a conic XP ring
+    this.lvChip = el('span', 'lv-chip');
+    this.lvRing = el('span', 'lv-ring');
+    this.lvText = el('span', '', 'Lv.1');
+    this.lvRank = el('span', 'lv-rank', 'Spark');
+    this.lvChip.append(this.lvRing, this.lvText, this.lvRank);
+    logoWrap.append(logo, this.lvChip, this.modeChip);
     const btns = el('div', 'flex gap-2');
     this.dailyBtn = el('button', 'icon-btn') as HTMLButtonElement;
     this.dailyBtn.textContent = '📅';
@@ -176,11 +208,16 @@ export class View {
       'combo-badge text-xs font-bold px-2 py-0.5 rounded-full bg-white/10 border border-white/15',
     );
     scoreRow.append(this.scoreEl, this.comboEl);
+    // PB pace bar (ui-spec §3): thin score/best progress with a gold 100% tick
+    this.paceTrack = el('div', 'pace-track hidden');
+    this.paceFill = el('div', 'pace-fill');
+    this.paceTrack.append(this.paceFill, el('div', 'pace-tick'));
     this.bestRow = el('div', 'text-xs text-dim font-semibold tracking-wider');
     this.bestEl = el('span', 'tabular-nums', '0');
-    this.bestRow.append(`${t('best')} `, this.bestEl);
+    this.streakChip = el('span', 'streak-chip hidden');
+    this.bestRow.append(`${t('best')} `, this.bestEl, this.streakChip);
     this.sublineEl = el('div', 'text-xs text-nova font-bold tracking-wider hidden');
-    scoreBox.append(scoreRow, this.bestRow, this.sublineEl);
+    scoreBox.append(scoreRow, this.paceTrack, this.bestRow, this.sublineEl);
 
     const novaBox = el('div', 'w-28 flex-none');
     const novaHead = el('div', 'flex items-center justify-between');
@@ -232,7 +269,8 @@ export class View {
 
     this.pauseOverlay = this.buildPauseOverlay();
     this.overOverlay = this.buildGameOverOverlay();
-    root.append(this.pauseOverlay, this.overOverlay);
+    this.statsOverlay = this.buildStatsOverlay();
+    root.append(this.pauseOverlay, this.overOverlay, this.statsOverlay);
   }
 
   private buildPauseOverlay(): HTMLElement {
@@ -243,8 +281,19 @@ export class View {
     this.restartBtn = el('button', 'btn mb-2', t('restart')) as HTMLButtonElement;
     this.soundToggleBtn = el('button', 'btn mb-2') as HTMLButtonElement;
     this.fxToggleBtn = el('button', 'btn mb-2') as HTMLButtonElement;
+    this.statsBtn = el('button', 'btn mb-2', `📊 ${t('stats')}`) as HTMLButtonElement;
+    // weekly quest pills (game-design §12) — shown while paused
+    this.questsBox = el('div', 'mt-3 text-left');
     const kbHint = el('div', 'fine-only text-sm text-dim mt-2', t('keyboard_hint'));
-    sheet.append(this.resumeBtn, this.restartBtn, this.soundToggleBtn, this.fxToggleBtn, kbHint);
+    sheet.append(
+      this.resumeBtn,
+      this.restartBtn,
+      this.soundToggleBtn,
+      this.fxToggleBtn,
+      this.statsBtn,
+      this.questsBox,
+      kbHint,
+    );
     overlay.appendChild(sheet);
     return overlay;
   }
@@ -257,25 +306,48 @@ export class View {
     this.overNewBest = el('div', 'logo-nova font-black text-sm h-5', '');
     this.overStars = el('div', 'stars-row my-1 hidden');
     this.overScore = el('div', 'hud-score my-2', '0');
+    this.overGap = el('div', 'gap-line mb-1 hidden');
     this.overBest = el('div', 'text-sm text-dim font-semibold mb-1', '');
+    this.overHl = el('div', 'hl-row hidden');
+    this.overNextLabel = el('div', 'text-xs text-dim mt-2 hidden', t('coming_next'));
+    this.overNextRow = el('div', 'next-row hidden');
     this.overNote = el('div', 'text-xs text-dim mb-3', '');
+    this.reviveBtn = el('button', 'btn gold mb-2', `▶ ${t('revive')}`) as HTMLButtonElement;
     this.playAgainBtn = el('button', 'btn gold mb-2', t('play_again')) as HTMLButtonElement;
     this.shareBtn = el('button', 'btn gold mb-2', t('share')) as HTMLButtonElement;
     this.retryBtn = el('button', 'btn mb-2', t('retry_ad')) as HTMLButtonElement;
-    this.classicBtn = el('button', 'btn', t('classic')) as HTMLButtonElement;
+    this.classicBtn = el('button', 'btn mb-2', t('classic')) as HTMLButtonElement;
+    this.dailyCardBtn = el('button', 'btn', `📅 ${t('daily')}`) as HTMLButtonElement;
     sheet.append(
       this.overTitle,
       this.overBanner,
       this.overNewBest,
       this.overStars,
       this.overScore,
+      this.overGap,
       this.overBest,
+      this.overHl,
+      this.overNextLabel,
+      this.overNextRow,
       this.overNote,
+      this.reviveBtn,
       this.playAgainBtn,
       this.shareBtn,
       this.retryBtn,
       this.classicBtn,
+      this.dailyCardBtn,
     );
+    overlay.appendChild(sheet);
+    return overlay;
+  }
+
+  private buildStatsOverlay(): HTMLElement {
+    const overlay = el('div', 'overlay');
+    const sheet = el('div', 'sheet panel');
+    sheet.append(el('h2', 'text-2xl font-black mb-2', `📊 ${t('stats')}`));
+    this.statsGrid = el('div', 'stats-grid');
+    this.statsCloseBtn = el('button', 'btn', t('close')) as HTMLButtonElement;
+    sheet.append(this.statsGrid, this.statsCloseBtn);
     overlay.appendChild(sheet);
     return overlay;
   }
@@ -539,13 +611,117 @@ export class View {
     } else {
       this.overStars.classList.add('hidden');
     }
+    this.overGap.textContent = data.gapText?.text ?? '';
+    this.overGap.classList.toggle('hidden', !data.gapText);
+    this.overGap.classList.toggle('gold', !!data.gapText?.gold);
+
+    this.overHl.textContent = '';
+    if (data.highlights && data.highlights.length > 0) {
+      for (const h of data.highlights) this.overHl.appendChild(el('span', 'hl-chip', h));
+      this.overHl.classList.remove('hidden');
+    } else {
+      this.overHl.classList.add('hidden');
+    }
+
+    this.overNextRow.textContent = '';
+    const showNext = !!data.nextPieces && data.nextPieces.length > 0;
+    if (showNext) {
+      for (const p of data.nextPieces!) this.overNextRow.appendChild(renderPieceGrid(p, 9, 1));
+    }
+    this.overNextLabel.classList.toggle('hidden', !showNext);
+    this.overNextRow.classList.toggle('hidden', !showNext);
+
+    this.reviveBtn.classList.toggle('hidden', !data.buttons.revive);
     this.playAgainBtn.classList.toggle('hidden', !data.buttons.playAgain);
     this.shareBtn.classList.toggle('hidden', !data.buttons.share);
     this.retryBtn.classList.toggle('hidden', !data.buttons.retry);
     this.retryBtn.disabled = !!data.buttons.retryDisabled;
     this.retryBtn.textContent = data.buttons.retryDisabled ? t('retry_used') : t('retry_ad');
     this.classicBtn.classList.toggle('hidden', !data.buttons.classic);
+    this.dailyCardBtn.classList.toggle('hidden', !data.buttons.daily);
     this.overOverlay.classList.add('on');
+  }
+
+  /* ---------- Phase 3: retention meta ---------- */
+
+  setLevel(level: number, rank: string, progress: number): void {
+    this.lvText.textContent = `Lv.${level}`;
+    this.lvRank.textContent = rank;
+    this.lvRing.style.setProperty('--p', progress.toFixed(3));
+  }
+
+  setStreak(current: number, shields: number): void {
+    if (current <= 0 && shields <= 0) {
+      this.streakChip.classList.add('hidden');
+      return;
+    }
+    this.streakChip.classList.remove('hidden');
+    this.streakChip.textContent = `🔥${current}`;
+    if (shields > 0) {
+      const s = el('span', 'shield', '🛡'.repeat(shields));
+      this.streakChip.appendChild(s);
+    }
+  }
+
+  /** PB pace bar: ratio 0..1 of score vs best (null hides), gold flash on PB. */
+  setPace(ratio: number | null, flash = false): void {
+    if (ratio === null) {
+      this.paceTrack.classList.add('hidden');
+      return;
+    }
+    this.paceTrack.classList.remove('hidden');
+    this.paceFill.style.transform = `scaleX(${Math.max(0, Math.min(1, ratio)).toFixed(3)})`;
+    if (flash) {
+      this.paceTrack.classList.remove('flash');
+      void this.paceTrack.offsetWidth;
+      this.paceTrack.classList.add('flash');
+      setTimeout(() => this.paceTrack.classList.remove('flash'), 250);
+    }
+  }
+
+  renderQuests(
+    items: { label: string; progress: number; target: number; done: boolean }[],
+  ): void {
+    this.questsBox.textContent = '';
+    this.questsBox.appendChild(
+      el('div', 'text-xs font-black text-dim tracking-widest mb-2', t('quests').toUpperCase()),
+    );
+    for (const q of items) {
+      const ratio = Math.min(1, q.progress / q.target);
+      const pill = el('div', 'quest-pill' + (q.done ? ' done' : ratio >= 0.9 ? ' near' : ''));
+      const row = el('div', 'q-row');
+      const label = el('span', '', q.label);
+      const count = el(
+        'span',
+        'q-count',
+        q.done ? '' : `${q.progress}/${q.target}`,
+      );
+      if (q.done) {
+        const check = el('span', 'q-check', '✔');
+        count.appendChild(check);
+      }
+      row.append(label, count);
+      const track = el('div', 'q-track');
+      const fill = el('div', 'q-fill');
+      fill.style.transform = `scaleX(${ratio.toFixed(3)})`;
+      track.appendChild(fill);
+      pill.append(row, track);
+      this.questsBox.appendChild(pill);
+    }
+  }
+
+  showStats(rows: { label: string; value: string }[] | null): void {
+    if (!rows) {
+      this.statsOverlay.classList.remove('on');
+      return;
+    }
+    this.statsGrid.textContent = '';
+    for (const r of rows) {
+      const tile = el('div', 'stat-tile');
+      tile.append(el('div', 'v', r.value), el('div', 'k', r.label));
+      this.statsGrid.appendChild(tile);
+    }
+    this.statsOverlay.classList.add('on');
   }
 
   /* ---------- Phase 2 additions ---------- */

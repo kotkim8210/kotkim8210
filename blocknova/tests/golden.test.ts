@@ -22,8 +22,10 @@ describe('golden first move (game-design §11)', () => {
     expect(move!.clearedCols).toEqual([8]);
     expect(move!.clearedCells).toHaveLength(17);
     expect(move!.combo).toBe(1);
-    // double clear: 2 placed + round(10 × 2 × 2.5) = 52
-    expect(move!.gained).toBe(52);
+    // double clear: 2 placed + round(10 × 2 × 2.5) = 52, and the board is
+    // emptied so the §12 perfect-clear bonus lands on the very first move
+    expect(move!.perfectClear).toBe(true);
+    expect(move!.gained).toBe(1052);
   });
 
   it('pre-charges the nova gauge to 50% and keeps charging normally', () => {

@@ -4,7 +4,10 @@ import { randomSeed } from './engine/rng';
 import { idx } from './engine/board';
 import { goldenBoard, goldenTray, GOLDEN_PRECHARGE } from './engine/golden';
 import { kstDayNumber, dailyPieces, dailySeed, starsFor, shareText } from './engine/daily';
-import { store } from './core/storage';
+import { applyXp, rankFor, xpProgress } from './engine/meta';
+import { advanceStreak, reconcileStreak, MAX_SHIELDS } from './engine/streak';
+import { isoWeekId, weeklyQuests } from './engine/quests';
+import { store, type QuestsStore } from './core/storage';
 import { SoundEngine } from './core/audio';
 import { vibrate } from './core/device';
 import { t } from './core/i18n';
@@ -28,6 +31,9 @@ let startingBest = store.best().classic;
 let paused = false;
 let selected: number | null = null;
 let movesThisRun = 0;
+let reviveUsed = false;
+/** Stats already credited for the current run (revive keeps the run going). */
+let runRecorded = { any: false, score: 0, nova: 0, lines: 0 };
 
 /* ---------- golden first move (game-design §11) ---------- */
 
@@ -102,6 +108,11 @@ function updateDailySubline(): void {
   );
 }
 
+function updatePace(flash = false): void {
+  const show = mode === 'classic' && startingBest > 0;
+  view.setPace(show ? Math.min(1, game.score / startingBest) : null, flash);
+}
+
 function renderAll(): void {
   view.renderBoard(game.board);
   view.renderTray(game.tray, game.placeablePieces(), selected);
@@ -110,7 +121,68 @@ function renderAll(): void {
   view.setCombo(game.combo);
   view.setNova(game.gauge, game.gaugeIsFull());
   updateDailySubline();
+  updatePace();
   keyboard.refresh();
+}
+
+/* ---------- retention meta (game-design §12) ---------- */
+
+function currentQuests(): { defs: ReturnType<typeof weeklyQuests>; state: QuestsStore } {
+  const week = isoWeekId(Date.now());
+  let state = store.quests();
+  if (state.week !== week) {
+    state = { week, progress: [0, 0, 0], done: [false, false, false] };
+    store.setQuests(state);
+  }
+  return { defs: weeklyQuests(week), state };
+}
+
+function questProgress(index: 0 | 1 | 2, delta: number): void {
+  const { defs, state } = currentQuests();
+  if (state.done[index]) return;
+  const progress = [...state.progress] as QuestsStore['progress'];
+  const done = [...state.done] as QuestsStore['done'];
+  progress[index] = Math.min(defs[index].target, progress[index] + delta);
+  if (progress[index] >= defs[index].target) {
+    done[index] = true;
+    view.toast(t('quest_done'));
+    if (defs[index].reward === 'shield') {
+      const s = store.streak();
+      if (s.shields < MAX_SHIELDS) {
+        store.setStreak({ shields: s.shields + 1 });
+        view.setStreak(s.current, s.shields + 1);
+      }
+    }
+  }
+  store.setQuests({ week: state.week, progress, done });
+}
+
+function questLabels(): { label: string; progress: number; target: number; done: boolean }[] {
+  const { defs, state } = currentQuests();
+  const keys = { lines: 'q_lines', nova: 'q_nova', daily: 'q_daily' } as const;
+  return defs.map((d, i) => ({
+    label: t(keys[d.key], { n: d.target }),
+    progress: state.progress[i],
+    target: d.target,
+    done: state.done[i],
+  }));
+}
+
+function recordRunStats(): void {
+  store.addStats({
+    games: runRecorded.any ? 0 : 1,
+    totalScore: game.score - runRecorded.score,
+    novaTotal: game.novaCount - runRecorded.nova,
+    linesTotal: game.linesTotal - runRecorded.lines,
+  });
+  runRecorded = { any: true, score: game.score, nova: game.novaCount, lines: game.linesTotal };
+}
+
+function refreshMetaChips(): void {
+  const meta = store.meta();
+  view.setLevel(meta.level, rankFor(meta.level), xpProgress(meta));
+  const s = store.streak();
+  view.setStreak(s.current, s.shields);
 }
 
 function setSelected(i: number | null): void {
@@ -151,6 +223,15 @@ function handleMove(move: MoveResult, prevBoard: number[], pieceColor: number): 
   const removed = [...move.clearedCells, ...move.novaCells];
   if (removed.length > 0) {
     view.setBonusChip(false);
+    // §12: 1 cleared cell = 1 XP (level-ups roll over)
+    const xpRes = applyXp(store.meta(), removed.length);
+    store.setMeta(xpRes.meta);
+    if (xpRes.levelsGained > 0) {
+      view.toast(t('level_up', { n: xpRes.meta.level, rank: rankFor(xpRes.meta.level) }));
+    }
+    view.setLevel(xpRes.meta.level, rankFor(xpRes.meta.level), xpProgress(xpRes.meta));
+    questProgress(0, move.clearedRows.length + move.clearedCols.length);
+    if (move.nova) questProgress(1, 1);
     // colors as they were before removal (placed cells take the piece color)
     const colorLookup = new Map<number, number>();
     for (const i of removed) {
@@ -185,6 +266,7 @@ function handleMove(move: MoveResult, prevBoard: number[], pieceColor: number): 
   if (mode === 'classic' && game.best > store.best().classic) {
     store.setBest({ classic: game.best });
   }
+  updatePace(move.newBest);
 
   if (move.perfectClear) {
     view.floatScore(t('perfect'), true);
@@ -204,16 +286,26 @@ function handleMove(move: MoveResult, prevBoard: number[], pieceColor: number): 
   }
 }
 
+function highlightChips(): string[] {
+  const chips: string[] = [];
+  if (game.novaCount > 0) chips.push(`⚡ NOVA ×${game.novaCount}`);
+  if (game.maxCombo >= 2) chips.push(`🔗 ${t('combo')} ${game.maxCombo}`);
+  return chips;
+}
+
 function finishGame(): void {
   ads.gameplayStop();
-  store.addStats({
-    games: 1,
-    totalScore: game.score,
-    novaTotal: game.novaCount,
-    linesTotal: game.linesTotal,
-  });
+  recordRunStats();
+
+  // §12: any finished run marks the KST day for the streak
+  const streakRes = advanceStreak(store.streak(), kstDayNumber());
+  store.setStreak(streakRes.state);
+  view.setStreak(streakRes.state.current, streakRes.state.shields);
+  if (streakRes.shieldsUsed > 0) view.toast(t('streak_kept'));
+  else if (streakRes.shieldEarned) view.toast(t('shield_earned'));
 
   if (mode === 'daily') {
+    questProgress(2, 1);
     const rec = store.daily();
     const first = rec.day !== dailyDay;
     const stars = starsFor(game.score);
@@ -241,6 +333,8 @@ function finishGame(): void {
       stars,
       banner: game.survived ? t('daily_survived') : '',
       note: first ? '' : t('daily_recorded'),
+      highlights: highlightChips(),
+      nextPieces: game.survived ? [] : game.upcomingPieces(3),
       buttons: { share: true, retry: true, retryDisabled: recNow.retried, classic: true },
     });
     return;
@@ -250,12 +344,24 @@ function finishGame(): void {
   store.setBest({ classic: game.best });
   const isNewBest = game.score > startingBest;
   if (isNewBest && startingBest > 0) view.confetti();
+
+  // §12 near-miss: distance to best + reveal of the upcoming pieces
+  const gap = startingBest - game.score;
+  const close = startingBest > 0 && gap > 0 && gap <= startingBest * 0.15;
+  const gapText =
+    startingBest > 0 && gap > 0
+      ? { text: t('best_gap', { n: gap }) + (close ? ` · ${t('one_more')}` : ''), gold: close }
+      : undefined;
+
   view.showGameOver({
     title: t('game_over'),
     score: game.score,
     metaLine: `${t('best')} ${game.best}`,
     isNewBest,
-    buttons: { playAgain: true },
+    gapText,
+    highlights: highlightChips(),
+    nextPieces: game.upcomingPieces(3),
+    buttons: { playAgain: true, revive: !reviveUsed, daily: true },
   });
 }
 
@@ -268,6 +374,8 @@ function restart(): void {
   selected = null;
   paused = false;
   movesThisRun = 0;
+  reviveUsed = false;
+  runRecorded = { any: false, score: 0, nova: 0, lines: 0 };
   view.showGameOver(null);
   view.showPause(false);
   if (isGoldenRun()) view.setBonusChip(true);
@@ -283,6 +391,8 @@ function beginDailyRun(): void {
   movesThisRun = 0;
   selected = null;
   paused = false;
+  reviveUsed = true; // no revive in daily — the rewarded hook there is retry
+  runRecorded = { any: false, score: 0, nova: 0, lines: 0 };
   if (coachStep > 0) endCoach();
   game = new Game({ queue: dailyPieces(dailyDay), seed: dailySeed(dailyDay) });
   view.showGameOver(null);
@@ -355,6 +465,7 @@ function setPaused(next: boolean): void {
   if (game.over) return;
   if (paused === next) return;
   paused = next;
+  if (next) view.renderQuests(questLabels());
   view.showPause(next);
   if (next) ads.gameplayStop();
   else ads.gameplayStart();
@@ -413,6 +524,47 @@ view.classicBtn.addEventListener('click', () => {
     view.setModeChip(null);
   }
 });
+view.reviveBtn.addEventListener('click', () => {
+  // monetization §2: rewarded revive, once per run, 12 random cells removed
+  ads.showRewarded((ok) => {
+    if (!ok || reviveUsed) return;
+    reviveUsed = true;
+    const removed = game.revive();
+    if (game.over) {
+      // extremely unlucky removal — the run truly ends
+      finishGame();
+      return;
+    }
+    view.showGameOver(null);
+    renderAll();
+    const colorLookup = new Map<number, number>(removed.map((i) => [i, 4]));
+    view.popCells(removed, colorLookup);
+    sound.clear(0);
+    ads.gameplayStart();
+  });
+});
+view.dailyCardBtn.addEventListener('click', () => {
+  view.showGameOver(null);
+  enterDaily();
+});
+view.statsBtn.addEventListener('click', () => {
+  const s = store.stats();
+  const meta = store.meta();
+  const streak = store.streak();
+  const daily = store.daily();
+  view.showStats([
+    { label: t('st_best'), value: String(store.best().classic) },
+    { label: t('st_games'), value: String(s.games) },
+    { label: t('st_total'), value: String(s.totalScore) },
+    { label: t('st_lines'), value: String(s.linesTotal) },
+    { label: t('st_nova'), value: String(s.novaTotal) },
+    { label: t('st_level'), value: `Lv.${meta.level} ${rankFor(meta.level)}` },
+    { label: t('st_streak'), value: `🔥${streak.current} (max ${streak.max})` },
+    { label: t('st_shields'), value: '🛡'.repeat(streak.shields) || '—' },
+    { label: t('st_daily'), value: daily.day > -9000 ? `${'⭐'.repeat(daily.stars) || '0⭐'} ${daily.score}` : '—' },
+  ]);
+});
+view.statsCloseBtn.addEventListener('click', () => view.showStats(null));
 view.soundToggleBtn.addEventListener('click', toggleMute);
 view.fxToggleBtn.addEventListener('click', () => {
   const lite = store.flags().fx !== 'lite';
@@ -454,6 +606,12 @@ function startFrameSampler(): void {
 
 /* ---------- boot ---------- */
 
+// settle missed streak days (shield auto-consumption, game-design §12)
+const bootStreak = reconcileStreak(store.streak(), kstDayNumber());
+store.setStreak(bootStreak.state);
+refreshMetaChips();
+currentQuests(); // week rollover check
+
 renderAll();
 requestAnimationFrame(() => {
   requestAnimationFrame(() => {
@@ -463,6 +621,7 @@ requestAnimationFrame(() => {
     ads.gameplayStart();
     document.body.focus();
     if (isGoldenRun()) startCoach();
+    if (bootStreak.shieldsUsed > 0) view.toast(t('streak_kept'));
     startFrameSampler();
   });
 });

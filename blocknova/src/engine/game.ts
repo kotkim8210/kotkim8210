@@ -14,7 +14,7 @@ import {
   idx,
   SIZE,
 } from './board';
-import { refillTray } from './bag';
+import { drawWeighted, refillTray } from './bag';
 import type { PieceDef } from './pieces';
 import { PIECES, TRAY_SIZE } from './pieces';
 import { clearScore, placementScore } from './scoring';
@@ -23,6 +23,13 @@ import { mulberry32 } from './rng';
 
 /** game-design.md §5 — nova gauge is full at 60 cleared cells. */
 export const NOVA_FULL = 60;
+
+/** game-design.md §12 — perfect clear: emptying the board pays a flat bonus
+ *  (applied after the nova ×3 multiplier). */
+export const PERFECT_BONUS = 1000;
+
+/** monetization.md §2 — revive removes this many random filled cells. */
+export const REVIVE_CELLS = 12;
 
 export interface MoveResult {
   /** Cells filled by the placement. */
@@ -205,8 +212,10 @@ export class Game {
       this.combo = 0;
     }
 
+    const perfectClear = lines > 0 && isBoardEmpty(this.board);
     let gained = placeScore + clearPart;
     if (nova) gained *= 3;
+    if (perfectClear) gained += PERFECT_BONUS;
     this.score += gained;
 
     let newBest = false;
@@ -243,10 +252,41 @@ export class Game {
       gauge: this.gauge,
       gaugeFull: this.gaugeIsFull(),
       newBest,
-      perfectClear: lines > 0 && isBoardEmpty(this.board),
+      perfectClear,
       refilled,
       gameOver: this.over,
     };
+  }
+
+  private upcomingCache: PieceDef[] | null = null;
+
+  /** Near-miss reveal (game-design §12): the pieces that were coming next.
+   *  Daily mode reads the fixed queue; classic draws from the live RNG stream
+   *  (only meant to be called once the run is over). */
+  upcomingPieces(count = 3): PieceDef[] {
+    if (this.queue) return this.queue.slice(this.queueIndex, this.queueIndex + count);
+    if (!this.upcomingCache) {
+      this.upcomingCache = Array.from({ length: count }, () => drawWeighted(this.pieces, this.rng));
+    }
+    return this.upcomingCache;
+  }
+
+  /** monetization.md §2 — rewarded revive: clear random filled cells and
+   *  continue the same run. Returns the removed cell indices. */
+  revive(cellsToRemove = REVIVE_CELLS): number[] {
+    const filled: number[] = [];
+    this.board.forEach((v, i) => {
+      if (v !== 0) filled.push(i);
+    });
+    for (let i = filled.length - 1; i > 0; i--) {
+      const j = Math.floor(this.rng() * (i + 1));
+      [filled[i], filled[j]] = [filled[j], filled[i]];
+    }
+    const removed = filled.slice(0, cellsToRemove);
+    removeCells(this.board, removed);
+    this.upcomingCache = null;
+    this.over = !this.anyMoves();
+    return removed;
   }
 }
 

@@ -43,8 +43,9 @@ describe('nova gauge (game-design §5)', () => {
     const boom = game.placeAt(1, 5, 8)!;
     expect(boom.nova).toBe(true);
     expect(game.gauge).toBe(0);
-    // Turn score ×3: (1 place + 15 combo clear) × 3.
-    expect(boom.gained).toBe(48);
+    // Turn score ×3: (1 place + 15 combo clear) × 3 = 48, +1000 perfect
+    // (the second clear empties the board).
+    expect(boom.gained).toBe(1048);
   });
 
   it('explosion removes an extra 3×3 around the row×col intersection', () => {
@@ -70,8 +71,8 @@ describe('nova gauge (game-design §5)', () => {
     expect(new Set(move.novaCells)).toEqual(new Set([idx(3, 7), idx(5, 7)]));
     expect(game.board[idx(3, 7)]).toBe(0);
     expect(game.board[idx(5, 7)]).toBe(0);
-    // (place 1 + clear 50) × 3
-    expect(move.gained).toBe(153);
+    // (place 1 + clear 50) × 3 = 153, +1000 perfect (blast empties the board)
+    expect(move.gained).toBe(1153);
     // Gauge resets and does not re-charge from the detonating clear.
     expect(game.gauge).toBe(0);
   });

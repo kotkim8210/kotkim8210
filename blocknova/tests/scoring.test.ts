@@ -41,7 +41,9 @@ describe('scoring (game-design §4)', () => {
 
     const second = game.placeAt(1, 5, 8)!;
     expect(second.combo).toBe(2);
-    expect(second.gained).toBe(1 + 15); // ×1.5 combo factor
+    // 1 + 15 (×1.5 combo factor) + 1000: the second clear empties the board
+    expect(second.perfectClear).toBe(true);
+    expect(second.gained).toBe(1016);
 
     const quiet = game.placeAt(2, 0, 0)!;
     expect(quiet.combo).toBe(0);
@@ -55,6 +57,6 @@ describe('scoring (game-design §4)', () => {
     const game = new Game({ board, tray: [dot, dot, dot], best: 5 });
     const move = game.placeAt(0, 4, 8)!;
     expect(move.newBest).toBe(true);
-    expect(game.best).toBe(11);
+    expect(game.best).toBe(1011); // includes the perfect-clear bonus
   });
 });

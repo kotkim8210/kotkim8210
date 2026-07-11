@@ -19,7 +19,8 @@ describe('line clear judgement (game-design §3)', () => {
     expect(move!.clearedRows).toEqual([4]);
     expect(move!.clearedCols).toEqual([]);
     expect(move!.clearedCells).toHaveLength(9);
-    expect(move!.gained).toBe(1 + 10); // 1 cell placed + 10 per line ×1
+    // 1 placed + 10 per line ×1, +1000 perfect (nothing else on the board)
+    expect(move!.gained).toBe(1011);
     expect(game.board[idx(4, 0)]).toBe(0);
   });
 
@@ -42,8 +43,8 @@ describe('line clear judgement (game-design §3)', () => {
     expect(move!.clearedCols).toEqual([8]);
     // 9 + 9 − 1 shared intersection cell = 17
     expect(move!.clearedCells).toHaveLength(17);
-    // 1 placed cell + round(10 × 2 lines × 2.5) = 51
-    expect(move!.gained).toBe(51);
+    // 1 placed cell + round(10 × 2 lines × 2.5) = 51, +1000 perfect clear (§12)
+    expect(move!.gained).toBe(1051);
     expect(isBoardEmpty(game.board)).toBe(true);
     expect(move!.perfectClear).toBe(true);
   });
