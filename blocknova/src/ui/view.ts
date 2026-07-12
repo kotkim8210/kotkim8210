@@ -414,16 +414,89 @@ export class View {
 
   /* ---------- rendering ---------- */
 
-  renderBoard(board: Board): void {
+  renderBoard(board: Board, wake = false): void {
     for (let i = 0; i < board.length; i++) {
       const cell = this.cells[i];
       const v = board[i];
       cell.className = 'cell' + (v ? ' gem' : '');
       if (v) cell.style.setProperty('--gem', gemVar(v - 1));
       else cell.style.removeProperty('--gem');
+      if (wake && !this.reducedMotion) {
+        cell.classList.add('wake');
+        cell.style.animationDelay = `${(rowOf(i) + colOf(i)) * 14}ms`;
+      }
+    }
+    if (wake && !this.reducedMotion) {
+      setTimeout(() => {
+        for (const cell of this.cells) {
+          cell.classList.remove('wake');
+          cell.style.removeProperty('animation-delay');
+        }
+      }, 700);
     }
     this.ghostCells = [];
     if (this.cursorIdx !== null) this.cells[this.cursorIdx]?.classList.add('kb-cursor');
+  }
+
+  /* ---------- zero-boredom micro-feedback ---------- */
+
+  /** "Almost!" shimmer on lines that reached 7-8/9 cells. */
+  almostLines(rows: number[], cols: number[]): void {
+    const marks: HTMLElement[] = [];
+    for (const r of rows) for (let c = 0; c < SIZE; c++) marks.push(this.cells[r * SIZE + c]);
+    for (const c of cols) for (let r = 0; r < SIZE; r++) marks.push(this.cells[r * SIZE + c]);
+    for (const cell of marks) {
+      cell.classList.remove('almost');
+      void cell.offsetWidth;
+      cell.classList.add('almost');
+    }
+    setTimeout(() => marks.forEach((cell) => cell.classList.remove('almost')), 600);
+  }
+
+  setDanger(on: boolean): void {
+    this.boardEl.classList.toggle('danger', on);
+  }
+
+  setComboHot(on: boolean): void {
+    this.scoreEl.classList.toggle('hot', on);
+  }
+
+  /** Ambient: a random gem catches the light. */
+  twinkle(): void {
+    const gems = this.cells.filter((cell) => cell.classList.contains('gem'));
+    if (gems.length === 0) return;
+    const cell = gems[Math.floor(Math.random() * gems.length)];
+    cell.classList.remove('twinkle');
+    void cell.offsetWidth;
+    cell.classList.add('twinkle');
+    setTimeout(() => cell.classList.remove('twinkle'), 700);
+  }
+
+  /** Ambient: a shooting star crosses the upper sky. */
+  shootingStar(): void {
+    const star = el('div', 'shooting-star');
+    star.style.setProperty('--sx', `${Math.round(Math.random() * (innerWidth * 0.7))}px`);
+    star.style.setProperty('--sy', `${Math.round(20 + Math.random() * (innerHeight * 0.25))}px`);
+    document.body.appendChild(star);
+    setTimeout(() => star.remove(), 900);
+  }
+
+  cardWiggle(): void {
+    this.eggBtn.classList.remove('wiggle');
+    void this.eggBtn.offsetWidth;
+    this.eggBtn.classList.add('wiggle');
+    setTimeout(() => this.eggBtn.classList.remove('wiggle'), 1500);
+  }
+
+  /** Idle nudge: placeable pieces hop to invite the next move. */
+  nudge(): void {
+    for (const slot of this.slots) {
+      if (!slot.classList.contains('pulse')) continue;
+      slot.classList.remove('nudge');
+      void slot.offsetWidth;
+      slot.classList.add('nudge');
+    }
+    setTimeout(() => this.slots.forEach((s) => s.classList.remove('nudge')), 1200);
   }
 
   renderTray(
@@ -527,8 +600,11 @@ export class View {
   }
 
   setNova(gauge: number, full: boolean): void {
-    this.novaFill.style.transform = `scaleX(${(gauge / NOVA_FULL).toFixed(3)})`;
+    const ratio = gauge / NOVA_FULL;
+    this.novaFill.style.transform = `scaleX(${ratio.toFixed(3)})`;
     this.novaTrack.classList.toggle('ready', full);
+    // 80%+ warms up before the READY blaze (anticipation gradient)
+    this.novaTrack.classList.toggle('warm', !full && ratio >= 0.8);
     // READY replaces the wordmark — the 112px head row can't fit both
     this.novaLabel.classList.toggle('on', full);
     this.novaLogo.classList.toggle('off', full);

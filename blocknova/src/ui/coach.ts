@@ -27,8 +27,10 @@ export class Coach {
     document.body.appendChild(this.root);
   }
 
-  /** Spotlight a screen rect and place the tip + arrow above or below it. */
-  show(rect: DOMRect, text: string, pad = 8): void {
+  /** Spotlight a screen rect and place the tip + arrow above or below it.
+   *  dim=false keeps the gold ring + tip but leaves the screen bright —
+   *  used for informational steps shown DURING live play. */
+  show(rect: DOMRect, text: string, pad = 8, dim = true): void {
     const top = rect.top - pad;
     const left = rect.left - pad;
     const w = rect.width + pad * 2;
@@ -37,6 +39,7 @@ export class Coach {
     this.spot.style.left = `${left}px`;
     this.spot.style.width = `${w}px`;
     this.spot.style.height = `${h}px`;
+    this.spot.style.boxShadow = dim ? '' : 'none';
 
     const above = rect.top > innerHeight * 0.45;
     this.arrow.textContent = above ? '↓' : '↑';

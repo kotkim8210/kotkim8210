@@ -17,7 +17,7 @@ import { isoWeekId, weeklyQuests } from './engine/quests';
 import { PETS, petProgress } from './engine/pets';
 import { store, type QuestsStore } from './core/storage';
 import { SoundEngine } from './core/audio';
-import { vibrate } from './core/device';
+import { prefersReducedMotion, vibrate } from './core/device';
 import { t } from './core/i18n';
 import { ads } from './ads/adapter';
 import { View } from './ui/view';
@@ -74,6 +74,8 @@ function newClassicGame(): Game {
   return new Game({ seed: randomSeed(), best: startingBest, assist });
 }
 
+let coachEndTimer: number | null = null;
+
 function positionCoach(): void {
   if (!coach || coachStep === 0) return;
   if (coachStep === 1) {
@@ -83,7 +85,9 @@ function positionCoach(): void {
     const b = view.cellRect(idx(8, 8));
     coach.show(new DOMRect(a.left, a.top, a.width, b.bottom - a.top), t('coach_drop'));
   } else {
-    coach.show(view.novaTrackRect(), t('coach_nova'));
+    // step 3 is informational — never dim live gameplay, and self-dismiss
+    coach.show(view.novaTrackRect(), t('coach_nova'), 8, false);
+    if (!coachEndTimer) coachEndTimer = window.setTimeout(endCoach, 4200);
   }
 }
 
@@ -104,6 +108,10 @@ function advanceCoach(step: number): void {
 
 function endCoach(): void {
   coachStep = 0;
+  if (coachEndTimer) {
+    clearTimeout(coachEndTimer);
+    coachEndTimer = null;
+  }
   coach?.destroy();
   coach = null;
   store.setFlags({ firstRunDone: true });
@@ -131,13 +139,19 @@ function updatePace(flash = false): void {
   view.setPace(show ? Math.min(1, game.score / startingBest) : null, flash);
 }
 
-function renderAll(): void {
-  view.renderBoard(game.board);
-  view.renderTray(game.tray, game.placeablePieces(), selected);
+function boardFillRatio(): number {
+  return game.board.filter((v) => v !== 0).length / game.board.length;
+}
+
+function renderAll(wake = false): void {
+  view.renderBoard(game.board, wake);
+  view.renderTray(game.tray, game.placeablePieces(), selected, wake);
   view.setScore(game.score, false);
   view.setBest(game.best);
   view.setCombo(game.combo);
+  view.setComboHot(game.combo >= 2);
   view.setNova(game.gauge, game.gaugeIsFull());
+  view.setDanger(boardFillRatio() >= 0.7);
   updateDailySubline();
   updatePace();
   keyboard.refresh();
@@ -257,6 +271,7 @@ function tryPlace(trayIndex: number, row: number, col: number): boolean {
   const prevBoard = [...game.board];
   const move = game.placeAt(trayIndex, row, col);
   if (!move) return false;
+  armNudge();
   handleMove(move, prevBoard, piece.color);
   return true;
 }
@@ -275,8 +290,28 @@ function handleMove(move: MoveResult, prevBoard: number[], pieceColor: number): 
 
   view.setScore(game.score);
   view.setCombo(move.combo);
+  view.setComboHot(move.combo >= 2);
   view.setNova(game.gauge, move.gaugeFull);
   updateDailySubline();
+
+  // zero-boredom: quiet placements still talk back
+  const fill = boardFillRatio();
+  view.setDanger(fill >= 0.7);
+  if (move.clearedCells.length === 0) {
+    if (fill >= 0.7) sound.heartbeat();
+    // lines this piece pushed to 7-8/9 shimmer "almost!"
+    const touchedRows = [...new Set(move.placed.map((i) => Math.floor(i / 9)))];
+    const touchedCols = [...new Set(move.placed.map((i) => i % 9))];
+    const rowFill = (r: number) => game.board.slice(r * 9, r * 9 + 9).filter((v) => v !== 0).length;
+    const colFill = (c: number) => {
+      let n = 0;
+      for (let r = 0; r < 9; r++) if (game.board[r * 9 + c] !== 0) n++;
+      return n;
+    };
+    const almostRows = touchedRows.filter((r) => rowFill(r) >= 7);
+    const almostCols = touchedCols.filter((c) => colFill(c) >= 7);
+    if (almostRows.length || almostCols.length) view.almostLines(almostRows, almostCols);
+  }
 
   const removed = [...move.clearedCells, ...move.novaCells];
   if (removed.length > 0) {
@@ -501,7 +536,7 @@ function restart(): void {
   view.showGameOver(null);
   view.showPause(false);
   if (isGoldenRun()) view.setBonusChip(true);
-  renderAll();
+  renderAll(true);
   ads.gameplayStart();
 }
 
@@ -521,7 +556,7 @@ function beginDailyRun(): void {
   view.showGameOver(null);
   view.showPause(false);
   view.setModeChip(t('daily_title', { n: dailyDay }));
-  renderAll();
+  renderAll(true);
   ads.gameplayStart();
 }
 
@@ -731,7 +766,41 @@ view.fxToggleBtn.addEventListener('click', () => {
 
 // keyboard focus inside portal iframes
 document.body.tabIndex = -1;
-window.addEventListener('pointerdown', () => window.focus(), { passive: true });
+window.addEventListener(
+  'pointerdown',
+  () => {
+    window.focus();
+    armNudge();
+  },
+  { passive: true },
+);
+
+/* ---------- zero-boredom ambience ---------- */
+
+// living world: twinkles, shooting stars, the puzzle card stirring
+let ambienceTick = 0;
+setInterval(() => {
+  if (document.hidden || paused || game.over) return;
+  if (prefersReducedMotion() || document.documentElement.classList.contains('fx-lite')) return;
+  ambienceTick += 1;
+  view.twinkle();
+  if (ambienceTick % 3 === 0) view.cardWiggle();
+  if (ambienceTick % 5 === 0) view.shootingStar();
+}, 4200);
+
+// idle nudge: after ~12s without a move, placeable pieces hop
+let nudgeTimer: number | null = null;
+function armNudge(): void {
+  if (nudgeTimer) clearTimeout(nudgeTimer);
+  nudgeTimer = window.setTimeout(() => {
+    if (!paused && !game.over && !document.hidden) {
+      view.nudge();
+      view.cardWiggle();
+    }
+    armNudge();
+  }, 12000);
+}
+armNudge();
 
 // visual QA hook: ?bnfx exposes the nova effect + audio state for automation
 if (new URLSearchParams(location.search).has('bnfx')) {
@@ -794,7 +863,7 @@ currentQuests(); // week rollover check
 view.setDailyBadge(dailyUnplayed());
 updatePetCard(petProgress(store.pets().cells));
 
-renderAll();
+renderAll(true);
 requestAnimationFrame(() => {
   requestAnimationFrame(() => {
     document.getElementById('splash')?.classList.add('done');

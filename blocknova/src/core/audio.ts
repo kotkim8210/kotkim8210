@@ -252,6 +252,16 @@ export class SoundEngine {
     this.tone(150, 0.09, 0, 'square', 0.22, 120);
   }
 
+  private lastBeat = 0;
+
+  /** Quiet sub thump while the board is in the danger zone (per move). */
+  heartbeat(): void {
+    const now = performance.now();
+    if (now - this.lastBeat < 900) return;
+    this.lastBeat = now;
+    this.tone(58, 0.14, 0, 'sine', 0.5, 42);
+  }
+
   /** Cute pickup blip when a piece is lifted from the tray. */
   pickup(): void {
     this.tone(330, 0.07, 0, 'sine', 0.4, 560);

@@ -1273,6 +1273,9 @@ body {
     transform: rotate(7deg);
   }
 }
+.egg.wiggle .card {
+  animation: egg-wobble 0.7s ease-in-out 2;
+}
 .egg.hatch .card {
   animation: egg-hatch 0.5s ease-out;
 }
@@ -1435,6 +1438,156 @@ body {
 .icon-btn.muted {
   border-color: color-mix(in srgb, var(--color-danger) 55%, transparent);
   color: var(--color-danger);
+}
+
+/* ---- zero-boredom layer: micro-feedback for every second ---- */
+
+/* "almost!" — a line that reached 7-8/9 cells shimmers gold once */
+.cell.almost::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-cell);
+  background: rgba(245, 197, 24, 0.38);
+  opacity: 0;
+  animation: fade-pulse 0.5s ease-out;
+  pointer-events: none;
+}
+@keyframes fade-pulse {
+  0% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* danger state: board ≥70% full — real information, not fake pressure */
+.board.danger::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-panel);
+  box-shadow: inset 0 0 34px 4px rgba(248, 113, 113, 0.28);
+  animation: danger-breathe 1.6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes danger-breathe {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.reduced-motion .board.danger::after,
+.fx-lite .board.danger::after {
+  animation: none;
+  opacity: 0.5;
+}
+
+/* hot streak: score burns gold while a combo is alive */
+.hud-score.hot {
+  color: #ffd75e;
+  text-shadow: 0 0 16px rgba(245, 197, 24, 0.7);
+}
+
+/* nova gauge 80%+: warm slow shimmer before the READY blaze */
+.nova-track.warm .nova-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 80%
+  );
+  transform: translateX(-100%);
+  animation: shimmer 2.8s linear infinite;
+}
+.reduced-motion .nova-track.warm .nova-fill::after {
+  animation: none;
+}
+
+/* ambient life: random gem twinkle */
+.cell.twinkle::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-cell);
+  background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.75) 50%, transparent 70%);
+  opacity: 0;
+  animation: fade-pulse 0.6s ease-out;
+  pointer-events: none;
+}
+
+/* ambient life: shooting star across the cosmos */
+.shooting-star {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: 70px;
+  height: 2px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.9), transparent);
+  transform: translate(var(--sx), var(--sy)) rotate(24deg);
+  opacity: 0;
+  animation: star-shoot 0.8s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes star-shoot {
+  0% {
+    transform: translate(var(--sx), var(--sy)) rotate(24deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(calc(var(--sx) + 180px), calc(var(--sy) + 80px)) rotate(24deg);
+    opacity: 0;
+  }
+}
+
+/* board wake ripple on a fresh game */
+.cell.wake {
+  animation: cell-wake 0.26s ease-out backwards;
+}
+@keyframes cell-wake {
+  from {
+    transform: scale(0.65);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.reduced-motion .cell.wake {
+  animation: none;
+}
+
+/* idle nudge: placeable pieces wave at the player */
+.slot.nudge .mini {
+  animation: nudge-hop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 2;
+}
+@keyframes nudge-hop {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-6px) scale(1.06);
+  }
+}
+.reduced-motion .slot.nudge .mini {
+  animation: none;
 }
 
 /* ---- toast ---- */
