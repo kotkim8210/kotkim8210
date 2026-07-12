@@ -198,6 +198,11 @@ def main():
         for c in candidates:
             if picked >= args.top:
                 break
+            # flat 근사 조회수로 선필터 — 기준 미달 영상의 비싼 상세+댓글 수집을 건너뜀
+            # (근사값일 수 있으므로 정확한 재확인은 아래 상세 수집에서 한 번 더)
+            fvc = c.get("view_count")
+            if isinstance(fvc, int) and fvc < args.min_views:
+                continue
             print(f"  → {c['url']}  ({c.get('title')})")
             try:
                 m = collect_one(c["url"], args.comments)
