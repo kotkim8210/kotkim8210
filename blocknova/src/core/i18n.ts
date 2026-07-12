@@ -92,6 +92,15 @@ const en: Dict = {
   pet_9: 'Star Unicorn',
   pet_10: 'Baby Dragon',
   pet_11: 'Little Alien',
+  puzzle_done: 'Puzzle complete!',
+  flavor_0: 'Born in a supernova, buries bones in stardust.',
+  flavor_1: 'Naps on comet tails, ignores gravity on purpose.',
+  flavor_2: 'Pounds mochi on the far side of the moon.',
+  flavor_3: 'Its tail once painted the northern lights.',
+  flavor_4: 'Eats bamboo grown in zero gravity. Very slowly.',
+  flavor_5: 'Cheeks full of nebula seeds for the winter.',
+  flavor_6: 'Slides between galaxies on frozen starlight.',
+  flavor_7: 'Just wants to know what blocks taste like.',
 };
 
 const ko: Dict = {
@@ -181,6 +190,15 @@ const ko: Dict = {
   pet_9: '별 유니콘',
   pet_10: '아기 용',
   pet_11: '꼬마 외계인',
+  puzzle_done: '퍼즐 완성!',
+  flavor_0: '초신성에서 태어나 별가루에 뼈다귀를 묻어요.',
+  flavor_1: '혜성 꼬리에서 낮잠 자며 중력을 일부러 무시해요.',
+  flavor_2: '달의 뒷면에서 떡방아를 찧고 있었어요.',
+  flavor_3: '이 여우의 꼬리가 오로라를 그렸대요.',
+  flavor_4: '무중력 대나무를 아주 천천히 먹어요.',
+  flavor_5: '볼주머니에 겨울용 성운 씨앗이 가득해요.',
+  flavor_6: '얼어붙은 별빛 위를 미끄러져 은하를 건너요.',
+  flavor_7: '블록이 무슨 맛인지 궁금할 뿐이에요.',
 };
 
 function currentLang(): 'en' | 'ko' {

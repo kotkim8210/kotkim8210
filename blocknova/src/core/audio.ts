@@ -100,6 +100,26 @@ export class SoundEngine {
         this.master = this.ctx.createGain();
         this.master.gain.value = 0.32; // single master level for consistency
         this.master.connect(this.ctx.destination);
+        // cosmic "space": a soft filtered feedback delay fed from the master
+        // makes every synth blip feel roomy instead of dry (all synth, 0 assets)
+        const send = this.ctx.createGain();
+        send.gain.value = 0.17;
+        const delay = this.ctx.createDelay(0.5);
+        delay.delayTime.value = 0.135;
+        const fbFilter = this.ctx.createBiquadFilter();
+        fbFilter.type = 'lowpass';
+        fbFilter.frequency.value = 2200;
+        const fb = this.ctx.createGain();
+        fb.gain.value = 0.32;
+        this.master.connect(send);
+        send.connect(delay);
+        delay.connect(fbFilter);
+        fbFilter.connect(fb);
+        fb.connect(delay);
+        const wet = this.ctx.createGain();
+        wet.gain.value = 0.5;
+        delay.connect(wet);
+        wet.connect(this.ctx.destination);
         // measurement tap for QA (proves signal actually flows)
         this.analyser = this.ctx.createAnalyser();
         this.analyser.fftSize = 256;
@@ -172,22 +192,28 @@ export class SoundEngine {
     src.stop(t0 + dur + 0.02);
   }
 
-  /** Placement: cute two-alternating pluck with a tiny upward bend. */
+  /** Placement: cute pluck, thickened with a softly detuned twin. */
   place(): void {
     this.placeAlt = (this.placeAlt + 1) % 4;
     const base = [523, 587, 659, 587][this.placeAlt]; // C5 D5 E5 D5 — playful
-    this.tone(base * 0.75, 0.1, 0, 'sine', 0.9, base * 1.1);
-    this.tone(base * 2, 0.05, 0.01, 'triangle', 0.22);
+    this.tone(base * 0.75, 0.1, 0, 'sine', 0.8, base * 1.1);
+    this.tone(base * 0.752, 0.1, 0, 'sine', 0.35, base * 1.105); // detuned twin
+    this.tone(base * 2, 0.06, 0.01, 'triangle', 0.2);
     this.noise(0.04, 0, 5200, 2, 0.1); // soft tick
   }
 
-  /** Clear: rising arpeggio + sparkle; combo pitch-up 440 × 2^(combo/12), cap 12. */
+  /** Clear: rising arpeggio over a warm pad + sparkle;
+   *  combo pitch-up 440 × 2^(combo/12), cap 12. */
   clear(combo: number): void {
     const base = 440 * Math.pow(2, Math.min(combo, 12) / 12);
+    // warm sub-pad root+fifth grounds the arpeggio
+    this.tone(base / 2, 0.34, 0, 'sine', 0.4);
+    this.tone((base / 2) * 1.5, 0.3, 0.02, 'sine', 0.24);
     this.tone(base, 0.14, 0, 'triangle', 0.85);
     this.tone(base * 1.26, 0.14, 0.055, 'triangle', 0.85);
     this.tone(base * 1.5, 0.2, 0.11, 'triangle', 0.9);
     this.tone(base * 2, 0.24, 0.165, 'sine', 0.55);
+    this.tone(base * 3, 0.18, 0.22, 'sine', 0.2); // air layer
     this.noise(0.22, 0.05, 6500, 1.2, 0.22); // glittery sweep
   }
 

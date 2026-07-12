@@ -24,6 +24,14 @@ export function sameCombination(a: number[], b: number[]): boolean {
 
 export const MAX_REDRAWS = 20;
 
+/** Early-session mercy (documented dynamic difficulty): boost the draw
+ *  weight of small pieces (≤3 cells) by `factor`. Weights only — the RNG
+ *  stream is untouched, so determinism is preserved. */
+export function applySmallBias(pieces: PieceDef[], factor: number): PieceDef[] {
+  if (factor === 1) return pieces;
+  return pieces.map((p) => (p.cells <= 3 ? { ...p, weight: p.weight * factor } : p));
+}
+
 export interface RefillOptions {
   pieces: PieceDef[];
   rng: Rng;
@@ -32,6 +40,8 @@ export interface RefillOptions {
    *  forbidden). Pass null for the very first fill. */
   prevIds: number[] | null;
   count?: number;
+  /** Small-piece weight multiplier (mercy spawns); default 1 = off. */
+  smallBias?: number;
 }
 
 /** Refill the tray: draw `count` weighted pieces from a single RNG stream.
@@ -41,8 +51,9 @@ export interface RefillOptions {
  *  stream; if no draw satisfies the constraints the last draw is kept (a tray
  *  with no placeable piece then simply triggers game over). */
 export function refillTray(opts: RefillOptions): PieceDef[] {
-  const { pieces, rng, board, prevIds } = opts;
+  const { rng, board, prevIds } = opts;
   const count = opts.count ?? 3;
+  const pieces = applySmallBias(opts.pieces, opts.smallBias ?? 1);
   let draw: PieceDef[] = [];
   for (let attempt = 0; attempt <= MAX_REDRAWS; attempt++) {
     draw = [];

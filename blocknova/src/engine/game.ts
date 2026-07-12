@@ -71,6 +71,9 @@ export interface GameOptions {
    *  Refills take the next pieces verbatim — no bag constraints — so a given
    *  day's run is identical for every player. */
   queue?: PieceDef[];
+  /** Early-session mercy: when the board is ≥60% full at refill time, small
+   *  pieces draw at 2.5× weight. Never active in daily mode. */
+  assist?: boolean;
 }
 
 export class Game {
@@ -86,6 +89,7 @@ export class Game {
   piecesPlaced = 0;
   over = false;
   readonly queue: PieceDef[] | null;
+  private readonly assist: boolean;
   private queueIndex = 0;
   private readonly rng: Rng;
   private readonly pieces: PieceDef[];
@@ -98,6 +102,7 @@ export class Game {
     this.best = opts.best ?? 0;
     this.board = opts.board ? [...opts.board] : emptyBoard();
     this.queue = opts.queue ? [...opts.queue] : null;
+    this.assist = opts.assist ?? false;
     this.gauge = Math.max(0, Math.min(NOVA_FULL, opts.gauge ?? 0));
     if (opts.tray) {
       this.tray = [...opts.tray];
@@ -116,12 +121,14 @@ export class Game {
       }
       return next;
     }
+    const fill = this.board.filter((v) => v !== 0).length / this.board.length;
     const draw = refillTray({
       pieces: this.pieces,
       rng: this.rng,
       board: this.board,
       prevIds: this.lastRefillIds,
       count: TRAY_SIZE,
+      smallBias: this.assist && fill >= 0.6 ? 2.5 : 1,
     });
     this.lastRefillIds = draw.map((p) => p.id);
     return draw;

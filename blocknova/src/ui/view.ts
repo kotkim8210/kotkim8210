@@ -1,10 +1,31 @@
 import type { Board } from '../engine/board';
 import { SIZE, rowOf, colOf } from '../engine/board';
 import type { PieceDef } from '../engine/pieces';
+import type { PetArt } from '../engine/petart';
+import { PET_TILES } from '../engine/pets';
 import { NOVA_FULL } from '../engine/game';
 import { t } from '../core/i18n';
 import { prefersReducedMotion } from '../core/device';
 import { mulberry32 } from '../engine/rng';
+
+/** Draw a 16×16 pixel-art sprite onto a crisp canvas (px = backing scale). */
+export function renderPetCanvas(art: PetArt, px: number): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = 16 * px;
+  canvas.height = 16 * px;
+  const g = canvas.getContext('2d');
+  if (g) {
+    art.rows.forEach((row, y) => {
+      for (let x = 0; x < row.length; x++) {
+        const ch = row[x];
+        if (ch === '.') continue;
+        g.fillStyle = art.palette[ch] ?? '#ff00ff';
+        g.fillRect(x * px, y * px, px, px);
+      }
+    });
+  }
+  return canvas;
+}
 
 export const GEM_VARS = ['--gem-0', '--gem-1', '--gem-2', '--gem-3', '--gem-4', '--gem-5'];
 
@@ -138,8 +159,12 @@ export class View {
   private overCountdown!: HTMLElement;
   private dailyDot!: HTMLElement;
   eggBtn!: HTMLButtonElement;
-  private eggRing!: HTMLElement;
-  private eggCore!: HTMLElement;
+  private eggCard!: HTMLElement;
+  private eggCovers: HTMLElement[] = [];
+  private eggArt: PetArt | null = null;
+  private eggCoverOrder: number[] = [];
+  private revealEl: HTMLElement | null = null;
+  private revealTimer: number | null = null;
   private modeChip!: HTMLElement;
   private bestRow!: HTMLElement;
   private sublineEl!: HTMLElement;
@@ -262,13 +287,18 @@ export class View {
       board.appendChild(cell);
     }
     this.boardEl = board;
-    // cosmic egg — fills as cells clear, hatches into collectible pets
+    // puzzle card — the pixel friend uncovering tile by tile as cells clear
     this.eggBtn = el('button', 'egg') as HTMLButtonElement;
     this.eggBtn.setAttribute('aria-label', t('pets_title'));
-    this.eggRing = el('span', 'egg-ring');
-    this.eggCore = el('span', 'egg-core', '🥚');
-    this.eggRing.appendChild(this.eggCore);
-    this.eggBtn.appendChild(this.eggRing);
+    this.eggCard = el('span', 'card');
+    const covers = el('span', 'covers');
+    for (let i = 0; i < PET_TILES; i++) {
+      const tile = el('i');
+      this.eggCovers.push(tile);
+      covers.appendChild(tile);
+    }
+    this.eggCard.appendChild(covers);
+    this.eggBtn.appendChild(this.eggCard);
     board.appendChild(this.eggBtn);
     wrap.appendChild(board);
 
@@ -396,7 +426,12 @@ export class View {
     if (this.cursorIdx !== null) this.cells[this.cursorIdx]?.classList.add('kb-cursor');
   }
 
-  renderTray(tray: (PieceDef | null)[], placeable: boolean[], selected: number | null): void {
+  renderTray(
+    tray: (PieceDef | null)[],
+    placeable: boolean[],
+    selected: number | null,
+    spawn = false,
+  ): void {
     tray.forEach((piece, i) => {
       const slot = this.slots[i];
       slot.textContent = '';
@@ -404,7 +439,12 @@ export class View {
       if (!piece) return;
       const maxDim = Math.max(piece.shape.length, piece.shape[0].length);
       const cellPx = maxDim >= 5 ? 13 : maxDim >= 4 ? 15 : 17;
-      slot.appendChild(renderPieceGrid(piece, cellPx));
+      const mini = renderPieceGrid(piece, cellPx);
+      if (spawn) {
+        mini.classList.add('spawn');
+        mini.style.animationDelay = `${i * 70}ms`;
+      }
+      slot.appendChild(mini);
       if (!placeable[i]) slot.classList.add('dim');
       else slot.classList.add('pulse');
       if (selected === i) slot.classList.add('selected');
@@ -500,21 +540,101 @@ export class View {
     this.soundToggleBtn.textContent = `${t('mute')}: ${muted ? 'OFF' : 'ON'}`;
   }
 
-  /* ---------- cosmic pets ---------- */
+  /* ---------- cosmic friends (pixel puzzle) ---------- */
 
-  setEgg(ratio: number, near: boolean, complete: boolean): void {
-    this.eggRing.style.setProperty('--p', ratio.toFixed(3));
-    this.eggCore.textContent = complete ? '🌟' : '🥚';
+  /** Update the corner puzzle card: current picture + uncovered tile count. */
+  setPetCard(art: PetArt, artIndex: number, tiles: number, near: boolean, complete: boolean): void {
+    if (this.eggArt !== art) {
+      this.eggArt = art;
+      this.eggCard.querySelector('canvas')?.remove();
+      this.eggCard.prepend(renderPetCanvas(art, 4));
+      // tiles uncover in a scrambled, per-picture deterministic order
+      const rng = mulberry32((artIndex + 7) >>> 0);
+      this.eggCoverOrder = Array.from({ length: PET_TILES }, (_, i) => i);
+      for (let i = this.eggCoverOrder.length - 1; i > 0; i--) {
+        const j = Math.floor(rng() * (i + 1));
+        [this.eggCoverOrder[i], this.eggCoverOrder[j]] = [this.eggCoverOrder[j], this.eggCoverOrder[i]];
+      }
+    }
+    const open = complete ? PET_TILES : tiles;
+    this.eggCoverOrder.forEach((coverIdx, orderPos) => {
+      this.eggCovers[coverIdx].classList.toggle('open', orderPos < open);
+    });
     this.eggBtn.classList.toggle('near', near && !complete);
   }
 
-  hatchFx(emoji: string, caption: string): void {
+  /** Brief feedback pulses on the card (mote absorbed / puzzle completed). */
+  cardBlink(): void {
+    this.eggBtn.classList.remove('blink');
+    void this.eggBtn.offsetWidth;
+    this.eggBtn.classList.add('blink');
+    setTimeout(() => this.eggBtn.classList.remove('blink'), 300);
+  }
+
+  cardHatch(): void {
     this.eggBtn.classList.remove('hatch');
     void this.eggBtn.offsetWidth;
     this.eggBtn.classList.add('hatch');
     setTimeout(() => this.eggBtn.classList.remove('hatch'), 600);
-    this.wordPunch(emoji, 56);
-    this.floatScore(caption, true, { px: 17, topPct: 0.6 });
+  }
+
+  /** Puzzle-complete cinematic: zoom the finished art center-screen and hold
+   *  (~2.6s, click to skip) so the player can actually appreciate it. */
+  revealPet(art: PetArt, name: string, flavor: string, holdMs = 2600): void {
+    if (!this.revealEl) {
+      this.revealEl = el('div', 'reveal');
+      this.revealEl.addEventListener('click', () => this.hideReveal());
+      document.body.appendChild(this.revealEl);
+    }
+    const frame = el('div', 'frame');
+    frame.append(
+      renderPetCanvas(art, 16),
+      el('div', 'r-title', `✨ ${t('puzzle_done')} ✨`),
+      el('div', 'r-name', name),
+      el('div', 'r-flavor', flavor),
+    );
+    this.revealEl.textContent = '';
+    this.revealEl.appendChild(frame);
+    this.revealEl.classList.add('on');
+    this.cardHatch();
+    this.confetti();
+    if (this.revealTimer) clearTimeout(this.revealTimer);
+    this.revealTimer = window.setTimeout(() => this.hideReveal(), holdMs);
+  }
+
+  hideReveal(): void {
+    this.revealEl?.classList.remove('on');
+    if (this.revealTimer) {
+      clearTimeout(this.revealTimer);
+      this.revealTimer = null;
+    }
+  }
+
+  /** Energy motes: cleared cells fly into the puzzle card (goal linkage). */
+  motes(cellIndices: number[]): void {
+    if (this.reducedMotion || cellIndices.length === 0) return;
+    const budget = this.fxLiteActive() ? 1 : 3;
+    const target = this.eggCard.getBoundingClientRect();
+    const tx = target.left + target.width / 2;
+    const ty = target.top + target.height / 2;
+    const picks = cellIndices.filter((_, i) => i % Math.ceil(cellIndices.length / budget) === 0).slice(0, budget);
+    picks.forEach((cellIdx, i) => {
+      const rect = this.cellRect(cellIdx);
+      const mote = el('div', 'mote');
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      mote.style.left = `${x - 4}px`;
+      mote.style.top = `${y - 4}px`;
+      document.body.appendChild(mote);
+      setTimeout(() => {
+        mote.classList.add('fly');
+        mote.style.transform = `translate(${tx - x}px, ${ty - y}px) scale(0.5)`;
+      }, 30 + i * 60);
+      setTimeout(() => {
+        mote.remove();
+        if (i === picks.length - 1) this.cardBlink();
+      }, 650 + i * 60);
+    });
   }
 
   setFxLite(lite: boolean): void {
@@ -864,7 +984,7 @@ export class View {
 
   showStats(
     rows: { label: string; value: string }[] | null,
-    pets?: { emoji: string; name: string; unlocked: boolean; fresh: boolean }[],
+    pets?: { art: PetArt; name: string; unlocked: boolean; fresh: boolean }[],
   ): void {
     if (!rows) {
       this.statsOverlay.classList.remove('on');
@@ -880,15 +1000,20 @@ export class View {
       const title = el(
         'div',
         'pets-span text-xs font-black text-dim tracking-widest mt-2',
-        `🥚 ${t('pets_title').toUpperCase()}`,
+        `🧩 ${t('pets_title').toUpperCase()}`,
       );
       const grid = el('div', 'pets-grid pets-span');
       for (const p of pets) {
-        const cell = el(
-          'div',
-          'pet-cell' + (p.unlocked ? (p.fresh ? ' fresh' : '') : ' locked'),
-          p.unlocked ? p.emoji : '❓',
-        );
+        const cell = el('div', 'pet-cell' + (p.unlocked ? (p.fresh ? ' fresh' : '') : ' locked'));
+        if (p.unlocked) {
+          const canvas = renderPetCanvas(p.art, 2);
+          canvas.style.width = '26px';
+          canvas.style.height = '26px';
+          canvas.style.imageRendering = 'pixelated';
+          cell.appendChild(canvas);
+        } else {
+          cell.textContent = '❓';
+        }
         cell.title = p.unlocked ? p.name : '???';
         grid.appendChild(cell);
       }

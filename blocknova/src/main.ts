@@ -59,6 +59,8 @@ const isGoldenRun = () => !store.flags().firstRunDone && mode === 'classic';
 
 function newClassicGame(): Game {
   startingBest = store.best().classic;
+  // early-session mercy spawns (documented DDA — the genre's proven D1 lever)
+  const assist = store.stats().games < 5;
   if (isGoldenRun()) {
     return new Game({
       board: goldenBoard(),
@@ -66,9 +68,10 @@ function newClassicGame(): Game {
       gauge: GOLDEN_PRECHARGE,
       seed: randomSeed(),
       best: startingBest,
+      assist,
     });
   }
-  return new Game({ seed: randomSeed(), best: startingBest });
+  return new Game({ seed: randomSeed(), best: startingBest, assist });
 }
 
 function positionCoach(): void {
@@ -262,7 +265,8 @@ function handleMove(move: MoveResult, prevBoard: number[], pieceColor: number): 
   selected = null;
   movesThisRun += 1;
   view.renderBoard(game.board);
-  view.renderTray(game.tray, game.placeablePieces(), selected);
+  // refilled trays bounce in with a stagger
+  view.renderTray(game.tray, game.placeablePieces(), selected, move.refilled);
   keyboard.refresh();
   view.markPlaced(move.placed);
 
@@ -293,19 +297,21 @@ function handleMove(move: MoveResult, prevBoard: number[], pieceColor: number): 
     questProgress(0, move.clearedRows.length + move.clearedCols.length);
     if (move.nova) questProgress(1, 1);
 
-    // cosmic egg: fills in real time, hatches mid-game (collection goal)
+    // pixel puzzle: cleared cells uncover the picture tile by tile, and
+    // energy motes visibly fly from the cleared lines into the card
     const petsBefore = petProgress(store.pets().cells);
     store.addPetCells(removed.length);
     const petsAfter = petProgress(store.pets().cells);
+    view.motes(move.clearedCells);
     if (petsAfter.unlocked > petsBefore.unlocked) {
       const pet = PETS[petsAfter.unlocked - 1];
       freshPet = petsAfter.unlocked - 1;
-      view.hatchFx(pet.emoji, `${t('new_friend')} ${t(pet.key)}`);
+      // §publisher: zoom the finished puzzle for ~2.6s so it can be admired
+      view.revealPet(pet.art, `${t('new_friend')} ${t(pet.key)}`, t(`flavor_${petsAfter.unlocked - 1}`));
       sound.hatch();
-      view.confetti();
       view.toast(`${pet.emoji} ${t(pet.key)}`);
     }
-    view.setEgg(petsAfter.ratio, petsAfter.ratio >= 0.85, petsAfter.complete);
+    updatePetCard(petsAfter);
     // colors as they were before removal (placed cells take the piece color)
     const colorLookup = new Map<number, number>();
     for (const i of removed) {
@@ -473,6 +479,11 @@ function petLine(): string | undefined {
   const p = petProgress(store.pets().cells);
   if (p.complete) return t('pets_done');
   return t('next_pet', { n: p.needed });
+}
+
+function updatePetCard(p: ReturnType<typeof petProgress>): void {
+  const artIndex = Math.min(p.unlocked, PETS.length - 1);
+  view.setPetCard(PETS[artIndex].art, artIndex, p.tiles, p.ratio >= 0.85, p.complete);
 }
 
 function restart(): void {
@@ -693,7 +704,7 @@ function showStatsModal(): void {
       { label: t('st_daily'), value: daily.day > -9000 ? `${'⭐'.repeat(daily.stars) || '0⭐'} ${daily.score}` : '—' },
     ],
     PETS.map((p, i) => ({
-      emoji: p.emoji,
+      art: p.art,
       name: t(p.key),
       unlocked: i < unlocked,
       fresh: i === freshPet,
@@ -731,7 +742,7 @@ if (new URLSearchParams(location.search).has('bnfx')) {
   };
   w.__bnAudio = () => sound.debug();
   w.__bnHatch = () => {
-    view.hatchFx('🐶', `${t('new_friend')} ${t('pet_0')}`);
+    view.revealPet(PETS[0].art, `${t('new_friend')} ${t('pet_0')}`, t('flavor_0'));
     sound.hatch();
   };
 }
@@ -781,10 +792,7 @@ store.setStreak(bootStreak.state);
 refreshMetaChips();
 currentQuests(); // week rollover check
 view.setDailyBadge(dailyUnplayed());
-{
-  const p = petProgress(store.pets().cells);
-  view.setEgg(p.ratio, p.ratio >= 0.85, p.complete);
-}
+updatePetCard(petProgress(store.pets().cells));
 
 renderAll();
 requestAnimationFrame(() => {

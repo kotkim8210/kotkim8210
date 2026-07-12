@@ -1208,41 +1208,58 @@ body {
   }
 }
 
-/* cosmic egg — perched on the board's top-right corner */
+/* puzzle card — the pixel-art friend uncovering tile by tile, board corner */
 .egg {
   position: absolute;
-  top: -14px;
+  top: -16px;
   right: -8px;
   z-index: 16;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   display: grid;
   place-items: center;
   background: none;
   border: none;
   cursor: pointer;
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
 }
-.egg .egg-ring {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
+.egg .card {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 9px;
+  overflow: hidden;
+  border: 2px solid rgba(245, 197, 24, 0.55);
+  background: #17141f;
+}
+.egg .card canvas {
+  position: absolute;
+  inset: 2px;
+  width: 36px;
+  height: 36px;
+  image-rendering: pixelated;
+}
+.egg .covers {
+  position: absolute;
+  inset: 0;
   display: grid;
-  place-items: center;
-  background: conic-gradient(var(--color-nova) calc(var(--p) * 360deg), rgba(255, 255, 255, 0.14) 0);
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
 }
-.egg .egg-core {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: #1d1b2e;
-  font-size: 16px;
-  line-height: 1;
+.egg .covers i {
+  background: linear-gradient(145deg, #2c2749, #201c38);
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+  transition: opacity 0.35s ease, transform 0.35s ease;
 }
-.egg.near .egg-core {
+.egg .covers i.open {
+  opacity: 0;
+  transform: scale(0.4) rotate(28deg);
+}
+.egg.near .card {
   animation: egg-wobble 0.8s ease-in-out infinite;
+}
+.egg.blink .card {
+  box-shadow: 0 0 12px var(--color-nova);
 }
 @keyframes egg-wobble {
   0%,
@@ -1250,13 +1267,13 @@ body {
     transform: rotate(0);
   }
   25% {
-    transform: rotate(-10deg);
+    transform: rotate(-7deg);
   }
   75% {
-    transform: rotate(10deg);
+    transform: rotate(7deg);
   }
 }
-.egg.hatch .egg-core {
+.egg.hatch .card {
   animation: egg-hatch 0.5s ease-out;
 }
 @keyframes egg-hatch {
@@ -1273,8 +1290,115 @@ body {
     transform: scale(1);
   }
 }
-.reduced-motion .egg.near .egg-core,
-.reduced-motion .egg.hatch .egg-core {
+.reduced-motion .egg.near .card,
+.reduced-motion .egg.hatch .card {
+  animation: none;
+}
+
+/* energy motes: cleared cells feed the puzzle card */
+.mote {
+  position: fixed;
+  z-index: 48;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, var(--color-nova-hi), var(--color-nova));
+  box-shadow: 0 0 8px var(--color-nova);
+  transition: transform 0.55s cubic-bezier(0.3, 0, 0.6, 1), opacity 0.55s ease;
+  opacity: 1;
+}
+.mote.fly {
+  opacity: 0.1;
+}
+
+/* puzzle-complete cinematic: zoom the finished pixel art center-screen */
+.reveal {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  background: rgba(12, 10, 22, 0.82);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.reveal.on {
+  opacity: 1;
+  pointer-events: auto;
+}
+.reveal .frame {
+  text-align: center;
+  animation: reveal-pop 0.55s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.reduced-motion .reveal .frame {
+  animation: none;
+}
+@keyframes reveal-pop {
+  0% {
+    transform: scale(0.15) rotate(-8deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.08) rotate(2deg);
+  }
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+.reveal canvas {
+  width: 192px;
+  height: 192px;
+  image-rendering: pixelated;
+  border-radius: 20px;
+  border: 3px solid rgba(245, 197, 24, 0.7);
+  background: radial-gradient(120% 90% at 50% 0%, #2b2452 0%, #17141f 70%);
+  box-shadow: 0 0 40px rgba(245, 197, 24, 0.35), 0 18px 50px rgba(0, 0, 0, 0.6);
+}
+.reveal .r-title {
+  margin-top: 14px;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--color-dim);
+  letter-spacing: 0.12em;
+}
+.reveal .r-name {
+  font-size: 26px;
+  font-weight: 900;
+  background: linear-gradient(90deg, var(--color-nova), var(--color-nova-hi));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.reveal .r-flavor {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--color-ink);
+  opacity: 0.85;
+  max-width: 260px;
+}
+
+/* tray refill: pieces bounce in with a stagger */
+.slot .mini.spawn {
+  animation: mini-spawn 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+@keyframes mini-spawn {
+  0% {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.reduced-motion .slot .mini.spawn {
   animation: none;
 }
 
