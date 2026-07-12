@@ -21,6 +21,10 @@ except ImportError:
 
 def fetch_comments(url: str, max_fetch: int = 100):
     """댓글을 최대 max_fetch개 가져와 좋아요순 정렬."""
+    # 유튜브 봇 체크 우회 폴백은 fetch_meta의 것을 공용으로 사용
+    sys.path.insert(0, __file__.rsplit("/", 1)[0])
+    from fetch_meta import extract_info_botcheck_fallback
+
     opts = {
         "quiet": True,
         "no_warnings": True,
@@ -33,8 +37,7 @@ def fetch_comments(url: str, max_fetch: int = 100):
             }
         },
     }
-    with YoutubeDL(opts) as ydl:
-        info = ydl.extract_info(url, download=False)
+    info = extract_info_botcheck_fallback(url, opts)
 
     comments = info.get("comments") or []
     # 좋아요순 재정렬 (top 정렬이 완벽하지 않을 수 있어 확실히 다시 정렬)
