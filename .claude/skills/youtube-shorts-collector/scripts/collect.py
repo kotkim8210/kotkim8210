@@ -220,7 +220,8 @@ def main():
         print("[결과 없음] 조건에 맞는 영상을 수집하지 못했습니다.")
         return
 
-    ts = datetime.now().strftime("%Y%m%d_%H%M")
+    # 초까지 포함 — 같은 분에 끝난 연속 실행이 서로 덮어쓰지 않도록
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     json_path = os.path.join(args.out, f"collected_{ts}.json")
     md_path = os.path.join(args.out, f"collected_{ts}.md")
 
