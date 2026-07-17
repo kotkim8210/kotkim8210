@@ -1,30 +1,28 @@
 import "dotenv/config";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+import { refreshLongLivedToken, debugToken, updateEnvTokenLine } from "./token.js";
 
-const GRAPH_API_VERSION = "v21.0";
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ENV_PATH = join(__dirname, "..", ".env");
 
 async function main() {
+  const writeEnv = process.argv.includes("--write");
   const current = process.env.IG_ACCESS_TOKEN;
   if (!current) {
     console.error("IG_ACCESS_TOKEN 이 .env 에 없습니다.");
     process.exit(1);
   }
 
-  const url = `https://graph.facebook.com/${GRAPH_API_VERSION}/refresh_access_token?grant_type=ig_refresh_token&access_token=${encodeURIComponent(current)}`;
-
   console.log("[refresh-token] 현재 토큰으로 갱신 요청 중...");
-  const res = await fetch(url);
-  const text = await res.text();
-  let body;
+  let result;
   try {
-    body = JSON.parse(text);
-  } catch {
-    console.error(`[refresh-token] non-JSON 응답 (${res.status}): ${text.slice(0, 300)}`);
-    process.exit(1);
-  }
-
-  if (!res.ok || body.error) {
-    const err = body.error ?? {};
-    console.error(`[refresh-token] 실패 (${res.status}): ${err.message ?? text}`);
+    result = await refreshLongLivedToken(current, {
+      appId: process.env.FB_APP_ID,
+      appSecret: process.env.FB_APP_SECRET,
+    });
+  } catch (err) {
+    console.error(`[refresh-token] 실패: ${err.message}`);
     if (err.code === 190) {
       console.error("        토큰이 만료됐거나 revoke 됐습니다. Graph API Explorer 에서 재발급 필요.");
       console.error("        → docs/instagram-setup.md 의 '토큰 재발급' 섹션 참고");
@@ -32,22 +30,29 @@ async function main() {
     process.exit(1);
   }
 
-  if (!body.access_token) {
-    console.error(`[refresh-token] 응답에 access_token 없음: ${JSON.stringify(body)}`);
-    process.exit(1);
+  const expiresInDays = Math.round(result.expiresInSec / 86400);
+  const expiresAt = new Date(Date.now() + result.expiresInSec * 1000);
+
+  console.log(`\n=== 새 long-lived 토큰 (${result.method}) ===`);
+  console.log(`expires_in: ${result.expiresInSec}s (~${expiresInDays}일)`);
+  console.log(`expires_at: ${expiresAt.toISOString()}`);
+
+  if (writeEnv) {
+    const { replaced } = await updateEnvTokenLine(ENV_PATH, result.accessToken);
+    console.log(`\n✓ .env 의 IG_ACCESS_TOKEN ${replaced ? "교체" : "추가"} 완료 (--write)`);
+  } else {
+    console.log("\n--- 새 토큰 (이 줄을 .env 의 IG_ACCESS_TOKEN 에 복사) ---");
+    console.log(result.accessToken);
+    console.log("---\n");
+    console.log("팁: `npm run refresh-token -- --write` 로 실행하면 .env 를 자동으로 갱신합니다.");
   }
 
-  const expiresInSec = body.expires_in ?? 0;
-  const expiresInDays = Math.round(expiresInSec / 86400);
-  const expiresAt = new Date(Date.now() + expiresInSec * 1000);
-
-  console.log("\n=== 새 long-lived 토큰 ===");
-  console.log(`expires_in: ${expiresInSec}s (~${expiresInDays}일)`);
-  console.log(`expires_at: ${expiresAt.toISOString()}`);
-  console.log("\n--- 새 토큰 (이 줄을 .env 의 IG_ACCESS_TOKEN 에 복사) ---");
-  console.log(body.access_token);
-  console.log("---\n");
-  console.log("⚠️  .env 파일은 자동 수정되지 않습니다 — 수동으로 IG_ACCESS_TOKEN= 값을 위 토큰으로 교체하세요.");
+  // 갱신 후 만료일 확인 (best-effort)
+  const dbg = await debugToken(result.accessToken, {
+    appId: process.env.FB_APP_ID,
+    appSecret: process.env.FB_APP_SECRET,
+  });
+  if (dbg?.expiresAt) console.log(`확인된 만료일: ${dbg.expiresAt.toISOString()} (${dbg.daysLeft}일 남음)`);
 }
 
 main().catch((err) => {

@@ -155,7 +155,9 @@ npm run upload <topic_id>
 
 `refresh-token` 호출이 실패하면 (401 / `code=190`) 토큰이 revoke 됐거나 60일 지났습니다. 3단계로 돌아가 short-lived 토큰부터 재생성 → 4단계 long-lived 교환 → `.env` 갱신.
 
-매월 1회 `npm run refresh-token` 실행 권장 — 그러면 60일 카운터가 리셋되어 사실상 무기한 유지.
+매월 1회 `npm run refresh-token -- --write` 실행 권장(`--write` 는 `.env` 자동 갱신) — 60일 카운터가 리셋되어 사실상 무기한 유지.
+cron 으로 걸어두면 완전 무인: `0 9 1 * * cd /path && node src/refresh-token.js --write`.
+또는 `.env` 에 `AUTO_REFRESH_TOKEN=true` 를 두면 발행 시 만료 14일 전 자동 갱신됩니다.
 
 ---
 
@@ -172,9 +174,13 @@ npm run upload <topic_id>
 
 - `--daily-cap N` — `upload-state.json`의 타임스탬프로 **지난 24시간 발행 수를 자동 계산**, N 초과 시 중단. cron이 중복 실행돼도 한도 방어.
 - `--interval 초` — 한 실행에서 여러 개 발행 시 사이 간격 (스팸 버스트 방지).
-- `--label 이름` + `--report` — 슬롯(예: 출근길/저녁)별 태그 저장 후 인사이트 비교.
+- `--label 이름` + `--report [--at 48]` — 슬롯(예: 출근길/저녁)별 태그 저장 후 인사이트 비교. 매일 `--snapshot` cron 을 걸어두면 "게시 후 48h" 시점 지표로 나이를 통제해 비교.
+- **자동 재시도** — 네트워크·429·5xx·Graph 스로틀 코드(4/17/32/613)는 지수 백오프 재시도. 권한(#10/#200)·만료(190)는 즉시 실패.
+- **동시 실행 락** — `output/.upload.lock`. 겹치면 두 번째 실행이 스스로 종료 (3h 지난 락은 자동 대체).
+- **토큰 만료 감시** — 만료 14일 전 경고 + `WEBHOOK_URL` 알림. `AUTO_REFRESH_TOKEN=true` 면 자동 갱신 후 `.env` 반영.
+- `--hashtags-in-comment` — 해시태그를 캡션 대신 첫 댓글로 (캡션을 깔끔하게 유지하는 운영 취향용).
 
-권장 운영(신규 계정): cron으로 하루 2슬롯 × 1개 = `--all --limit 1 --daily-cap 2 --label <slot>`.
+권장 운영(신규 계정): cron으로 하루 2슬롯 × 1개 = `--all --limit 1 --daily-cap 2 --label <slot>` + 23:50 `--snapshot`.
 자세한 cron 예시는 `README.md`의 "안전 발행 (throttle) + A/B 시간대 테스트" 참고.
 
 ---

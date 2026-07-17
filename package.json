@@ -8,6 +8,8 @@
     "pipeline": "node src/pipeline.js",
     "batch": "node src/batch.js",
     "upload": "node src/upload-instagram.js",
+    "snapshot": "node src/upload-instagram.js --snapshot",
+    "report": "node src/upload-instagram.js --report",
     "refresh-token": "node src/refresh-token.js",
     "sheets": "node src/sheets-runner.js"
   },

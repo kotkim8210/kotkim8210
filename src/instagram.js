@@ -1,26 +1,46 @@
+import { withRetry, TransientError } from "./retry.js";
+
 const GRAPH_API_VERSION = "v21.0";
 const GRAPH_BASE = `https://graph.facebook.com/${GRAPH_API_VERSION}`;
 
 const TERMINAL_STATUS = new Set(["FINISHED", "ERROR", "EXPIRED", "PUBLISHED"]);
 const SUCCESS_STATUS = new Set(["FINISHED", "PUBLISHED"]);
 
+// Meta 공식 문서상 일시적(transient)/스로틀 오류 코드 — 재시도 대상.
+// 1·2: 서비스 일시 장애, 4: 앱 rate limit, 17: 유저 rate limit, 32: 페이지 rate limit, 613: 호출 한도
+const TRANSIENT_GRAPH_CODES = new Set([1, 2, 4, 17, 32, 613]);
+
 async function graphFetch(url, init = {}) {
-  const res = await fetch(url, init);
-  const text = await res.text();
-  let body;
-  try {
-    body = text.length ? JSON.parse(text) : {};
-  } catch {
-    throw new Error(`Graph API non-JSON response (${res.status}): ${text.slice(0, 300)}`);
-  }
-  if (!res.ok || body.error) {
-    const err = body.error ?? {};
-    const msg = err.message ?? text;
-    const code = err.code ? ` [code=${err.code}]` : "";
-    const sub = err.error_subcode ? ` [subcode=${err.error_subcode}]` : "";
-    throw new Error(`Graph API ${res.status}${code}${sub}: ${msg}`);
-  }
-  return body;
+  return withRetry(async () => {
+    let res;
+    try {
+      res = await fetch(url, init);
+    } catch (err) {
+      throw new TransientError(`Graph API 네트워크 오류: ${err.message}`, err);
+    }
+    const text = await res.text();
+    let body;
+    try {
+      body = text.length ? JSON.parse(text) : {};
+    } catch {
+      const msg = `Graph API non-JSON response (${res.status}): ${text.slice(0, 300)}`;
+      if (res.status === 429 || res.status >= 500) throw new TransientError(msg);
+      throw new Error(msg);
+    }
+    if (!res.ok || body.error) {
+      const err = body.error ?? {};
+      const msg = err.message ?? text;
+      const code = err.code ? ` [code=${err.code}]` : "";
+      const sub = err.error_subcode ? ` [subcode=${err.error_subcode}]` : "";
+      const full = `Graph API ${res.status}${code}${sub}: ${msg}`;
+      // 스로틀/일시 장애는 재시도, 인증(190)·권한(10/200/803) 등은 즉시 실패
+      if (TRANSIENT_GRAPH_CODES.has(err.code) || res.status === 429 || res.status >= 500) {
+        throw new TransientError(full);
+      }
+      throw new Error(full);
+    }
+    return body;
+  }, { label: "graph" });
 }
 
 export class InstagramClient {
@@ -105,6 +125,17 @@ export class InstagramClient {
     }
 
     return { mediaId: body.id, permalink };
+  }
+
+  /** 게시물에 댓글 작성 (해시태그 첫 댓글 전략용). 성공 시 comment id 반환. */
+  async postComment(mediaId, message) {
+    const url = `${GRAPH_BASE}/${mediaId}/comments`;
+    const params = new URLSearchParams();
+    params.set("message", message);
+    params.set("access_token", this.accessToken);
+    const body = await graphFetch(url, { method: "POST", body: params });
+    if (!body.id) throw new Error(`postComment: 응답에 id 없음: ${JSON.stringify(body)}`);
+    return body.id;
   }
 
   /**

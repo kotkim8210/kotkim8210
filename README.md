@@ -140,8 +140,8 @@ npm run upload -- --all --limit 5
 # imgbb까지만 검증 (IG 발행 안 함)
 node src/upload-instagram.js <topic_id> --dry-run
 
-# 60일 토큰 갱신 (월 1회 권장)
-npm run refresh-token
+# 60일 토큰 갱신 (월 1회 권장 · --write 는 .env 자동 반영)
+npm run refresh-token -- --write
 ```
 
 ### 안전 발행 (throttle) + A/B 시간대 테스트
@@ -149,29 +149,43 @@ npm run refresh-token
 신규 계정이 한 번에 대량 발행하면 공식 API여도 스팸으로 잡힙니다. 분산 발행용 플래그:
 
 ```bash
---interval <초>    한 실행 안에서 발행 사이 대기 (예: 1800 = 30분)
---daily-cap <N>    지난 24시간 누적 발행 상한 (upload-state 기준 자동 계산)
---label <이름>     각 발행에 슬롯 태그 저장 (A/B 비교용)
---report           업로드 게시물 인사이트를 슬롯별로 집계 (reach/♥/💬/🔖)
+--interval <초>          한 실행 안에서 발행 사이 대기 (예: 1800 = 30분)
+--daily-cap <N>          지난 24시간 누적 발행 상한 (upload-state 기준 자동 계산)
+--label <이름>           각 발행에 슬롯 태그 저장 (A/B 비교용)
+--hashtags-in-comment    해시태그를 캡션 대신 첫 댓글로 발행
+--snapshot               게시물 지표를 insights-history.json 에 기록 (매일 cron)
+--report [--at 48]       게시 후 <at>시간 시점 지표를 슬롯별 비교 (스냅샷 기반)
 ```
 
-**A/B 시간대 비교 (출근길 vs 저녁) — cron 2슬롯, 하루 2개:**
+**내장 안전장치 (플래그 없이 자동):**
+
+- **자동 재시도** — imgbb/Graph API 의 일시 오류(네트워크·429·5xx·스로틀 코드)는 2s→4s→8s→16s 백오프로 최대 4회 재시도. 잘못된 키·권한·만료 토큰은 즉시 실패.
+- **동시 실행 락** — `output/.upload.lock` 으로 cron 중복 실행 차단 (3h 지난 락은 죽은 프로세스로 보고 자동 대체).
+- **발행 큐 로테이션** — `--all` 은 같은 카테고리 연속 발행을 피하도록 round-robin 정렬, `season: 하반기/상반기` 토픽은 제철에 우선(비시즌은 큐 뒤로, 스킵 아님).
+- **토큰 만료 감시** — 발행 시 만료 14일 전이면 경고(+웹훅). `.env` 에 `AUTO_REFRESH_TOKEN=true` 면 자동 갱신 후 `.env` 반영.
+- **실패 알림** — `.env` 에 `WEBHOOK_URL`(Slack/Discord incoming webhook) 설정 시 실패·토큰경고를 푸시.
+
+**A/B 시간대 비교 (출근길 vs 저녁) — production crontab:**
 
 ```bash
-# crontab -e  (KST 기준 7:55 / 21:30, 각 1개 · 24h 상한 2)
+# crontab -e  (서버가 UTC면 첫 줄에 CRON_TZ=Asia/Seoul)
 55  7 * * *  cd /path/kotkim8210 && /usr/bin/node src/upload-instagram.js --all --limit 1 --daily-cap 2 --label morning >> /var/log/kotkim.log 2>&1
 30 21 * * *  cd /path/kotkim8210 && /usr/bin/node src/upload-instagram.js --all --limit 1 --daily-cap 2 --label evening >> /var/log/kotkim.log 2>&1
+50 23 * * *  cd /path/kotkim8210 && /usr/bin/node src/upload-instagram.js --snapshot >> /var/log/kotkim.log 2>&1
+0   9 1 * *  cd /path/kotkim8210 && /usr/bin/node src/refresh-token.js --write >> /var/log/kotkim.log 2>&1
 ```
 
 - `--limit 1` = 슬롯당 1개, `--daily-cap 2` = cron 중복 실행돼도 24h 2개 넘지 않게 방어
-- 2주 누적 후 어느 시간대가 reach가 높은지 비교:
+- 매일 `--snapshot` 이 각 게시물 지표를 기록 → 리포트가 "게시 후 48시간" 시점으로 **나이를 통제**해 공정 비교
+- 2주 누적 후:
 
 ```bash
-npm run upload -- --report
-# 슬롯별 평균: morning n=14 reach=...  ♥=...  / evening n=14 reach=...
+npm run report -- --at 48
+# evening  n=14 age≈48h reach=1520 ♥=... (스냅 14/라이브 0)
+# morning  n=14 age≈47h reach= 980 ♥=... (스냅 14/라이브 0)
 ```
 
-> 시간대 A/B는 슬롯마다 다른 주제가 섞이므로 완벽한 실험은 아닙니다(참고용). 슬롯당 7건+ 쌓인 뒤 판단하세요. 서버 타임존이 UTC면 cron 시간을 KST-9h(=22:55 / 12:30 UTC)로 환산하거나 `CRON_TZ=Asia/Seoul`을 지정하세요.
+> 시간대 A/B는 슬롯마다 다른 주제가 섞이므로 완벽한 실험은 아닙니다(참고용). 슬롯당 7건+ 쌓인 뒤 판단하세요.
 
 ### 처리 흐름
 
@@ -270,6 +284,10 @@ npm run sheets -- --no-publish --limit 0
 | `DEFAULT_HANDLE` | — | 카드에 표시될 핸들. 기본값 `@알쓸지잡10` |
 | `PUPPETEER_SKIP_DOWNLOAD` | — | `true` 설정 시 Chromium 다운로드 스킵 |
 | `PUPPETEER_EXECUTABLE_PATH` | — | 시스템 Chrome 경로 (스킵 시 필수) |
+| `WEBHOOK_URL` | — | 실패·토큰경고 알림 (Slack/Discord incoming webhook) |
+| `AUTO_REFRESH_TOKEN` | — | `true` 면 만료 14일 전 발행 시 토큰 자동 갱신 + `.env` 반영 |
+| `FB_APP_ID` / `FB_APP_SECRET` | — | FB Login 토큰 갱신(fb_exchange)·만료 조회용 (Meta 앱 Basic 설정) |
+| `IG_SKIP_PREFLIGHT` | — | `true` 면 발행 전 인증/토큰 점검 생략 (오프라인 테스트용) |
 
 ## 프로젝트 구조
 
