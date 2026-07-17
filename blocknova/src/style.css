@@ -165,6 +165,53 @@ body {
   border-radius: 4px;
 }
 
+/* per-color micro-glyphs (ui-spec §6 색+형태 이중 구분 + a cute paw-print
+   nod to the Cosmic Friends). Dot arrangements differ per gem color so
+   color-blind players can tell pieces apart by pattern alone. */
+.cell.gem::before,
+.mini-cell.gem::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.42;
+  background-repeat: no-repeat;
+}
+/* g0 — single star dot */
+.g0::before {
+  background-image: radial-gradient(circle 1.6px at 50% 60%, #fff 95%, transparent 100%);
+}
+/* g1 — two dots, diagonal */
+.g1::before {
+  background-image: radial-gradient(circle 1.4px at 36% 42%, #fff 95%, transparent 100%),
+    radial-gradient(circle 1.4px at 64% 66%, #fff 95%, transparent 100%);
+}
+/* g2 — paw print (3-dot triangle) 🐾 */
+.g2::before {
+  background-image: radial-gradient(circle 1.3px at 36% 44%, #fff 95%, transparent 100%),
+    radial-gradient(circle 1.3px at 64% 44%, #fff 95%, transparent 100%),
+    radial-gradient(circle 1.7px at 50% 66%, #fff 95%, transparent 100%);
+}
+/* g3 — heart-ish (two top dots + wide bottom dot) */
+.g3::before {
+  background-image: radial-gradient(circle 1.5px at 40% 46%, #fff 95%, transparent 100%),
+    radial-gradient(circle 1.5px at 60% 46%, #fff 95%, transparent 100%),
+    radial-gradient(circle 1.2px at 50% 63%, #fff 95%, transparent 100%);
+  opacity: 0.34;
+}
+/* g4 — four dots, square */
+.g4::before {
+  background-image: radial-gradient(circle 1.2px at 38% 42%, #fff 95%, transparent 100%),
+    radial-gradient(circle 1.2px at 62% 42%, #fff 95%, transparent 100%),
+    radial-gradient(circle 1.2px at 38% 64%, #fff 95%, transparent 100%),
+    radial-gradient(circle 1.2px at 62% 64%, #fff 95%, transparent 100%);
+}
+/* g5 — twin horizontal dots (little eyes) */
+.g5::before {
+  background-image: radial-gradient(circle 1.6px at 38% 54%, #fff 95%, transparent 100%),
+    radial-gradient(circle 1.6px at 62% 54%, #fff 95%, transparent 100%);
+}
+
 /* ghost preview + invalid state */
 .cell.ghost-ok {
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.22), transparent 42%), var(--gem);

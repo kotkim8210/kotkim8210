@@ -69,8 +69,9 @@ export function renderPieceGrid(piece: PieceDef, cellPx: number, gapPx = 2): HTM
   grid.style.gap = `${gapPx}px`;
   for (let r = 0; r < h; r++) {
     for (let c = 0; c < w; c++) {
-      const cell = el('div', piece.shape[r][c] ? 'mini-cell gem' : 'mini-cell');
-      if (piece.shape[r][c]) cell.style.setProperty('--gem', gemVar(piece.color));
+      const on = piece.shape[r][c] === 1;
+      const cell = el('div', on ? `mini-cell gem g${piece.color % 6}` : 'mini-cell');
+      if (on) cell.style.setProperty('--gem', gemVar(piece.color));
       grid.appendChild(cell);
     }
   }
@@ -418,7 +419,7 @@ export class View {
     for (let i = 0; i < board.length; i++) {
       const cell = this.cells[i];
       const v = board[i];
-      cell.className = 'cell' + (v ? ' gem' : '');
+      cell.className = 'cell' + (v ? ` gem g${(v - 1) % 6}` : '');
       if (v) cell.style.setProperty('--gem', gemVar(v - 1));
       else cell.style.removeProperty('--gem');
       if (wake && !this.reducedMotion) {

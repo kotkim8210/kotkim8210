@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { PIECES, GRID, TRAY_SIZE } from '../src/engine/pieces';
 
 describe('piece pool v2 (variety expansion)', () => {
-  it('has 33 pieces with sequential ids', () => {
+  it('has 42 pieces with sequential ids', () => {
     expect(GRID).toBe(9);
     expect(TRAY_SIZE).toBe(3);
-    expect(PIECES).toHaveLength(33);
+    expect(PIECES).toHaveLength(42);
     PIECES.forEach((p, i) => expect(p.id).toBe(i));
   });
 
@@ -32,8 +32,15 @@ describe('piece pool v2 (variety expansion)', () => {
   it('names are unique and orientation variants exist', () => {
     const names = PIECES.map((p) => p.name);
     expect(new Set(names).size).toBe(names.length);
-    // every T orientation, both S/Z axes, all four 3-cell corners
-    for (const required of ['t4', 't4u', 't4l', 't4r', 's4', 's4v', 'z4', 'z4v', 'l3', 'j3', 'l3b', 'j3b']) {
+    // every T orientation, both S/Z axes, all four 3-cell corners,
+    // all eight L/J tetromino orientations, plus-piece and diagonals
+    for (const required of [
+      't4', 't4u', 't4l', 't4r',
+      's4', 's4v', 'z4', 'z4v',
+      'l3', 'j3', 'l3b', 'j3b',
+      'l4', 'j4', 'l4h', 'j4h', 'l4v2', 'j4v2', 'l4h2', 'j4h2',
+      'plus5', 'd2a', 'd2b', 'd3a', 'd3b',
+    ]) {
       expect(names).toContain(required);
     }
   });
