@@ -71,7 +71,8 @@ function newClassicGame(): Game {
       assist,
     });
   }
-  return new Game({ seed: randomSeed(), best: startingBest, assist });
+  // warm start: the first clear lands within a few moves instead of ~15+
+  return new Game({ seed: randomSeed(), best: startingBest, assist, warmStart: true });
 }
 
 let coachEndTimer: number | null = null;
@@ -552,7 +553,8 @@ function beginDailyRun(): void {
   reviveUsed = true; // no revive in daily — the rewarded hook there is retry
   runRecorded = { any: false, score: 0, nova: 0, lines: 0 };
   if (coachStep > 0) endCoach();
-  game = new Game({ queue: dailyPieces(dailyDay), seed: dailySeed(dailyDay) });
+  // daily warm start is seeded → identical terrain for every player that day
+  game = new Game({ queue: dailyPieces(dailyDay), seed: dailySeed(dailyDay), warmStart: true });
   view.showGameOver(null);
   view.showPause(false);
   view.setModeChip(t('daily_title', { n: dailyDay }));

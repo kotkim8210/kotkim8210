@@ -15,6 +15,7 @@ import {
   SIZE,
 } from './board';
 import { drawWeighted, refillTray } from './bag';
+import { warmStartBoard } from './warmstart';
 import type { PieceDef } from './pieces';
 import { PIECES, TRAY_SIZE } from './pieces';
 import { clearScore, placementScore } from './scoring';
@@ -74,6 +75,9 @@ export interface GameOptions {
   /** Early-session mercy: when the board is ≥60% full at refill time, small
    *  pieces draw at 2.5× weight. Never active in daily mode. */
   assist?: boolean;
+  /** Open with a partially pre-filled bottom (warmstart.ts) so the first
+   *  clear lands within a few moves. Ignored when `board` is provided. */
+  warmStart?: boolean;
 }
 
 export class Game {
@@ -100,7 +104,11 @@ export class Game {
     this.rng = opts.rng ?? mulberry32(opts.seed ?? 1);
     this.pieces = opts.pieces ?? PIECES;
     this.best = opts.best ?? 0;
-    this.board = opts.board ? [...opts.board] : emptyBoard();
+    this.board = opts.board
+      ? [...opts.board]
+      : opts.warmStart
+        ? warmStartBoard(this.rng)
+        : emptyBoard();
     this.queue = opts.queue ? [...opts.queue] : null;
     this.assist = opts.assist ?? false;
     this.gauge = Math.max(0, Math.min(NOVA_FULL, opts.gauge ?? 0));
