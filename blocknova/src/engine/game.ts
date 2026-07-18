@@ -1,0 +1,308 @@
+import type { Board } from './board';
+import {
+  canPlace,
+  emptyBoard,
+  fullLines,
+  hasAnyPlacement,
+  isBoardEmpty,
+  lineCells,
+  novaBlastCells,
+  placeOnBoard,
+  removeCells,
+  rowOf,
+  colOf,
+  idx,
+  SIZE,
+} from './board';
+import { drawWeighted, refillTray } from './bag';
+import { warmStartBoard } from './warmstart';
+import type { PieceDef } from './pieces';
+import { PIECES, TRAY_SIZE } from './pieces';
+import { clearScore, placementScore } from './scoring';
+import type { Rng } from './rng';
+import { mulberry32 } from './rng';
+
+/** game-design.md §5 — nova gauge is full at 60 cleared cells. */
+export const NOVA_FULL = 60;
+
+/** game-design.md §12 — perfect clear: emptying the board pays a flat bonus
+ *  (applied after the nova ×3 multiplier). */
+export const PERFECT_BONUS = 1000;
+
+/** monetization.md §2 — revive removes this many random filled cells. */
+export const REVIVE_CELLS = 12;
+
+export interface MoveResult {
+  /** Cells filled by the placement. */
+  placed: number[];
+  clearedRows: number[];
+  clearedCols: number[];
+  /** Cells removed by line clears (intersections counted once). */
+  clearedCells: number[];
+  /** True when a nova explosion fired on this move. */
+  nova: boolean;
+  novaCenter: { row: number; col: number } | null;
+  /** Extra cells removed by the 3×3 blast (beyond the line clears). */
+  novaCells: number[];
+  placeScore: number;
+  clearScorePart: number;
+  /** Total score gained this move (×3 already applied on a nova turn). */
+  gained: number;
+  /** Combo counter after this move (0 when the placement cleared nothing). */
+  combo: number;
+  gauge: number;
+  gaugeFull: boolean;
+  newBest: boolean;
+  perfectClear: boolean;
+  refilled: boolean;
+  gameOver: boolean;
+}
+
+export interface GameOptions {
+  seed?: number;
+  rng?: Rng;
+  pieces?: PieceDef[];
+  best?: number;
+  /** Preset board / tray (used by tests and the Phase 2 golden first move). */
+  board?: Board;
+  tray?: (PieceDef | null)[];
+  /** Nova gauge pre-charge (golden first move: 50%). */
+  gauge?: number;
+  /** Daily mode (game-design §6): a fixed piece sequence consumed in order.
+   *  Refills take the next pieces verbatim — no bag constraints — so a given
+   *  day's run is identical for every player. */
+  queue?: PieceDef[];
+  /** Early-session mercy: when the board is ≥60% full at refill time, small
+   *  pieces draw at 2.5× weight. Never active in daily mode. */
+  assist?: boolean;
+  /** Open with a partially pre-filled bottom (warmstart.ts) so the first
+   *  clear lands within a few moves. Ignored when `board` is provided. */
+  warmStart?: boolean;
+}
+
+export class Game {
+  board: Board;
+  tray: (PieceDef | null)[];
+  score = 0;
+  best: number;
+  combo = 0;
+  gauge = 0;
+  linesTotal = 0;
+  novaCount = 0;
+  maxCombo = 0;
+  piecesPlaced = 0;
+  over = false;
+  readonly queue: PieceDef[] | null;
+  private readonly assist: boolean;
+  private queueIndex = 0;
+  private readonly rng: Rng;
+  private readonly pieces: PieceDef[];
+  private lastRefillIds: number[] | null = null;
+  private bestBeaten = false;
+
+  constructor(opts: GameOptions = {}) {
+    this.rng = opts.rng ?? mulberry32(opts.seed ?? 1);
+    this.pieces = opts.pieces ?? PIECES;
+    this.best = opts.best ?? 0;
+    this.board = opts.board
+      ? [...opts.board]
+      : opts.warmStart
+        ? warmStartBoard(this.rng)
+        : emptyBoard();
+    this.queue = opts.queue ? [...opts.queue] : null;
+    this.assist = opts.assist ?? false;
+    this.gauge = Math.max(0, Math.min(NOVA_FULL, opts.gauge ?? 0));
+    if (opts.tray) {
+      this.tray = [...opts.tray];
+      this.lastRefillIds = opts.tray.filter((p): p is PieceDef => !!p).map((p) => p.id);
+    } else {
+      this.tray = this.refill();
+    }
+    this.over = !this.anyMoves();
+  }
+
+  private refill(): (PieceDef | null)[] {
+    if (this.queue) {
+      const next: (PieceDef | null)[] = [];
+      for (let i = 0; i < TRAY_SIZE; i++) {
+        next.push(this.queueIndex < this.queue.length ? this.queue[this.queueIndex++] : null);
+      }
+      return next;
+    }
+    const fill = this.board.filter((v) => v !== 0).length / this.board.length;
+    const draw = refillTray({
+      pieces: this.pieces,
+      rng: this.rng,
+      board: this.board,
+      prevIds: this.lastRefillIds,
+      count: TRAY_SIZE,
+      smallBias: this.assist && fill >= 0.6 ? 2.5 : 1,
+    });
+    this.lastRefillIds = draw.map((p) => p.id);
+    return draw;
+  }
+
+  /** Daily mode: pieces not yet placed out of the fixed sequence. */
+  remainingPieces(): number {
+    return this.queue ? this.queue.length - this.piecesPlaced : Infinity;
+  }
+
+  /** Daily survival: the run ended because all queued pieces were placed. */
+  get survived(): boolean {
+    return !!this.queue && this.over && this.piecesPlaced === this.queue.length;
+  }
+
+  gaugeIsFull(): boolean {
+    return this.gauge >= NOVA_FULL;
+  }
+
+  canPlaceTray(trayIndex: number, row: number, col: number): boolean {
+    const piece = this.tray[trayIndex];
+    return !!piece && canPlace(this.board, piece.shape, row, col);
+  }
+
+  /** True while at least one tray piece has a legal placement. */
+  anyMoves(): boolean {
+    return this.tray.some((p) => p && hasAnyPlacement(this.board, p.shape));
+  }
+
+  placeablePieces(): boolean[] {
+    return this.tray.map((p) => !!p && hasAnyPlacement(this.board, p.shape));
+  }
+
+  /** game-design.md §5 — blast center: the row×col intersection when both line
+   *  kinds cleared; otherwise the cleared line at the placed piece's center. */
+  private novaCenter(
+    rows: number[],
+    cols: number[],
+    piece: PieceDef,
+    row: number,
+    col: number,
+  ): { row: number; col: number } {
+    const midR = Math.min(SIZE - 1, row + Math.floor((piece.shape.length - 1) / 2));
+    const midC = Math.min(SIZE - 1, col + Math.floor((piece.shape[0].length - 1) / 2));
+    if (rows.length && cols.length) return { row: rows[0], col: cols[0] };
+    if (rows.length) return { row: rows[0], col: midC };
+    return { row: midR, col: cols[0] };
+  }
+
+  /** Execute a move. Returns null when the placement is illegal. */
+  placeAt(trayIndex: number, row: number, col: number): MoveResult | null {
+    if (this.over) return null;
+    const piece = this.tray[trayIndex];
+    if (!piece || !canPlace(this.board, piece.shape, row, col)) return null;
+
+    const placed = placeOnBoard(this.board, piece, row, col);
+    const placeScore = placementScore(piece.cells);
+
+    const { rows, cols } = fullLines(this.board);
+    const lines = rows.length + cols.length;
+    const cleared = lines > 0 ? lineCells(rows, cols) : new Set<number>();
+    const gaugeWasFull = this.gaugeIsFull();
+
+    let clearPart = 0;
+    let nova = false;
+    let novaCenter: { row: number; col: number } | null = null;
+    let novaCells: number[] = [];
+
+    if (lines > 0) {
+      clearPart = clearScore(lines, this.combo);
+      this.combo += 1;
+      this.maxCombo = Math.max(this.maxCombo, this.combo);
+      this.linesTotal += lines;
+      removeCells(this.board, cleared);
+      if (gaugeWasFull) {
+        // §5: with a full gauge, the next clear detonates — 3×3 extra removal,
+        // the turn's score ×3, gauge back to 0.
+        nova = true;
+        this.novaCount += 1;
+        novaCenter = this.novaCenter(rows, cols, piece, row, col);
+        novaCells = novaBlastCells(this.board, novaCenter.row, novaCenter.col);
+        removeCells(this.board, novaCells);
+        this.gauge = 0;
+      } else {
+        this.gauge = Math.min(NOVA_FULL, this.gauge + cleared.size);
+      }
+    } else {
+      this.combo = 0;
+    }
+
+    const perfectClear = lines > 0 && isBoardEmpty(this.board);
+    let gained = placeScore + clearPart;
+    if (nova) gained *= 3;
+    if (perfectClear) gained += PERFECT_BONUS;
+    this.score += gained;
+
+    let newBest = false;
+    if (this.score > this.best) {
+      this.best = this.score;
+      if (!this.bestBeaten) {
+        this.bestBeaten = true;
+        newBest = true;
+      }
+    }
+
+    this.piecesPlaced += 1;
+    this.tray[trayIndex] = null;
+    let refilled = false;
+    if (this.tray.every((p) => p === null)) {
+      this.tray = this.refill();
+      refilled = this.tray.some((p) => p !== null);
+    }
+
+    this.over = !this.anyMoves();
+
+    return {
+      placed,
+      clearedRows: rows,
+      clearedCols: cols,
+      clearedCells: [...cleared],
+      nova,
+      novaCenter,
+      novaCells,
+      placeScore,
+      clearScorePart: clearPart,
+      gained,
+      combo: this.combo,
+      gauge: this.gauge,
+      gaugeFull: this.gaugeIsFull(),
+      newBest,
+      perfectClear,
+      refilled,
+      gameOver: this.over,
+    };
+  }
+
+  private upcomingCache: PieceDef[] | null = null;
+
+  /** Near-miss reveal (game-design §12): the pieces that were coming next.
+   *  Daily mode reads the fixed queue; classic draws from the live RNG stream
+   *  (only meant to be called once the run is over). */
+  upcomingPieces(count = 3): PieceDef[] {
+    if (this.queue) return this.queue.slice(this.queueIndex, this.queueIndex + count);
+    if (!this.upcomingCache) {
+      this.upcomingCache = Array.from({ length: count }, () => drawWeighted(this.pieces, this.rng));
+    }
+    return this.upcomingCache;
+  }
+
+  /** monetization.md §2 — rewarded revive: clear random filled cells and
+   *  continue the same run. Returns the removed cell indices. */
+  revive(cellsToRemove = REVIVE_CELLS): number[] {
+    const filled: number[] = [];
+    this.board.forEach((v, i) => {
+      if (v !== 0) filled.push(i);
+    });
+    for (let i = filled.length - 1; i > 0; i--) {
+      const j = Math.floor(this.rng() * (i + 1));
+      [filled[i], filled[j]] = [filled[j], filled[i]];
+    }
+    const removed = filled.slice(0, cellsToRemove);
+    removeCells(this.board, removed);
+    this.upcomingCache = null;
+    this.over = !this.anyMoves();
+    return removed;
+  }
+}
+
+export { rowOf, colOf, idx };

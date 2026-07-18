@@ -1,0 +1,94 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Block Nova — 와이어프레임 v1.1 (Cosmic Glass)</title><script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{ink:'#EDEAF7',mute:'#9A97AC',nova:'#F5C518',novaHi:'#FFE9A0',danger:'#F87171'},borderRadius:{cell:'7px',panel:'18px'}}}}</script>
+<style>
+body{font-family:Pretendard,system-ui,sans-serif;background:radial-gradient(120% 90% at 50% -10%,#232041 0%,#17171C 55%)}
+.glass{background:rgba(255,255,255,.04);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.10);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+.gem{border:1px solid rgba(255,255,255,.15);box-shadow:0 0 12px -3px var(--g);background:linear-gradient(145deg,rgba(255,255,255,.28),transparent 42%),var(--g);position:relative}
+.gem:after{content:'';position:absolute;top:3px;left:4px;width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.8)}
+.socket{background:rgba(255,255,255,.03);box-shadow:inset 0 2px 6px rgba(0,0,0,.45)}
+.goldtext{background:linear-gradient(90deg,#F5C518,#FFE9A0);-webkit-background-clip:text;background-clip:text;color:transparent}
+@keyframes shim{0%{transform:translateX(-120%)}100%{transform:translateX(320%)}}
+.shimmer{position:relative;overflow:hidden}.shimmer:after{content:'';position:absolute;inset:0;width:40%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);animation:shim 1.6s infinite}
+</style></head>
+<body class="text-ink p-6">
+<h1 class="text-xl font-bold mb-1">Block Nova — 와이어프레임 <span class="goldtext">v1.1</span></h1>
+<p class="text-mute text-sm mb-6">Cosmic Glass · 토큰/모션은 docs/ui-spec.md · 프레임 380px · <span class="text-nova">콘솔의 "cdn.tailwindcss.com" 경고는 이 미리보기 파일에만 해당 — 실제 게임은 Vite 정식 빌드라 무관</span></p>
+<div class="flex flex-wrap gap-8 items-start">
+
+<section><p class="text-xs text-mute mb-2">① 첫 실행 — 골든 퍼스트 무브 (1수 더블클리어 + 노바 50% 선충전)</p>
+<div class="w-[380px] rounded-2xl glass p-4 space-y-3 relative overflow-hidden">
+  <div class="flex justify-between items-center"><span class="font-black">BLOCK<span class="goldtext">NOVA</span></span><button class="text-mute text-xs border border-white/10 rounded-full px-2 py-0.5">Skip</button></div>
+  <div><div class="flex justify-between text-[10px] text-mute mb-1"><span>NOVA <span class="text-nova">⚡보너스 충전</span></span><span>50%</span></div>
+    <div class="h-2 rounded bg-white/10 overflow-hidden shimmer"><div class="h-full" style="width:50%;background:linear-gradient(90deg,#F5C518,#FFE9A0)"></div></div></div>
+  <div class="relative"><div id="b1" class="grid grid-cols-9 gap-[3px] glass p-2 rounded-panel aspect-square"></div>
+    <div class="absolute -bottom-1 right-6 text-nova text-2xl animate-bounce">⬇</div></div>
+  <div class="grid grid-cols-3 gap-3">
+    <div class="glass rounded-panel p-2 grid place-items-center ring-2 ring-nova"><div id="p1" class="grid gap-[2px]"></div></div>
+    <div class="glass rounded-panel p-2 grid place-items-center"><div id="p2" class="grid gap-[2px]"></div></div>
+    <div class="glass rounded-panel p-2 grid place-items-center"><div id="p3" class="grid gap-[2px]"></div></div>
+  </div>
+  <p class="text-center text-sm">이 조각을 끌어 놓아보세요 <span class="text-mute text-xs">(Tap↔Click 자동 전환)</span></p>
+</div></section>
+
+<section><p class="text-xs text-mute mb-2">② 메인 — 레벨링·PB 페이스 바·퀘스트 (프리미엄 HUD)</p>
+<div class="w-[380px] rounded-2xl glass p-4 space-y-3">
+  <div class="flex items-center justify-between">
+    <span class="glass rounded-full px-2.5 py-1 text-xs font-bold">Lv.7 <span class="goldtext">Star</span></span>
+    <span class="font-black">BLOCK<span class="goldtext">NOVA</span></span>
+    <span class="text-mute text-sm">🔥12🛡 · 🔇 · ⏸</span></div>
+  <div>
+    <div class="flex items-end justify-between"><p class="text-4xl font-black tabular-nums">8,120</p>
+      <span class="bg-nova/15 text-nova rounded-full px-2.5 py-1 text-xs font-bold">COMBO ×4</span>
+      <div class="text-right"><p class="text-[10px] text-mute">BEST</p><p class="font-bold tabular-nums">12,140</p></div></div>
+    <div class="h-1 mt-1 rounded bg-white/10"><div class="h-full rounded" style="width:67%;background:#60A5FA"></div></div>
+  </div>
+  <div><div class="flex justify-between text-[10px] text-mute mb-1"><span>NOVA</span><span class="text-nova font-bold">READY</span></div>
+    <div class="h-2 rounded bg-white/10 overflow-hidden shimmer"><div class="h-full w-full" style="background:linear-gradient(90deg,#F5C518,#FFE9A0)"></div></div></div>
+  <div id="b2" class="grid grid-cols-9 gap-[3px] glass p-2 rounded-panel aspect-square"></div>
+  <div class="glass rounded-panel px-3 py-2 flex items-center justify-between text-[11px]">
+    <span>주간 퀘스트 · 줄 60개</span><div class="w-24 h-1.5 rounded bg-white/10"><div class="h-full rounded bg-nova" style="width:92%;box-shadow:0 0 8px #F5C518"></div></div><span class="text-nova">55/60</span></div>
+</div></section>
+
+<section><p class="text-xs text-mute mb-2">③ 노바 폭발 — ×3 + happytime()</p>
+<div class="w-[380px] rounded-2xl glass p-4 space-y-3">
+  <div class="flex justify-between items-center"><span class="font-black">BLOCK<span class="goldtext">NOVA</span></span><span class="goldtext text-xs font-bold animate-pulse">★ NOVA ★</span></div>
+  <div class="relative">
+    <div id="b3" class="grid grid-cols-9 gap-[3px] glass p-2 rounded-panel aspect-square"></div>
+    <div class="absolute inset-0 grid place-items-center pointer-events-none">
+      <div class="w-36 h-36 rounded-full border-4 border-nova/70 animate-ping"></div>
+      <p class="absolute font-black text-3xl goldtext drop-shadow">+1,440 ×3</p></div>
+  </div>
+  <p class="text-[10px] text-mute text-center">백색 플래시 → 골드 링 → 셰이크 · 파티클 ≤24 · reduced-motion 시 페이드</p>
+</div></section>
+
+<section><p class="text-xs text-mute mb-2">④ 게임오버 — 근접실패 + 다음 조각 공개 + 스트릭/퀘스트</p>
+<div class="w-[380px] rounded-2xl glass relative overflow-hidden">
+  <div class="p-4 opacity-25"><div class="glass rounded-panel aspect-square"></div></div>
+  <div class="absolute inset-0" style="background:rgba(0,0,0,.55)"></div>
+  <div class="absolute bottom-0 inset-x-0 glass rounded-t-panel p-5 space-y-3">
+    <p class="text-center text-3xl font-black tabular-nums">11,820</p>
+    <p class="text-center text-sm">Best까지 <span class="goldtext font-black">-320</span> · <span class="text-nova">한 판이면 넘어요</span></p>
+    <div class="flex items-center justify-center gap-2 text-[11px] text-mute"><span>다음 조각이었어요 →</span>
+      <span id="n1" class="grid gap-[2px]"></span><span id="n2" class="grid gap-[2px]"></span><span id="n3" class="grid gap-[2px]"></span></div>
+    <div class="flex justify-center gap-2 text-[10px]"><span class="glass rounded-full px-2 py-0.5">하이라이트 · NOVA ×2</span><span class="glass rounded-full px-2 py-0.5">최고 콤보 5</span></div>
+    <button class="h-12 w-full rounded-xl font-black text-[#17171C]" style="background:linear-gradient(90deg,#F5C518,#FFE9A0)">▶ 부활하고 계속하기 <span class="font-medium text-xs">(광고)</span></button>
+    <div class="grid grid-cols-2 gap-2"><button class="h-11 rounded-xl glass text-mute">다시하기</button><button class="h-11 rounded-xl glass text-mute">공유 📋</button></div>
+    <div class="glass rounded-panel p-3 flex items-center justify-between">
+      <div><p class="text-xs font-bold">🔥 12일 연속 <span class="text-[10px] text-mute">(🛡 실드 1)</span></p><p class="text-[10px] text-mute">Daily #12 ⭐⭐⭐☆☆ · 다음 판 07:41:23</p></div>
+      <button class="h-9 px-4 rounded-lg text-white text-sm font-bold" style="background:#8B5CF6">도전</button></div>
+  </div>
+</div></section>
+</div>
+<script>
+const G=['#22D3EE','#8B5CF6','#34D399','#F472B6','#F59E0B','#60A5FA'];
+function cell(on,i){const d=document.createElement('div');d.className='rounded-cell aspect-square '+(on?'gem':'socket');if(on)d.style.setProperty('--g',G[i%6]);return d}
+function grid(id,f){const el=document.getElementById(id);for(let i=0;i<81;i++){const r=(i/9)|0,c=i%9;el.appendChild(cell(f(r,c),r+c))}}
+grid('b1',(r,c)=>(r===7&&c!==8)||(r===8&&c!==8));                       // 골든 퍼스트 무브 프리셋
+grid('b2',(r,c)=>(r>5&&(r+c)%3!==0)||(r===4&&c<7)||(c===8&&r>2));
+grid('b3',(r,c)=>r>4);
+function mini(id,shape,col,s=12){const el=document.getElementById(id);el.style.display='grid';el.style.gridTemplateColumns=`repeat(${shape[0].length},${s}px)`;
+ shape.flat().forEach(v=>{const d=document.createElement('div');d.style.cssText=`width:${s}px;height:${s}px;border-radius:3px;background:${v?col:'transparent'}`;if(v){d.className='gem';d.style.setProperty('--g',col)}el.appendChild(d)})}
+mini('p1',[[1],[1]],G[0],16);mini('p2',[[1,1],[1,1]],G[2],16);mini('p3',[[1,0],[1,1]],G[1],16);
+mini('n1',[[1,1,1]],G[4]);mini('n2',[[1,1],[1,1]],G[3]);mini('n3',[[1],[1],[1]],G[5]);
+</script></body></html>
