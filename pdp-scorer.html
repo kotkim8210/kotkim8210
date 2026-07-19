@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>상세페이지 전환 점수기 · 당신의 상세페이지, 몇 점에 팔릴까?</title>
+<meta name="description" content="이커머스 상세페이지(PDP) 전환 체크리스트 점수기. 항목을 체크하면 0~100점 + 우선 개선 항목. 설치·가입 없이 즉시." />
+<link rel="stylesheet" href="assets/app.css" />
+<style>
+  .hero{ text-align:center; padding:26px 0 6px; }
+  .hero h1{ font-size:36px; } @media(max-width:600px){ .hero h1{font-size:26px;} }
+  .lead{ font-size:17px; color:var(--muted); max-width:600px; margin:10px auto; }
+  .grp{ margin:14px 0 4px; font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); }
+  .chk{ display:flex; gap:10px; align-items:flex-start; padding:8px 10px; border:1px solid var(--line); border-radius:10px; margin:6px 0; cursor:pointer; background:var(--panel); }
+  .chk:hover{ border-color:var(--accent); }
+  .chk input{ width:auto; margin-top:3px; }
+  .chk .w{ margin-left:auto; font-family:var(--mono); font-size:11px; color:var(--muted); }
+  .scorewrap{ display:grid; grid-template-columns:160px 1fr; gap:20px; align-items:center; }
+  @media(max-width:680px){ .scorewrap{grid-template-columns:1fr;} }
+  .dial .num{ font-family:var(--mono); font-size:56px; font-weight:800; letter-spacing:-.03em; line-height:1; }
+  .dial .grade{ font-size:14px; font-weight:700; margin-top:4px; }
+  .fix li{ margin:7px 0; color:var(--muted); }
+  .pro{ background:linear-gradient(180deg,rgba(139,92,246,.12),rgba(110,168,254,.06)); border:1px solid var(--accent-2); }
+  .editbar{ position:sticky; top:0; z-index:30; background:rgba(10,14,22,.85); backdrop-filter:blur(8px);
+            border-bottom:1px solid var(--line); padding:8px 0; margin:-32px -20px 16px; }
+  .editbar .wrap2{ max-width:1080px; margin:0 auto; padding:0 20px; display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+</style>
+</head>
+<body>
+
+<div class="editbar">
+  <div class="wrap2">
+    <span class="tag">2호 미니앱 · 무료 점수 작동 / PRO는 CONFIG 결제링크·코드 설정</span>
+    <span class="tag" id="usagestat"></span>
+  </div>
+</div>
+
+<div class="wrap narrow">
+  <a class="home" href="index.html">← 툴킷 홈</a>
+
+  <div class="hero">
+    <span class="kicker">셀러·이커머스용 무료 도구</span>
+    <h1>이 상세페이지, 몇 점에 팔릴까?</h1>
+    <p class="lead">전환을 가르는 <b>20개 핵심 항목</b>을 체크하면 <b>0~100점 + 무엇부터 고쳐야 할지</b>를 즉시 알려드립니다.
+    광고비 올리기 전에 <b>새는 구멍</b>부터 막으세요.</p>
+  </div>
+
+  <div class="card">
+    <div id="list"></div>
+    <div class="btn-row">
+      <button class="btn lg" id="run" type="button">점수 측정하기 →</button>
+      <button class="btn ghost" id="allno" type="button">초기화</button>
+    </div>
+  </div>
+
+  <div id="result" class="hidden">
+    <div class="card">
+      <div class="scorewrap">
+        <div class="dial"><div class="num metric" id="s_total">0</div><div class="grade" id="s_grade">—</div></div>
+        <div id="bygroup"></div>
+      </div>
+    </div>
+    <h2>먼저 고칠 것 (영향 큰 순)</h2>
+    <div class="card"><ul class="fix" id="fix" style="margin:0;padding-left:18px"></ul></div>
+
+    <div class="card pro">
+      <div class="badge" style="color:var(--accent-2)">PRO · ₩9,900 <span class="tag">런칭가</span></div>
+      <h3 style="margin:6px 0">약점 항목별 <b>구체 개선 가이드 + 카피 예시</b> 잠금 해제</h3>
+      <p id="proHint" style="margin:0;color:var(--muted)">무료는 '무엇을' 알려주고, PRO는 '어떻게'(문구·배치 예시)를 줍니다. 평생 이용.</p>
+      <div class="btn-row">
+        <button class="btn" id="buyPro" type="button">₩9,900 PRO 잠금 해제 →</button>
+        <span class="flex" style="gap:6px"><input id="code" placeholder="구매 후 코드" style="max-width:160px"><button class="btn ghost" id="unlock" type="button">입력</button></span>
+      </div>
+    </div>
+  </div>
+
+  <p class="muted-foot">
+    점수는 이커머스 전환 베스트프랙티스 <b>체크리스트(가중치)</b> 기반 가이드입니다. 입력값은 이 브라우저에만 처리됩니다. ·
+    사업 맥락: <a href="ideas/miniapp-loop.md">ideas/miniapp-loop.md</a>
+  </p>
+</div>
+
+<script>
+/* ====== CONFIG (배포 전) ====== */
+const CONFIG={ paymentLink:"", proCode:"PDP-PRO-2026", gaId:"", gaEnabled:true, pixelEnabled:true };
+/* ============================== */
+if(CONFIG.gaId){ const gs=document.createElement('script'); gs.async=true; gs.src='https://www.googletagmanager.com/gtag/js?id='+CONFIG.gaId; document.head.appendChild(gs); window.dataLayer=window.dataLayer||[]; window.gtag=function(){dataLayer.push(arguments);}; gtag('js',new Date()); gtag('config',CONFIG.gaId); }
+const $=id=>document.getElementById(id);
+const SKEY="pdp_stats_v1";
+let stats=JSON.parse(localStorage.getItem(SKEY)||'{"runs":0,"upgrades":0,"unlocked":false}');
+function saveStats(){ localStorage.setItem(SKEY,JSON.stringify(stats)); renderStat(); }
+function renderStat(){ $("usagestat").textContent=`측정 ${stats.runs} · 업그레이드 ${stats.upgrades}${stats.unlocked?" · PRO✓":""}`; }
+function track(t,m){ if(CONFIG.gaEnabled&&window.gtag)gtag('event',t,m||{}); if(CONFIG.pixelEnabled&&window.fbq)fbq('trackCustom',t,m||{}); }
+function esc(s){return(s??"").replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+const CHECK=[
+ ["첫 화면","핵심 베네핏을 첫 줄에서 한 문장으로 말한다",3,"제품명 말고 '결과'를 말하세요. 예) ‘바르고 5분, 끈적임 없는 보습’."],
+ ["첫 화면","대표 이미지/영상이 제품 사용 결과를 보여준다",3,"패키지샷보다 ‘사용 중/전후’ 컷이 전환을 올립니다."],
+ ["첫 화면","가격·할인·혜택이 위쪽에서 바로 보인다",2,"가격 숨기지 마세요. 할인 근거(정가 대비)를 함께."],
+ ["첫 화면","첫 화면에 구매 버튼(CTA)이 보인다",2,"스크롤 전에 행동 지점을 노출."],
+ ["신뢰","리뷰/별점이 노출된다",3,"별점+건수+대표 후기 3개를 상단 가까이."],
+ ["신뢰","실사용 후기/사진(UGC)이 있다",2,"고객 사진 후기는 광고보다 강력합니다."],
+ ["신뢰","환불·교환·보장 정책이 명확하다",2,"‘30일 환불보장’ 한 줄이 구매 불안을 줄입니다."],
+ ["신뢰","인증·수상·언론·판매수 등 권위 신호가 있다",2,"‘누적 N개 판매’, 인증마크 등."],
+ ["욕구","비포/애프터 또는 사용 시나리오가 있다",2,"문제→해결 흐름으로 구성."],
+ ["욕구","경쟁사 대비 차별점이 분명하다",2,"‘왜 이걸 사야 하는가’ 비교표 한 개."],
+ ["욕구","핵심 스펙·성분·사이즈 등 의사결정 정보가 충분",2,"반품 줄이는 정확한 정보."],
+ ["욕구","타깃 고객을 명확히 호명한다",1,"‘민감성 피부라면’처럼 대상 특정."],
+ ["행동","CTA 문구가 행동 중심이다(‘지금 받기’ 등)",2,"‘구매’보다 결과 지향 문구."],
+ ["행동","한정·재고·마감 등 긴급성 요소가 있다",1,"과장 금지, 사실 기반 긴급성."],
+ ["행동","배송·결제수단 정보가 명확하다",1,"배송일·무료배송 조건 명시."],
+ ["행동","자주 묻는 질문(FAQ)으로 반론을 막는다",2,"구매 직전 망설임을 FAQ로 해소."],
+ ["모바일","모바일에서 글자·이미지가 읽기 쉽다",3,"트래픽 대다수가 모바일. 한 컬럼·큰 글씨."],
+ ["모바일","페이지 로딩이 빠르다(무거운 이미지 최적화)",2,"이미지 압축, 첫 화면 가벼이."],
+ ["모바일","문단이 짧고 스캔하기 쉽다",1,"긴 글 대신 소제목·불릿."],
+ ["모바일","장바구니/구매 버튼이 항상 닿는 위치다",2,"하단 고정 CTA 권장."]
+];
+const TOTW=CHECK.reduce((a,c)=>a+c[2],0);
+
+function build(){
+  let html="", lastG="";
+  CHECK.forEach((c,i)=>{
+    if(c[0]!==lastG){ html+=`<div class="grp">${c[0]}</div>`; lastG=c[0]; }
+    html+=`<label class="chk"><input type="checkbox" data-i="${i}"><span>${esc(c[1])}</span><span class="w">${c[2]}점</span></label>`;
+  });
+  $("list").innerHTML=html;
+}
+function applyUnlock(){ if(stats.unlocked){ document.querySelectorAll(".tipline").forEach(e=>e.classList.remove("hidden")); $("proHint").textContent="PRO 활성화됨 — 아래 개선 가이드가 표시됩니다."; } }
+
+function gradeOf(s){ return s>=85?["S","var(--go)","바로 광고 태워도 좋아요"]:s>=70?["A","var(--go)","조금만 다듬으면 강합니다"]:s>=55?["B","var(--watch)","새는 구멍이 보입니다"]:s>=40?["C","var(--watch)","전환보다 페이지부터 고치세요"]:["D","var(--kill)","광고 전에 상세페이지 재작업"]; }
+
+$("run").onclick=()=>{
+  const checked=[...document.querySelectorAll('#list input:checked')].map(e=>+e.dataset.i);
+  const gain=checked.reduce((a,i)=>a+CHECK[i][2],0);
+  const score=Math.round(gain/TOTW*100);
+  stats.runs++; saveStats(); track("score_run",{score});
+  const [g,col,msg]=gradeOf(score);
+  $("result").classList.remove("hidden");
+  const tEl=$("s_total"); tEl.textContent=score; tEl.style.color=col;
+  $("s_grade").textContent=`${g}등급 · ${msg}`; $("s_grade").style.color=col;
+  // 그룹별 달성
+  const groups={}; CHECK.forEach((c,i)=>{ groups[c[0]]=groups[c[0]]||[0,0]; groups[c[0]][1]+=c[2]; if(checked.includes(i))groups[c[0]][0]+=c[2]; });
+  $("bygroup").innerHTML=Object.entries(groups).map(([n,[a,b]])=>{
+    const p=Math.round(a/b*100);
+    return `<div class="axis" style="margin:8px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span>${n}</span><b>${p}%</b></div>
+      <div style="height:9px;background:var(--panel-2);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:3px"><div style="height:100%;width:${p}%;background:linear-gradient(90deg,var(--accent),var(--accent-2))"></div></div></div>`;
+  }).join("");
+  // 개선 우선순위(미체크, 가중치 높은 순)
+  const missing=CHECK.map((c,i)=>({c,i})).filter(o=>!checked.includes(o.i)).sort((a,b)=>b.c[2]-a.c[2]);
+  $("fix").innerHTML = missing.length
+    ? missing.slice(0,10).map(o=>`<li><b>${esc(o.c[1])}</b> <span class="tag">+${o.c[2]}점</span>
+        <div class="tipline ${stats.unlocked?"":"hidden"}" style="color:var(--accent)">↳ ${esc(o.c[3])}</div></li>`).join("")
+    : "<li>모든 핵심 항목 충족! 이제 트래픽·가격 테스트로 넘어가세요.</li>";
+  applyUnlock();
+  $("result").scrollIntoView({behavior:"smooth",block:"start"});
+};
+$("allno").onclick=()=>{ document.querySelectorAll('#list input').forEach(e=>e.checked=false); $("result").classList.add("hidden"); };
+$("buyPro").onclick=()=>{ stats.upgrades++; saveStats(); track("upgrade_click",{}); if(CONFIG.paymentLink)window.open(CONFIG.paymentLink,"_blank","noopener"); else alert("결제 링크가 아직 설정되지 않았습니다 (CONFIG.paymentLink)."); };
+$("unlock").onclick=()=>{ if($("code").value.trim().toUpperCase()===CONFIG.proCode.toUpperCase()){ stats.unlocked=true; saveStats(); applyUnlock(); track("pro_unlock",{}); } else { $("code").style.borderColor="var(--kill)"; } };
+
+build(); renderStat();
+</script>
+</body>
+</html>

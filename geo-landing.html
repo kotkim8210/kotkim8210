@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>보이나(BOINA) · AI 검색 가시성 진단 — 당신의 브랜드, ChatGPT는 추천하나요?</title>
+<meta name="description" content="ChatGPT·Perplexity·구글 AI 개요·네이버 AI 브리핑에서 당신의 브랜드가 추천·인용되는지 진단하고 고쳐주는 GEO(생성형 엔진 최적화) 서비스." />
+<link rel="stylesheet" href="assets/app.css" />
+<style>
+  .hero { text-align:center; padding: 30px 0 8px; }
+  .hero h1 { font-size: 42px; line-height:1.15; }
+  @media (max-width:600px){ .hero h1{font-size:30px;} }
+  .lead { font-size: 18px; color: var(--muted); max-width: 660px; margin: 12px auto; }
+  .statband { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:18px 0; }
+  @media (max-width:760px){ .statband{grid-template-columns:repeat(2,1fr);} }
+  .stat { background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:16px; text-align:center; }
+  .stat .big { font-family:var(--mono); font-size:26px; font-weight:800; color:var(--accent); letter-spacing:-.02em; }
+  .stat .lbl { font-size:12px; color:var(--muted); margin-top:4px; }
+  .price-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:8px; }
+  @media (max-width:760px){ .price-grid{grid-template-columns:1fr;} }
+  .price { background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:22px; text-align:center; cursor:pointer; transition:.12s; }
+  .price:hover, .price.sel { border-color:var(--accent); transform:translateY(-3px); }
+  .price .amt { font-size:28px; font-weight:800; letter-spacing:-.02em; }
+  .price .was { color:var(--muted); font-size:13px; text-decoration:line-through; }
+  .price .per { color:var(--muted); font-size:13px; }
+  .price .feat { font-size:13px; color:var(--muted); margin-top:8px; line-height:1.7; }
+  .badge { font-size:11px; font-weight:700; color:var(--accent-2); }
+  .editbar { position:sticky; top:0; z-index:30; background:rgba(10,14,22,.85); backdrop-filter:blur(8px);
+             border-bottom:1px solid var(--line); padding:8px 0; margin:-32px -20px 16px; }
+  .editbar .wrap2 { max-width:1080px; margin:0 auto; padding:0 20px; display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+  .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:50; padding:20px; }
+  .modal-bg.show { display:flex; }
+  .modal { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:26px; max-width:460px; width:100%; box-shadow:var(--shadow); }
+  .dash { position:fixed; right:0; top:0; height:100%; width:340px; max-width:90vw; background:var(--panel);
+          border-left:1px solid var(--line); box-shadow:var(--shadow); transform:translateX(100%); transition:.2s; z-index:40; overflow:auto; padding:20px; }
+  .dash.open { transform:translateX(0); }
+  .dashtoggle { position:fixed; right:16px; bottom:16px; z-index:45; }
+  .funnel-step { margin:10px 0; }
+  .funnel-step .bar { height:26px; background:var(--panel-2); border-radius:6px; overflow:hidden; border:1px solid var(--line); }
+  .funnel-step .fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent-2)); display:flex; align-items:center; padding-left:8px; font-size:12px; font-weight:700; color:#08101f; }
+  .checklist li { margin:6px 0; }
+  .qbox { display:flex; gap:10px; align-items:center; background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:14px; color:var(--text); margin:8px 0; }
+  .qbox .ai { font-family:var(--mono); font-size:11px; color:var(--accent-2); }
+</style>
+</head>
+<body>
+
+<!-- ===== 창업자 전용 안내 (배포 전 읽기) ===== -->
+<div class="editbar">
+  <div class="wrap2">
+    <span class="tag">검증용 랜딩 · 배포 전 아래 &lt;script&gt; CONFIG에 Formspree(신청)·결제링크(예약금)를 넣으세요</span>
+    <button class="btn secondary" id="openDash" type="button">📊 퍼널 대시보드</button>
+  </div>
+</div>
+
+<div class="wrap narrow">
+  <a class="home" href="index.html">← 툴킷 홈</a>
+
+  <div class="hero">
+    <span class="kicker">AI 검색 시대 · 1차 진단 47곳 한정 모집</span>
+    <h1>당신의 브랜드,<br>ChatGPT는 추천하나요?</h1>
+    <p class="lead">
+      고객은 이제 구글이 아니라 <b>ChatGPT·Perplexity·구글 AI 개요·네이버 AI 브리핑</b>에 묻습니다.
+      거기서 <b>경쟁사만 추천되고 당신이 빠져 있다면</b>, 매출이 조용히 새고 있는 겁니다.
+      <b>보이나(BOINA)</b>가 4대 AI에서 당신 브랜드의 노출·인용 상태를 진단하고, 무엇을 고쳐야 할지 알려드립니다.
+    </p>
+    <div class="btn-row" style="justify-content:center">
+      <button class="btn lg" data-cta="hero" type="button">무료 미니진단 신청하기 →</button>
+    </div>
+    <small id="proof" style="display:block;margin-top:8px"></small>
+  </div>
+
+  <!-- 트렌드 근거 -->
+  <div class="statband">
+    <div class="stat"><div class="big">60%+</div><div class="lbl">검색에 AI 답변이 끼는 비중 (2026)</div></div>
+    <div class="stat"><div class="big">10%+</div><div class="lbl">한국인이 ChatGPT를 검색으로 사용</div></div>
+    <div class="stat"><div class="big">92%</div><div class="lbl">기업의 2026 AI 마케팅 투자 확대</div></div>
+    <div class="stat"><div class="big">$1.5k~10k</div><div class="lbl">해외 GEO 대행 월 단가</div></div>
+  </div>
+  <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:-6px">
+    네이버 AI 브리핑·구글 AI 개요가 이미 기본 노출. 검색이 "링크 10개"에서 "AI가 고른 1~3개 추천"으로 바뀌는 중입니다.
+  </p>
+
+  <h2>이런 적, 있으시죠?</h2>
+  <div class="card">
+    <ul style="color:var(--muted);margin:0;padding-left:18px;line-height:2">
+      <li>ChatGPT에 <b>"○○ 카테고리 추천 브랜드"</b>를 물으면 — 경쟁사 이름만 나오고 우리는 없다</li>
+      <li>SEO·블로그·광고는 해왔는데, 정작 <b>AI 답변에는 우리가 인용되지 않는다</b></li>
+      <li>고객이 "AI한테 물어보고 결정했다"는데 — <b>우리가 그 답에 어떻게 들어가는지 모른다</b></li>
+    </ul>
+    <div class="qbox"><span class="ai">ChatGPT ▸</span> "민감성 피부 비건 선크림 추천해줘" → <b>A사, B사, C사…</b> <span style="color:var(--kill)">(우리 브랜드 없음)</span></div>
+  </div>
+
+  <h2>보이나 진단이 알려드리는 것</h2>
+  <div class="card">
+    <ul class="checklist" style="color:var(--muted);margin:0;padding-left:18px">
+      <li>✅ <b>4대 AI(ChatGPT·Perplexity·구글 AI 개요·네이버)</b>에서 우리 브랜드/제품이 추천·인용되는지 실측</li>
+      <li>✅ 같은 질문에서 <b>경쟁사는 왜 뜨고 우리는 왜 안 뜨는지</b> 원인 분석</li>
+      <li>✅ AI가 신뢰하는 출처(리뷰·커뮤니티·비교콘텐츠·구조화 데이터) 기준 <b>우리의 빈틈</b></li>
+      <li>✅ <b>30일 개선 액션플랜</b> — 무엇을, 어떤 순서로 고치면 AI 답변에 들어가는지</li>
+      <li>✅ 결과 리포트 + <b>30분 1:1 콜</b></li>
+    </ul>
+  </div>
+
+  <h2>진단 신청</h2>
+  <p style="color:var(--muted);font-size:13px">
+    ※ <b>1단계(무료 미니진단)</b>로 가볍게 시작하거나, 바로 <b>2단계(유료 정밀진단)</b>를 예약하세요.
+    유료 니즈는 결국 <b>실제 결제</b>로만 확인됩니다 — 그래서 정밀진단엔 환불 가능한 예약금이 있습니다.
+  </p>
+  <div class="price-grid">
+    <div class="price" data-price="free" data-amt="0">
+      <div class="badge">무료 미니진단</div><div class="amt">₩0</div><div class="per">대표 질문 1개</div>
+      <div class="feat">4대 AI 노출 여부<br>1장 요약 리포트</div>
+    </div>
+    <div class="price sel" data-price="audit" data-amt="290000">
+      <div class="badge" style="color:var(--go)">정밀진단 · 인기</div>
+      <div class="was">₩490,000</div><div class="amt">₩290,000</div><div class="per">검증 한정가 · 1회</div>
+      <div class="feat">질문 10~15개 실측<br>경쟁사 비교 + 원인<br>30일 액션플랜 + 콜</div>
+    </div>
+    <div class="price" data-price="retainer" data-amt="1500000">
+      <div class="badge">월 관리</div><div class="amt">₩1,500,000~</div><div class="per">/ 월</div>
+      <div class="feat">GEO 콘텐츠 실행<br>월간 모니터링·리포트</div>
+    </div>
+  </div>
+  <div class="btn-row" style="justify-content:center;margin-top:18px">
+    <button class="btn lg" data-cta="pricing" type="button">이 플랜으로 신청 →</button>
+  </div>
+
+  <h2>왜 보이나인가</h2>
+  <div class="card">
+    <p style="margin:0">
+      GEO는 새 버튼 하나로 끝나는 기술이 아니라, <b>결국 콘텐츠·권위·비교노출·PR 작업</b>입니다 —
+      바로 마케팅·이커머스·콘텐츠 실무에서 다져온 영역이죠. 거대 에이전시(월 수백만 원)도,
+      혼자 다루기 버거운 해외 SaaS 도구(Profound·Peec·Otterly)도 아닌,
+      <b>"진단부터 실행까지 대신 해주는" 한국 DTC·이커머스 브랜드 맞춤 서비스</b>입니다.
+    </p>
+  </div>
+
+  <p class="muted-foot">
+    이 페이지는 <b>검증용(스모크 테스트)</b>입니다. 방문→스크롤→신청→예약금 결제 퍼널이 자동 기록되어
+    우측 하단 <b>📊 대시보드</b>에서 확인됩니다. 통계 수치는 트렌드 리서치 인용값이며, 진단 결과는 실측 기반입니다.
+    합격선 판정은 <a href="gate-calculator.html">Tool 03</a>에서 하세요.
+  </p>
+</div>
+
+<!-- ===== 신청 모달 ===== -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h2 style="margin-top:0">진단 신청</h2>
+    <p>선택한 플랜: <b id="m_plan">정밀진단 · ₩290,000</b></p>
+    <label>이메일 *</label>
+    <input type="email" id="m_email" placeholder="you@brand.com" />
+    <label style="margin-top:10px">브랜드/사이트 (선택)</label>
+    <input type="url" id="m_site" placeholder="https://brand.co.kr 또는 스마트스토어 URL" />
+    <div class="btn-row">
+      <button class="btn lg" id="m_submit" type="button">신청하기</button>
+      <button class="btn ghost" id="m_close" type="button">닫기</button>
+    </div>
+    <p id="m_done" class="hidden" style="color:var(--go);font-weight:700">✓ 신청 완료! 곧 연락드릴게요.</p>
+
+    <!-- 2단계: 실제 결제 (revealed preference). CONFIG.paymentLink 설정 시 노출 -->
+    <div id="m_stage2" class="hidden" style="margin-top:16px;border-top:1px dashed var(--line);padding-top:14px">
+      <div class="badge" style="color:var(--go)">2단계 · 진짜 검증</div>
+      <p style="margin:6px 0">정밀진단 자리를 <b>지금 확정</b>하세요. <b>예약금 ₩50,000</b>(정밀진단비에서 차감 · 전액 환불 가능)을 걸면 1차 47곳 안에 들어갑니다.</p>
+      <div class="btn-row">
+        <a class="btn lg" id="m_pay" href="#" target="_blank" rel="noopener" style="text-decoration:none">💳 예약금 ₩50,000 걸기 →</a>
+      </div>
+      <small>※ 이게 유일한 <b>유료 니즈 확정 신호</b>입니다. 결제 완료는 결제사(Stripe·Gumroad·토스) 대시보드에서 확인하세요.</small>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 퍼널 대시보드 ===== -->
+<button class="btn secondary dashtoggle" id="openDash2" type="button">📊</button>
+<div class="dash" id="dash">
+  <div class="flex spread"><h2 style="margin:0">퍼널 (이 브라우저)</h2><button class="btn ghost" id="closeDash" type="button">✕</button></div>
+  <div id="funnel"></div>
+  <h3>요약</h3>
+  <div class="kv"><span class="k">방문(세션)</span><span id="d_views">0</span></div>
+  <div class="kv"><span class="k">50% 스크롤</span><span id="d_scroll">0</span></div>
+  <div class="kv"><span class="k">신청 클릭</span><span id="d_clicks">0</span></div>
+  <div class="kv"><span class="k">진단 신청(리드)</span><span id="d_leads">0</span></div>
+  <div class="kv"><span class="k">예약금 결제 클릭 <span class="tag" style="color:var(--go)">강·돈</span></span><span id="d_preorder">0</span></div>
+  <div class="kv"><span class="k">신청 클릭률</span><span id="d_ctr">0%</span></div>
+  <div class="kv"><span class="k">방문→신청 전환</span><span id="d_cvr">0%</span></div>
+  <div class="note warn" style="margin-top:14px">
+    <b>신호 강도:</b> 방문·스크롤(관심) &lt; 신청·이메일(약·말) &lt; <b>예약금 결제(강·돈)</b>.
+    "유료 니즈"는 맨 오른쪽 하나로만 확정됩니다. 표본 적으면 수치 신뢰 금지.
+  </div>
+  <div class="btn-row">
+    <button class="btn secondary" id="d_export" type="button">이벤트 CSV</button>
+    <button class="btn ghost" id="d_clear" type="button">초기화</button>
+  </div>
+  <h3>신청 리드</h3>
+  <div id="d_leadlist" style="font-size:12px;color:var(--muted)"></div>
+</div>
+
+<script>
+/* =================== CONFIG: 배포 전 설정 ===================
+   1) submitEndpoint — 진단 신청(리드)을 받을 곳. (무료 폼, 백엔드/DB 불필요)
+      예) Formspree: "https://formspree.io/f/XXXX"  ·  Tally/Google Form action URL
+   2) paymentLink   — 2단계 예약금 결제 링크. (무코드 결제, 백엔드 불필요)
+      예) Stripe Payment Link / Gumroad / Lemon Squeezy / 토스페이먼츠 결제링크
+   둘 다 비우면 데이터는 이 브라우저 localStorage에만 쌓입니다. */
+const CONFIG = {
+  submitEndpoint: "",      // 진단 신청 수집 엔드포인트
+  paymentLink: "",         // 예약금 결제 링크 (비우면 결제 버튼 숨김)
+  gaEnabled: true,
+  pixelEnabled: true
+};
+/* ============================================================== */
+
+const $=id=>document.getElementById(id);
+const EKEY="geo_events_v1", LKEY="geo_leads_v1";
+let events=load(EKEY,[]), leads=load(LKEY,[]);
+let selectedPlan={id:"audit",amt:290000,label:"정밀진단 · ₩290,000"};
+
+function load(k,fb){try{return JSON.parse(localStorage.getItem(k))??fb;}catch(e){return fb;}}
+function saveEvents(){localStorage.setItem(EKEY,JSON.stringify(events));}
+function saveLeads(){localStorage.setItem(LKEY,JSON.stringify(leads));}
+
+function track(type,meta){
+  events.push({type,meta:meta||null,t:Date.now()});
+  saveEvents(); renderDash();
+  if(CONFIG.gaEnabled && window.gtag) gtag('event',type,meta||{});
+  if(CONFIG.pixelEnabled && window.fbq) fbq('trackCustom',type,meta||{});
+}
+
+/* 세션 1회 방문 */
+if(!sessionStorage.getItem("geo_seen")){ sessionStorage.setItem("geo_seen","1"); track("page_view"); }
+
+/* 50% 스크롤 1회 */
+let scrolled=false;
+addEventListener("scroll",()=>{
+  if(scrolled) return;
+  const h=document.documentElement;
+  if((h.scrollTop+innerHeight)/h.scrollHeight>=0.5){ scrolled=true; if(!sessionStorage.getItem("geo_scroll")){ sessionStorage.setItem("geo_scroll","1"); track("scroll_50"); } }
+},{passive:true});
+
+/* 플랜 선택 */
+const PLAN_LABEL={free:"무료 미니진단 · ₩0",audit:"정밀진단 · ₩290,000",retainer:"월 관리 · ₩1,500,000~"};
+document.querySelectorAll(".price").forEach(p=>p.onclick=()=>{
+  document.querySelectorAll(".price").forEach(x=>x.classList.remove("sel"));
+  p.classList.add("sel");
+  const id=p.dataset.price;
+  selectedPlan={id,amt:+p.dataset.amt,label:PLAN_LABEL[id]};
+  track("plan_select",{plan:id,amt:selectedPlan.amt});
+});
+
+/* CTA → 모달 */
+document.querySelectorAll("[data-cta]").forEach(b=>b.onclick=()=>{
+  track("cta_click",{where:b.dataset.cta,plan:selectedPlan.id});
+  $("m_plan").textContent=selectedPlan.label;
+  $("m_done").classList.add("hidden"); $("m_stage2").classList.add("hidden");
+  $("modal").classList.add("show"); $("m_email").focus();
+});
+$("m_close").onclick=()=>$("modal").classList.remove("show");
+$("modal").onclick=e=>{ if(e.target===$("modal")) $("modal").classList.remove("show"); };
+$("m_pay").onclick=()=>{ track("preorder_click",{plan:selectedPlan.id,amt:selectedPlan.amt}); };
+
+$("m_submit").onclick=async ()=>{
+  const email=$("m_email").value.trim();
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ $("m_email").focus(); $("m_email").style.borderColor="var(--kill)"; return; }
+  $("m_email").style.borderColor="";
+  const rec={email,site:$("m_site").value.trim(),plan:selectedPlan.id,amt:selectedPlan.amt,t:Date.now()};
+  leads.push(rec); saveLeads();
+  track("lead_submit",{plan:selectedPlan.id});
+  if(CONFIG.submitEndpoint){
+    try{ await fetch(CONFIG.submitEndpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(rec)}); }catch(e){}
+  }
+  $("m_done").classList.remove("hidden");
+  $("m_email").value=""; $("m_site").value="";
+  /* 무료 플랜이면 결제 단계 생략, 유료(정밀진단)면 2단계 결제 노출 */
+  if(selectedPlan.id!=="free" && CONFIG.paymentLink){ $("m_pay").href=CONFIG.paymentLink; $("m_stage2").classList.remove("hidden"); }
+  else { setTimeout(()=>$("modal").classList.remove("show"),1400); }
+};
+
+/* 대시보드 */
+function openDash(){ $("dash").classList.add("open"); renderDash(); }
+$("openDash").onclick=openDash; $("openDash2").onclick=openDash;
+$("closeDash").onclick=()=>$("dash").classList.remove("open");
+
+function count(t){ return events.filter(e=>e.type===t).length; }
+function renderDash(){
+  const v=count("page_view")||0, sc=count("scroll_50"), cl=count("cta_click"), ld=count("lead_submit"), po=count("preorder_click");
+  $("d_views").textContent=v; $("d_scroll").textContent=sc; $("d_clicks").textContent=cl; $("d_leads").textContent=ld; $("d_preorder").textContent=po;
+  $("d_ctr").textContent=(v?cl/v*100:0).toFixed(1)+"%"; $("d_cvr").textContent=(v?ld/v*100:0).toFixed(1)+"%";
+  const steps=[["방문",v],["50% 스크롤",sc],["신청 클릭",cl],["진단 신청",ld],["예약금 결제(강)",po]];
+  const max=Math.max(v,1);
+  $("funnel").innerHTML=steps.map(([n,c])=>`
+    <div class="funnel-step"><small>${n} — <b>${c}</b></small>
+      <div class="bar"><div class="fill" style="width:${Math.max((c/max)*100,c?6:0)}%">${Math.round(c/max*100)}%</div></div></div>`).join("");
+  $("d_leadlist").innerHTML = leads.length
+    ? leads.slice(-30).reverse().map(e=>`${esc(e.email)} <span class="tag">${e.plan}${e.site?" · "+esc(e.site):""}</span>`).join("<br>")
+    : "아직 없음";
+  $("proof").textContent = ld>0 ? `이미 ${ld}곳이 진단을 신청했어요` : "";
+}
+function esc(s){return(s??"").replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+$("d_clear").onclick=()=>{ if(confirm("이벤트/리드 기록을 모두 지울까요?")){ events=[]; leads=[]; saveEvents(); saveLeads(); sessionStorage.clear(); renderDash(); } };
+$("d_export").onclick=()=>{
+  const head=["type","plan","amt","extra","timestamp_iso"];
+  const rows=events.map(e=>[e.type,e.meta?.plan||"",e.meta?.amt||"",JSON.stringify(e.meta||{}),new Date(e.t).toISOString()]);
+  const csv=[head,...rows].map(r=>r.map(c=>`"${String(c??"").replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob=new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"}); const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob); a.download="geo_events_"+new Date().toISOString().slice(0,10)+".csv"; a.click();
+};
+
+renderDash();
+</script>
+</body>
+</html>

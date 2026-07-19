@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tool 03 · 단계별 합격선 계산기</title>
+<link rel="stylesheet" href="assets/app.css" />
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <span class="kicker">Tool 03 — Stage-Gate Calculator</span>
+    <a class="home" href="index.html">← 툴킷 홈</a>
+  </div>
+  <h1>단계별 합격선 계산기</h1>
+  <p>실제 측정값을 넣으면 단계마다 <span class="pill go">GO</span> / <span class="pill watch">WATCH</span> / <span class="pill kill">KILL</span>을 판정합니다.
+  핵심은 <b>테스트 전에 합격선을 잠그는 것</b> — 사후에 기준을 낮춰 합리화하는 걸 막습니다.</p>
+
+  <!-- threshold lock -->
+  <div class="card">
+    <div class="flex spread">
+      <h3 style="margin:0">① 합격선 설정 & 잠금</h3>
+      <span id="lockState" class="tag">미잠금</span>
+    </div>
+    <div class="grid cols-3" style="margin-top:8px">
+      <div><label>1단계 CTA 클릭률 합격선 (%)</label><input type="number" id="t_ctr" value="5" step="0.5"></div>
+      <div><label>1단계 등록 전환율 합격선 (%)</label><input type="number" id="t_cvr" value="3" step="0.5"></div>
+      <div><label>2단계 실제 결제자 최소 (명)</label><input type="number" id="t_pay" value="10"></div>
+      <div><label>3단계 30일 리텐션 합격선 (%)</label><input type="number" id="t_ret" value="30" step="1"></div>
+      <div><label>4단계 LTV:CAC 합격선 (배)</label><input type="number" id="t_ratio" value="3" step="0.5"></div>
+      <div><label>표본 신뢰 최소 방문수</label><input type="number" id="t_minN" value="100"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="lockBtn" type="button">🔒 합격선 잠그기</button>
+      <button class="btn ghost" id="unlockBtn" type="button">잠금 해제</button>
+    </div>
+    <small id="lockMeta"></small>
+  </div>
+
+  <!-- Stage 1 -->
+  <h2>1단계 · 수요 검증 (개발 0줄)</h2>
+  <div class="card">
+    <div class="grid cols-3">
+      <div><label>방문수 (세션)</label><input type="number" id="s1_visits" value="0" oninput="calc()"></div>
+      <div><label>CTA 클릭수</label><input type="number" id="s1_clicks" value="0" oninput="calc()"></div>
+      <div><label>이메일/사전 등록수</label><input type="number" id="s1_signups" value="0" oninput="calc()"></div>
+    </div>
+    <div class="grid cols-3" style="margin-top:16px">
+      <div class="card" style="margin:0"><small>CTA 클릭률</small><div class="metric" id="r1_ctr">0%</div><span id="v1_ctr" class="pill kill">—</span></div>
+      <div class="card" style="margin:0"><small>등록 전환율</small><div class="metric" id="r1_cvr">0%</div><span id="v1_cvr" class="pill kill">—</span></div>
+      <div class="card" style="margin:0"><small>표본 충분성</small><div class="metric" id="r1_n">0</div><span id="v1_n" class="pill kill">—</span></div>
+    </div>
+    <div class="note" id="s1_note"></div>
+  </div>
+
+  <!-- Stage 2 -->
+  <h2>2단계 · 선판매 검증 (실제 돈)</h2>
+  <div class="card">
+    <div class="grid cols-2">
+      <div><label>사전결제 / 유료 베타 결제자 (명)</label><input type="number" id="s2_payers" value="0" oninput="calc()"></div>
+      <div><label>참고: 무료 등록수 (전환율 계산용)</label><input type="number" id="s2_free" value="0" oninput="calc()"></div>
+    </div>
+    <div class="grid cols-2" style="margin-top:16px">
+      <div class="card" style="margin:0"><small>실제 결제자</small><div class="metric" id="r2_pay">0</div><span id="v2_pay" class="pill kill">—</span></div>
+      <div class="card" style="margin:0"><small>등록→결제 전환율</small><div class="metric" id="r2_p2p">0%</div><small>관심을 돈으로 바꾼 비율</small></div>
+    </div>
+    <div class="note warn">무료엔 몰리는데 결제가 0이면 <b>문제는 진짜지만 "이 가격/이 형태"엔 지불 의사가 없다</b>는 신호입니다. 가격·패키징을 바꿔 재검증하세요.</div>
+  </div>
+
+  <!-- Stage 3 -->
+  <h2>3단계 · MVP 리텐션</h2>
+  <div class="card">
+    <div class="grid cols-2">
+      <div><label>가입/결제 코호트 (명)</label><input type="number" id="s3_cohort" value="0" oninput="calc()"></div>
+      <div><label>30일 후에도 활성 사용자 (명)</label><input type="number" id="s3_active" value="0" oninput="calc()"></div>
+    </div>
+    <div class="grid cols-2" style="margin-top:16px">
+      <div class="card" style="margin:0"><small>30일 리텐션</small><div class="metric" id="r3_ret">0%</div><span id="v3_ret" class="pill kill">—</span></div>
+      <div class="card" style="margin:0"><small>월 이탈률(추정)</small><div class="metric" id="r3_churn">0%</div><small>= 100% − 리텐션</small></div>
+    </div>
+    <div class="note">리텐션이 무너지면 기능 추가로 막지 말고 <b>"진짜 문제를 풀고 있는가"</b>를 다시 검증하세요.</div>
+  </div>
+
+  <!-- Stage 4 -->
+  <h2>4단계 · 단위경제 (LTV : CAC)</h2>
+  <div class="card">
+    <div class="grid cols-3">
+      <div><label>ARPU (1인당 월매출, ₩)</label><input type="number" id="s4_arpu" value="19900" oninput="calc()"></div>
+      <div><label>매출총이익률 (%)</label><input type="number" id="s4_gm" value="80" oninput="calc()"></div>
+      <div><label>평균 유지개월 (= 1 / 월이탈률)</label><input type="number" id="s4_life" value="6" step="0.5" oninput="calc()"></div>
+      <div><label>마케팅 총비용 (₩)</label><input type="number" id="s4_spend" value="0" oninput="calc()"></div>
+      <div><label>그 비용으로 획득한 고객수</label><input type="number" id="s4_acq" value="0" oninput="calc()"></div>
+      <div><label>회수기간 목표 (개월)</label><input type="number" id="s4_payback" value="12" oninput="calc()"></div>
+    </div>
+    <div class="grid cols-3" style="margin-top:16px">
+      <div class="card" style="margin:0"><small>LTV</small><div class="metric" id="r4_ltv">₩0</div><small>ARPU×GM%×유지개월</small></div>
+      <div class="card" style="margin:0"><small>CAC</small><div class="metric" id="r4_cac">₩0</div><small>마케팅비/획득수</small></div>
+      <div class="card" style="margin:0"><small>LTV : CAC</small><div class="metric" id="r4_ratio">—</div><span id="v4_ratio" class="pill kill">—</span></div>
+    </div>
+    <div class="kv"><span class="k">CAC 회수기간</span><span id="r4_pb">—</span></div>
+    <div class="note">통념: <b>LTV:CAC ≥ 3</b>이고 <b>회수기간이 목표 이내</b>여야 유료 마케팅을 확대할 만합니다.</div>
+  </div>
+
+  <!-- verdict -->
+  <h2>종합 판정</h2>
+  <div class="card">
+    <div id="overall"></div>
+  </div>
+
+  <p class="muted-foot">입력값과 합격선은 이 브라우저(localStorage)에 저장됩니다.</p>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const LS="vtk_gate_v1", LOCK="vtk_gate_lock_v1";
+const fields=["t_ctr","t_cvr","t_pay","t_ret","t_ratio","t_minN",
+  "s1_visits","s1_clicks","s1_signups","s2_payers","s2_free","s3_cohort","s3_active",
+  "s4_arpu","s4_gm","s4_life","s4_spend","s4_acq","s4_payback"];
+
+(function restore(){ const d=load(LS,{}); fields.forEach(f=>{ if(d[f]!=null) $(f).value=d[f]; }); })();
+function load(k,fb){try{return JSON.parse(localStorage.getItem(k))??fb;}catch(e){return fb;}}
+function persist(){ const d={}; fields.forEach(f=>d[f]=$(f).value); localStorage.setItem(LS,JSON.stringify(d)); }
+const num=id=>parseFloat($(id).value)||0;
+function pct(n,d){ return d>0?(n/d*100):0; }
+function won(n){ return "₩"+Math.round(n).toLocaleString(); }
+function setPill(el,state,label){ el.className="pill "+state; el.textContent=label; }
+
+/* lock */
+function renderLock(){
+  const l=load(LOCK,null);
+  if(l){ $("lockState").textContent="🔒 잠김"; $("lockState").style.color="var(--go)";
+    $("lockMeta").textContent="잠금: "+new Date(l.at).toLocaleString()+" — 합격선을 바꾸려면 잠금 해제하세요.";
+    ["t_ctr","t_cvr","t_pay","t_ret","t_ratio","t_minN"].forEach(f=>$(f).disabled=true);
+  } else { $("lockState").textContent="미잠금"; $("lockState").style.color="var(--watch)"; $("lockMeta").textContent="";
+    ["t_ctr","t_cvr","t_pay","t_ret","t_ratio","t_minN"].forEach(f=>$(f).disabled=false); }
+}
+$("lockBtn").onclick=()=>{ localStorage.setItem(LOCK,JSON.stringify({at:Date.now()})); renderLock(); persist(); };
+$("unlockBtn").onclick=()=>{ if(confirm("합격선 잠금을 해제할까요? (사후 기준 변경은 자기기만 위험)")){ localStorage.removeItem(LOCK); renderLock(); } };
+
+function calc(){
+  persist();
+  // Stage 1
+  const v=num("s1_visits"), c=num("s1_clicks"), su=num("s1_signups");
+  const ctr=pct(c,v), cvr=pct(su,v);
+  $("r1_ctr").textContent=ctr.toFixed(1)+"%"; $("r1_cvr").textContent=cvr.toFixed(1)+"%"; $("r1_n").textContent=v;
+  const tCtr=num("t_ctr"), tCvr=num("t_cvr"), minN=num("t_minN");
+  mark($("r1_ctr"),$("v1_ctr"),ctr,tCtr); mark($("r1_cvr"),$("v1_cvr"),cvr,tCvr);
+  const nOK=v>=minN; setPill($("v1_n"), nOK?"go":"kill", nOK?"충분":"부족"); $("r1_n").className="metric "+(nOK?"go":"kill");
+  $("s1_note").innerHTML = v<minN
+    ? `<strong>표본 부족.</strong> 방문 ${v}명은 합격선(${minN}) 미만 — 전환율 수치를 신뢰하지 마세요. 트래픽을 더 모으세요.`
+    : (ctr>=tCtr && cvr>=tCvr ? `<strong style="color:var(--go)">통과.</strong> 수요 신호 확인 — 2단계(실제 결제)로 넘어가세요.`
+       : `<strong style="color:var(--kill)">미달.</strong> 클릭은 있어도 전환이 약하거나, 클릭 자체가 약합니다. 헤드라인/오퍼/타깃을 바꿔 재테스트.`);
+
+  // Stage 2
+  const payers=num("s2_payers"), free=num("s2_free"), tPay=num("t_pay");
+  $("r2_pay").textContent=payers; $("r2_p2p").textContent=pct(payers,free).toFixed(1)+"%";
+  const payOK=payers>=tPay; setPill($("v2_pay"),payOK?"go":"kill",payOK?"통과":"미달"); $("r2_pay").className="metric "+(payOK?"go":"kill");
+
+  // Stage 3
+  const coh=num("s3_cohort"), act=num("s3_active"); const ret=pct(act,coh);
+  $("r3_ret").textContent=ret.toFixed(1)+"%"; $("r3_churn").textContent=(coh>0?(100-ret).toFixed(1):0)+"%";
+  const tRet=num("t_ret"); mark($("r3_ret"),$("v3_ret"),ret,tRet);
+
+  // Stage 4
+  const arpu=num("s4_arpu"), gm=num("s4_gm")/100, life=num("s4_life");
+  const spend=num("s4_spend"), acq=num("s4_acq");
+  const ltv=arpu*gm*life; const cac=acq>0?spend/acq:0;
+  const ratio=cac>0?ltv/cac:0;
+  $("r4_ltv").textContent=won(ltv); $("r4_cac").textContent=won(cac);
+  $("r4_ratio").textContent=cac>0?ratio.toFixed(2)+"x":"—";
+  const tRatio=num("t_ratio");
+  if(cac>0){ const st=ratio>=tRatio?"go":(ratio>=tRatio*0.66?"watch":"kill");
+    setPill($("v4_ratio"),st,st==="go"?"건강":st==="watch"?"주의":"위험"); $("r4_ratio").className="metric "+st; }
+  else { setPill($("v4_ratio"),"watch","데이터 부족"); $("r4_ratio").className="metric watch"; }
+  const monthlyChurn=life>0?(1/life):0; const pb=(arpu*gm)>0?cac/(arpu*gm):0;
+  $("r4_pb").textContent = cac>0 ? pb.toFixed(1)+"개월 (목표 "+num("s4_payback")+"개월)" : "—";
+
+  // overall
+  renderOverall({nOK,ctrOK:ctr>=tCtr,cvrOK:cvr>=tCvr,payOK,retOK:ret>=tRet,
+    ratioOK:cac>0&&ratio>=tRatio, hasS1:v>0,hasS2:payers>0||free>0,hasS3:coh>0,hasS4:cac>0});
+}
+function mark(metricEl,pillEl,val,thr){
+  const st=val>=thr?"go":(val>=thr*0.66?"watch":"kill");
+  metricEl.className="metric "+st; setPill(pillEl,st, st==="go"?"통과":st==="watch"?"근접":"미달");
+}
+function renderOverall(s){
+  const line=(label,ok,active)=> active
+    ? `<div class="kv"><span class="k">${label}</span><span class="pill ${ok?'go':'kill'}">${ok?'GO':'KILL'}</span></div>`
+    : `<div class="kv"><span class="k">${label}</span><span class="tag">데이터 입력 전</span></div>`;
+  const s1=s.hasS1&&s.nOK&&s.ctrOK&&s.cvrOK;
+  $("overall").innerHTML =
+    line("1단계 수요 검증", s1, s.hasS1) +
+    line("2단계 선판매(실결제)", s.payOK, s.hasS2) +
+    line("3단계 MVP 리텐션", s.retOK, s.hasS3) +
+    line("4단계 단위경제 LTV:CAC", s.ratioOK, s.hasS4) +
+    `<div class="note" style="margin-top:14px">${nextStep(s,s1)}</div>`;
+}
+function nextStep(s,s1){
+  if(!s.hasS1) return "1단계부터 측정값을 입력하세요. 각 단계는 앞 단계를 통과해야 다음으로 갑니다.";
+  if(!s1) return "<strong style='color:var(--kill)'>1단계 미통과.</strong> 여기서 멈추고 오퍼/타깃/문제를 바꿔 재검증하세요. 다음 단계로 가지 마세요.";
+  if(s.hasS2&&!s.payOK) return "<strong style='color:var(--kill)'>2단계 미통과.</strong> 무료 관심은 있으나 지불이 부족 — 가격/패키징 재설계.";
+  if(s.hasS3&&!s.retOK) return "<strong style='color:var(--kill)'>3단계 미통과.</strong> 리텐션 붕괴 — 문제 적합성 재검토.";
+  if(s.hasS4&&!s.ratioOK) return "<strong style='color:var(--watch)'>4단계 주의.</strong> 단위경제 미달 — 유료 확장 보류, ARPU↑ 또는 CAC↓.";
+  return "<strong style='color:var(--go)'>현재까지 모든 입력 단계 통과.</strong> 다음 단계 데이터를 채워 계속 검증하세요.";
+}
+
+renderLock(); calc();
+</script>
+</body>
+</html>

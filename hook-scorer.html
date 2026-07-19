@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>후킹 스코어러 · 당신의 SNS/광고 후킹, 몇 점일까?</title>
+<meta name="description" content="마케터·셀러를 위한 후킹(헤드라인) 점수 측정기. 붙여넣으면 0~100점 + 축별 분석 + 개선 제안. 설치·가입 없이 즉시." />
+<link rel="stylesheet" href="assets/app.css" />
+<style>
+  .hero{ text-align:center; padding:26px 0 6px; }
+  .hero h1{ font-size:38px; } @media(max-width:600px){ .hero h1{font-size:28px;} }
+  .lead{ font-size:17px; color:var(--muted); max-width:600px; margin:10px auto; }
+  .scorewrap{ display:grid; grid-template-columns:160px 1fr; gap:20px; align-items:center; }
+  @media(max-width:680px){ .scorewrap{grid-template-columns:1fr;} }
+  .dial{ text-align:center; }
+  .dial .num{ font-family:var(--mono); font-size:58px; font-weight:800; letter-spacing:-.03em; line-height:1; }
+  .dial .grade{ font-size:14px; font-weight:700; margin-top:4px; }
+  .axis{ margin:10px 0; }
+  .axis .top{ display:flex; justify-content:space-between; font-size:13px; }
+  .axis .bar{ height:10px; background:var(--panel-2); border:1px solid var(--line); border-radius:6px; overflow:hidden; margin-top:4px; }
+  .axis .fill{ height:100%; background:linear-gradient(90deg,var(--accent),var(--accent-2)); }
+  .tips li{ margin:6px 0; color:var(--muted); }
+  .pro{ background:linear-gradient(180deg,rgba(139,92,246,.12),rgba(110,168,254,.06)); border:1px solid var(--accent-2); }
+  .lock{ position:relative; }
+  .lock .veil{ position:absolute; inset:0; backdrop-filter:blur(4px); background:rgba(10,14,22,.55);
+               border-radius:var(--radius); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; text-align:center; padding:16px; }
+  .var-list li{ margin:7px 0; }
+  .copybtn{ font-size:11px; }
+  .editbar{ position:sticky; top:0; z-index:30; background:rgba(10,14,22,.85); backdrop-filter:blur(8px);
+            border-bottom:1px solid var(--line); padding:8px 0; margin:-32px -20px 16px; }
+  .editbar .wrap2{ max-width:1080px; margin:0 auto; padding:0 20px; display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+</style>
+</head>
+<body>
+
+<div class="editbar">
+  <div class="wrap2">
+    <span class="tag">1호 미니앱 · 배포 전 &lt;script&gt; CONFIG에 결제링크(PRO)·코드 설정 / 무료 스코어러는 그대로 작동</span>
+    <span class="tag" id="usagestat"></span>
+  </div>
+</div>
+
+<div class="wrap narrow">
+  <a class="home" href="index.html">← 툴킷 홈</a>
+
+  <div class="hero">
+    <span class="kicker">마케터·셀러용 무료 도구</span>
+    <h1>이 후킹, 몇 점일까?</h1>
+    <p class="lead">광고·인스타·쓰레드·상세페이지 <b>첫 문장(후킹)</b>을 붙여넣으면
+    <b>0~100점</b>과 <b>왜 약한지 + 어떻게 고칠지</b>를 즉시 알려드립니다. 설치·가입 없음.</p>
+  </div>
+
+  <div class="card">
+    <label for="hook">후킹/헤드라인 (한 줄)</label>
+    <textarea id="hook" placeholder="예) 마케터라면 무조건 알아야 할 후킹 공식 3가지 (마지막이 핵심)"></textarea>
+    <div class="btn-row">
+      <button class="btn lg" id="run" type="button">점수 측정하기 →</button>
+      <button class="btn ghost" id="sample" type="button">예시 넣기</button>
+    </div>
+  </div>
+
+  <div id="result" class="hidden">
+    <div class="card">
+      <div class="scorewrap">
+        <div class="dial">
+          <div class="num metric" id="s_total">0</div>
+          <div class="grade" id="s_grade">—</div>
+        </div>
+        <div id="axes"></div>
+      </div>
+    </div>
+
+    <h2>개선 제안</h2>
+    <div class="card"><ul class="tips" id="tips" style="margin:0;padding-left:18px"></ul></div>
+
+    <!-- PRO -->
+    <div class="card pro">
+      <div class="badge" style="color:var(--accent-2)">PRO · 변형 생성기</div>
+      <h3 style="margin:6px 0">같은 주제로 <b>검증된 후킹 공식 10개</b> 자동 생성</h3>
+      <div class="lock" id="varlock">
+        <ul class="var-list" id="vars" style="margin:0;padding-left:18px;color:var(--muted)">
+          <li>왜 …, 다들 틀리게 알고 있을까?</li>
+          <li>…, 이거 모르면 손해입니다</li>
+          <li>3가지만 바꾸면 … (마지막이 핵심)</li>
+        </ul>
+        <div class="veil" id="veil">
+          <div style="font-weight:700">🔒 PRO · ₩9,900 <span class="tag">런칭가</span></div>
+          <small style="color:var(--muted)">후킹 공식 변형 10개 자동생성 + 업종별 템플릿팩 · 평생 이용</small>
+          <div class="btn-row" style="justify-content:center">
+            <button class="btn" id="buyPro" type="button">₩9,900 PRO 잠금 해제 →</button>
+          </div>
+          <div class="flex" style="justify-content:center;gap:6px;margin-top:6px">
+            <input id="code" placeholder="구매 후 받은 코드" style="max-width:180px" />
+            <button class="btn ghost" id="unlock" type="button">입력</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="muted-foot">
+    점수는 <b>휴리스틱(길이·구체성·파워워드·호기심·타깃)</b> 기반의 가이드입니다 — 절대평가가 아니라 개선 방향용입니다.
+    입력값은 이 브라우저에만 처리되며 서버로 전송되지 않습니다. · 이 앱의 사업 맥락:
+    <a href="ideas/miniapp-loop.md">ideas/miniapp-loop.md</a>
+  </p>
+</div>
+
+<script>
+/* ============ CONFIG (배포 전 설정) ============
+   paymentLink : PRO 결제 링크(Gumroad/Lemon Squeezy/Stripe/토스). 비우면 안내만.
+   proCode     : 구매자에게 전달할 잠금해제 코드(원하는 값으로 변경). */
+const CONFIG = { paymentLink:"", proCode:"HOOK-PRO-2026", gaId:"", gaEnabled:true, pixelEnabled:true };
+/* ============================================== */
+if(CONFIG.gaId){ const gs=document.createElement('script'); gs.async=true; gs.src='https://www.googletagmanager.com/gtag/js?id='+CONFIG.gaId; document.head.appendChild(gs); window.dataLayer=window.dataLayer||[]; window.gtag=function(){dataLayer.push(arguments);}; gtag('js',new Date()); gtag('config',CONFIG.gaId); }
+
+const $=id=>document.getElementById(id);
+const SKEY="hook_stats_v1";
+let stats=JSON.parse(localStorage.getItem(SKEY)||'{"runs":0,"upgrades":0,"unlocked":false}');
+function saveStats(){ localStorage.setItem(SKEY,JSON.stringify(stats)); renderStat(); }
+function renderStat(){ $("usagestat").textContent=`측정 ${stats.runs} · 업그레이드클릭 ${stats.upgrades}${stats.unlocked?" · PRO✓":""}`; }
+function track(t,m){ if(CONFIG.gaEnabled&&window.gtag)gtag('event',t,m||{}); if(CONFIG.pixelEnabled&&window.fbq)fbq('trackCustom',t,m||{}); }
+
+/* ---------- 사전 ---------- */
+const POWER=["무료","공짜","비밀","충격","단돈","절대","진짜","완전","미친","미쳤","역대급","꿀팁","실화","솔직히","핵심","당장","끝","한방","손해","후회","폭망","대박","최초","유일","검증","공개","총정리","무조건","사실은","레전드"];
+const CURIO=/(비밀|이유|방법|법\b|차이|이것|그것|왜|어떻게|공개|총정리|후기|순간|놓치)/;
+const TARGET=["마케터","셀러","대표","사장","당신","여러분","초보","직장인","창업","자영업","브랜드","쇼핑몰","스마트스토어","분들"];
+const UNIT=/(원|분|초|시간|일\b|주\b|개월|배\b|위\b|%|만\b|천\b|명)/;
+
+function scoreHook(raw){
+  const t=raw.trim(); const len=[...t].length;
+  // 1) 길이·간결성
+  let a1; if(len>=12&&len<=45)a1=20; else if(len<12)a1=Math.round(len/12*14); else if(len<=70)a1=Math.round(20-(len-45)/25*12); else a1=6;
+  a1=Math.max(0,Math.min(20,a1));
+  // 2) 구체성·숫자
+  let a2=0; if(/\d/.test(t))a2+=12; if(UNIT.test(t))a2+=8; if(/\d+\s*(가지|위|개|%|배|분|일|주|만|천|명)/.test(t))a2=Math.max(a2,16); a2=Math.min(20,a2);
+  // 3) 파워워드·감정
+  const pc=POWER.filter(w=>t.includes(w)).length; let a3=Math.min(pc*9,20);
+  // 4) 호기심 갭
+  let a4=0; if(t.includes("?"))a4+=8; if(CURIO.test(t))a4+=8; if(/\d+\s*가지|TOP|순위|이것|그것/.test(t))a4+=6; if(t.includes("..."))a4+=3; a4=Math.min(20,a4);
+  // 5) 타깃·관련성
+  let a5=0; if(TARGET.some(w=>t.includes(w)))a5+=12; if(/(당신|여러분|님|분들|라면|이라면)/.test(t))a5+=8; a5=Math.min(20,a5);
+  const total=Math.max(0,Math.min(100,a1+a2+a3+a4+a5));
+  return {len,total,axes:[
+    ["길이·간결성",a1,"후킹은 12~45자가 강합니다. 한 호흡에 읽히게 줄이세요."],
+    ["구체성·숫자",a2,"숫자/기간/금액을 넣으세요. ‘많이’ 대신 ‘3배’, ‘빠르게’ 대신 ‘5분’."],
+    ["파워워드·감정",a3,"감정·강조어(무료·비밀·솔직히·손해·핵심 등)를 1~2개 더하세요."],
+    ["호기심 갭",a4,"끝까지 다 말하지 마세요. 질문형·‘이것’·‘N가지’로 클릭을 유발."],
+    ["타깃 호명",a5,"누구에게 하는 말인지 박으세요. ‘마케터라면’, ‘셀러님’, ‘당신’."]
+  ]};
+}
+function gradeOf(s){ return s>=85?["S","var(--go)"]:s>=70?["A","var(--go)"]:s>=55?["B","var(--watch)"]:s>=40?["C","var(--watch)"]:["D","var(--kill)"]; }
+
+function render(r){
+  $("result").classList.remove("hidden");
+  const [g,col]=gradeOf(r.total);
+  const tEl=$("s_total"); tEl.textContent=r.total; tEl.style.color=col;
+  $("s_grade").textContent=`${g}등급 · ${r.total>=70?"바로 써도 좋아요":r.total>=40?"고치면 확 올라갑니다":"다시 쓰는 걸 추천"}`;
+  $("s_grade").style.color=col;
+  $("axes").innerHTML=r.axes.map(([n,v])=>`
+    <div class="axis"><div class="top"><span>${n}</span><b>${v}/20</b></div>
+      <div class="bar"><div class="fill" style="width:${v/20*100}%"></div></div></div>`).join("");
+  const weak=r.axes.filter(a=>a[1]<12).sort((x,y)=>x[1]-y[1]);
+  $("tips").innerHTML=(weak.length?weak:[["","",""]]).map(a=>a[2]?`<li><b>${a[0]}</b> — ${a[2]}</li>`:`<li>강한 후킹입니다. 변형 10개를 만들어 A/B 테스트하세요.</li>`).join("")
+    + (r.len>70?'<li><b>너무 깁니다</b> — 핵심만 남기고 절반으로 줄여보세요.</li>':'');
+  buildVars(($("hook").value.trim()));
+}
+
+/* ---------- PRO: 변형 생성기 ---------- */
+const FORMULAS=[
+  x=>`왜 ${x}, 다들 틀리게 알고 있을까?`,
+  x=>`${x}, 이거 모르면 손해입니다`,
+  x=>`3가지만 바꾸면 ${x} (마지막이 핵심)`,
+  x=>`솔직히 ${x}, 이렇게 하면 망합니다`,
+  x=>`아무도 안 알려주는 ${x}의 비밀`,
+  x=>`단 5분이면 끝나는 ${x}`,
+  x=>`${x} 때문에 밤잠 설치는 분들 보세요`,
+  x=>`${x}, 결국 이거 하나면 됩니다`,
+  x=>`전문가가 공짜로 안 푸는 ${x} 공식`,
+  x=>`${x} 2주 해본 솔직 후기 (데이터 공개)`
+];
+function topic(t){ return (t||"이것").replace(/[?!.…]+$/,"").slice(0,40); }
+function buildVars(t){
+  const x=topic(t);
+  $("vars").innerHTML=FORMULAS.map(f=>{
+    const s=f(x);
+    return `<li>${esc(s)} <button class="btn ghost copybtn" data-c="${esc(s)}" type="button">복사</button></li>`;
+  }).join("");
+  document.querySelectorAll(".copybtn").forEach(b=>b.onclick=()=>{ navigator.clipboard?.writeText(b.dataset.c); b.textContent="복사됨"; setTimeout(()=>b.textContent="복사",1200); });
+}
+function applyUnlockState(){
+  if(stats.unlocked){ $("veil").style.display="none"; }
+}
+$("buyPro").onclick=()=>{ stats.upgrades++; saveStats(); track("upgrade_click",{}); if(CONFIG.paymentLink) window.open(CONFIG.paymentLink,"_blank","noopener"); else alert("결제 링크가 아직 설정되지 않았습니다 (CONFIG.paymentLink)."); };
+$("unlock").onclick=()=>{ if($("code").value.trim().toUpperCase()===CONFIG.proCode.toUpperCase()){ stats.unlocked=true; saveStats(); applyUnlockState(); track("pro_unlock",{}); } else { $("code").style.borderColor="var(--kill)"; } };
+
+/* ---------- run ---------- */
+function esc(s){return(s??"").replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+$("run").onclick=()=>{ const t=$("hook").value.trim(); if(!t){ $("hook").focus(); return; } stats.runs++; saveStats(); track("score_run",{len:[...t].length}); render(scoreHook(t)); applyUnlockState(); $("result").scrollIntoView({behavior:"smooth",block:"start"}); };
+$("sample").onclick=()=>{ $("hook").value="마케터라면 무조건 알아야 할 후킹 공식 3가지 (마지막이 핵심)"; $("run").click(); };
+$("hook").addEventListener("keydown",e=>{ if((e.metaKey||e.ctrlKey)&&e.key==="Enter")$("run").click(); });
+
+renderStat();
+</script>
+</body>
+</html>
