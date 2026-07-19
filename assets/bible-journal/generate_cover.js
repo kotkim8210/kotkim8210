@@ -11,7 +11,7 @@ const TW = 1748, TH = 2480, BLEED = 35;
 const W = TW + BLEED * 2, H = TH + BLEED * 2;   // 1818 x 2550
 const CREAM = '#F6F1E6', INK = '#54603F';
 const INK_SOFT = 'rgba(84,96,63,0.58)', INK_FAINT = 'rgba(84,96,63,0.32)';
-const SAFE = 105; // frame/safe inset from bleed edge (≈70px inside trim)
+const SAFE = 177; // frame inset from bleed edge (≈142px=12mm inside trim) — 와이어 타공 여백(제본쪽 10mm+) 확보
 
 function page() { const c = createCanvas(W, H); const x = c.getContext('2d'); x.fillStyle = CREAM; x.fillRect(0, 0, W, H); return { c, x }; }
 function fit(x, t, maxW, base, fam) { let s = base; do { x.font = `${s}px "${fam}"`; if (x.measureText(t).width <= maxW) break; s -= 2; } while (s > 10); return s; }
@@ -34,7 +34,7 @@ function front() {
   center(x, '자녀를 위한 기도 저널', CX, O + 1335, 84, 'NMB', 'rgba(84,96,63,0.92)');
   center(x, '쉬지 말고 기도하라', CX, O + 2025, 70, 'NMB', INK);
   center(x, '데살로니가전서 5 : 17', CX, O + 2120, 48, 'NMR', INK_SOFT);
-  center(x, '씨앗과 기도', CX, O + 2330, 50, 'NMB', INK_SOFT);
+  center(x, '씨앗과 기도', CX, O + 2245, 50, 'NMB', INK_SOFT);
   return c;
 }
 // BACK
@@ -53,9 +53,12 @@ function guides(base) {
   const c = createCanvas(W, H); const x = c.getContext('2d'); x.drawImage(base, 0, 0);
   x.setLineDash([18, 12]); x.lineWidth = 3;
   x.strokeStyle = 'rgba(210,60,60,0.9)'; x.strokeRect(BLEED, BLEED, TW, TH);                 // trim
-  x.strokeStyle = 'rgba(60,110,210,0.85)'; x.strokeRect(BLEED + 70, BLEED + 70, TW - 140, TH - 140); // safe
-  x.setLineDash([]); x.fillStyle = 'rgba(210,60,60,0.95)'; x.font = '30px "NMR"'; x.textAlign = 'left';
-  x.fillText('빨강 = 재단선(trim) / 파랑 = 안전선(safe) / 바깥 = 도련(bleed)', BLEED + 80, BLEED + 50);
+  x.strokeStyle = 'rgba(60,110,210,0.85)'; x.strokeRect(BLEED + 59, BLEED + 59, TW - 118, TH - 118); // safe 5mm
+  x.setLineDash([]);
+  const PUNCH = 118; // 10mm 타공 존 (제본쪽: 앞표지=왼쪽, 뒤표지=오른쪽)
+  x.fillStyle = 'rgba(230,140,40,0.18)'; x.fillRect(BLEED, BLEED, PUNCH, TH);
+  x.fillStyle = 'rgba(210,60,60,0.95)'; x.font = '30px "NMR"'; x.textAlign = 'left';
+  x.fillText('빨강 = 재단선(trim) / 파랑 = 안전선(safe 5mm) / 주황 밴드 = 와이어 타공 존(10mm) / 바깥 = 도련(bleed)', BLEED + 80, BLEED + 50);
   return c;
 }
 

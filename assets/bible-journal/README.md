@@ -73,3 +73,10 @@
 - `cover_front_guides.png` : 재단선(빨강)·안전선(파랑) 확인용 (업로드 X)
 - 와이어제본이라 책등 없음(앞/뒤 분리). RGB PNG — 디지털 POD는 대부분 그대로 수용(필요시 PDF/CMYK 변환 가능)
 - 최종 POD 세트: 흑백 본문 110p + 컬러 앞/뒤 표지 + 와이어 + 미색지
+
+## v1.9 — 전체 검수(2026-07-19) + 표지 타공 안전여백
+- **전수 검수 완료**: 썸네일 5종·상세 6조각·내지 미리보기·로고 4종·PDF 3종(페이지 수·A5 규격) 이상 없음. 성경 표기(데살로니가전서 5:17, 엡 6:4, 통독표 66권) 정확.
+- **수정: 표지 프레임 타공 침범** — 기존 프레임이 재단선 기준 약 6mm 안쪽에 있어 와이어 타공 존(제본쪽 10mm)과 겹칠 위험 → **12mm로 이동**(`SAFE 105→177`), 앞표지 발행처(씨앗과 기도) 위치 보정. 가이드에 주황 타공 존(10mm) 표시 추가.
+- 알려진 미세 불일치(무해): 상세·썸네일 카피 "기도 92편" vs 흑백 입고본 데일리 93장(1장 초과 제공). 수정 불요.
+- **재생성 환경**: `/tmp/journal`에 나눔명조 TTF 3종 + `npm i @napi-rs/canvas pdfkit` 후 `NODE_PATH=<node_modules> node generate_*.js`.
+  폰트 출처: `raw.githubusercontent.com/google/fonts/main/ofl/nanummyeongjo/NanumMyeongjo-{Regular,Bold,ExtraBold}.ttf` (Regular은 `NanumMyeongjo.ttf`로 복사).
