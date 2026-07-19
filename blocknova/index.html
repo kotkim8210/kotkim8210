@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#17171C" />
+    <title>Block Nova</title>
+    <style>
+      /* Splash: single loading bar, zero external requests. Inlined so it paints
+         before the JS bundle arrives (gameplay reach budget: <= 3s). */
+      #splash {
+        position: fixed; inset: 0; z-index: 100;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+        background: radial-gradient(120% 90% at 50% -10%, #232041 0%, #17171C 55%);
+        transition: opacity 0.25s ease; font-family: Pretendard, system-ui, sans-serif;
+      }
+      #splash.done { opacity: 0; pointer-events: none; }
+      #splash .logo {
+        font-size: 28px; font-weight: 900; letter-spacing: 0.04em; color: #EDEAF7;
+      }
+      #splash .logo b {
+        background: linear-gradient(90deg, #F5C518, #FFE9A0);
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+      }
+      #splash .bar {
+        width: 180px; height: 4px; border-radius: 2px; overflow: hidden;
+        background: rgba(255, 255, 255, 0.08);
+      }
+      #splash .bar i {
+        display: block; height: 100%; width: 30%; border-radius: 2px;
+        background: linear-gradient(90deg, #F5C518, #FFE9A0);
+        animation: bn-load 0.9s ease-in-out infinite alternate;
+        transform-origin: left;
+      }
+      @keyframes bn-load {
+        from { transform: translateX(-40%) scaleX(0.6); }
+        to { transform: translateX(240%) scaleX(1); }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="splash" aria-hidden="true">
+      <div class="logo">BLOCK <b>NOVA</b></div>
+      <div class="bar"><i></i></div>
+    </div>
+    <div id="app"></div>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>
