@@ -216,3 +216,29 @@ coupang-sourcing/
 │   └── pipeline.py             # 키워드 → 신호 → 마진게이트 → 랭킹
 └── tests/                      # 오프라인 검증 (59개)
 ```
+
+---
+
+## 9. 실시간 시장조사 — `research.py` (키 불필요, 지금 바로 실행)
+
+쿠팡·네이버쇼핑 HTML은 봇 차단(Akamai 403 / 네이버 418)으로 막히지만, **네이버 데이터랩 쇼핑인사이트**는 공개 조회 기능이라 API 키 없이 실데이터가 나옵니다.
+
+```bash
+python research.py cat                          # 카테고리 대분류
+python research.py cat --cid 50000004           # 하위 (가구/인테리어)
+python research.py find --name 조명              # 이름으로 cid 찾기
+python research.py top --cid 50001119 --pages 5 # 인기검색어 TOP100
+python research.py top --cid 50001119 --filter 태양광,센서
+python research.py trend --cid 50001119 --keyword 태양광정원등   # 계절 그래프
+python research.py scan --cid 50001119 --filter 태양광,센서 --top 10  # ★소싱 스캔
+```
+
+`scan`은 인기검색어 순위 + 12개월 계절 진폭을 한 표로 묶어 **연중형 / 계절형 / 강계절**을 판정합니다.
+
+### 얻는 것 / 못 얻는 것
+| | |
+|---|---|
+| ✅ 카테고리 트리·인기검색어 순위·계절 트렌드 | 무엇이 지금 팔리는가, 언제 팔리는가 |
+| ❌ 경쟁사 리뷰수·가격·광고 침투율 | 쿠팡 파트너스 공식 API 또는 사용자 PC 크롤러로 보완 |
+
+> 봇 차단을 우회하지 않습니다. 공개 조회 기능을 예의 있게(요청 간 지연) 사용합니다.
