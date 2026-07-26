@@ -79,14 +79,17 @@ def main() -> int:
     if "로켓그로스요금표" in wb.sheetnames:
         rg = wb["로켓그로스요금표"]
         rg_dangling = []
-        for r in range(4, 10):
+        for r in range(4, 7):
             f = rg[f"G{r}"].value
             if isinstance(f, str):
                 for sheet, col, rownum in XREF.findall(f):
                     if sheets[sheet][f"{col}{rownum}"].value is None:
                         rg_dangling.append(f"G{r}→{sheet}!{col}{rownum}")
         check(not rg_dangling, "요금표 물류비 수식의 가정 참조 유효", rg_dangling)
-        check(rg["B4"].value == "초소형" and rg["B9"].value == "초대형", "요금표 6단계 존재")
+        check(rg["B4"].value == "Large Size 1" and rg["B6"].value == "Extra Large Size",
+              "요금표 3개 사이즈 유형 존재", rg["B4"].value)
+        check(rg["D4"].value == 1375 and rg["E4"].value == 2200,
+              "공식 고지값(입출고비 1,375 / 배송비 2,200) 반영", (rg["D4"].value, rg["E4"].value))
 
     # ── 2) 금지 함수 ────────────────────────────────────────────────────
     print("[2] LibreOffice 비호환 함수")
@@ -101,11 +104,22 @@ def main() -> int:
 
     # ── 3) 마진 계산 독립 재현 ──────────────────────────────────────────
     print("[3] 마진 계산 파이썬 재현 (8행)")
-    A = {  # 가정 시트 값 읽기
-        "fx": g["C10"].value, "customsMode": g["C11"].value, "impVat": g["C12"].value,
-        "shipFee": g["C15"].value, "mkt": g["C16"].value, "etc": g["C17"].value,
-        "bizType": g["C5"].value, "annual": g["C6"].value,
+    def gv(label_starts):
+        """가정 시트에서 라벨로 값을 찾는다(행 위치가 바뀌어도 안전)."""
+        for rr in range(1, g.max_row + 1):
+            lab = g.cell(row=rr, column=2).value
+            if isinstance(lab, str) and lab.startswith(label_starts):
+                return g.cell(row=rr, column=3).value
+        return None
+
+    A = {
+        "fx": gv("환율"), "customsMode": gv("수입 통관"), "impVat": gv("수입 매입세액"),
+        "shipFee": gv("배송비 수수료"), "mkt": gv("마케팅(광고)"), "etc": gv("기타 비용"),
+        "bizType": gv("사업자 유형"), "annual": gv("예상 연 과세표준"),
+        "coupon": gv("판매자 할인쿠폰"), "feeVatExcl": gv("수수료율 VAT"),
     }
+    check(all(v is not None for v in A.values()), "가정 시트 핵심 항목 모두 조회됨",
+          [k for k, v in A.items() if v is None])
     G_ = ws["G8"].value; H_ = ws["H8"].value or 0
     J_ = ws["J8"].value; K_ = ws["K8"].value
     L_ = ws["L8"].value; M_ = ws["M8"].value
@@ -119,11 +133,13 @@ def main() -> int:
 
     I_ = J_ * A["fx"]
     N_ = G_ * A["mkt"]
-    P_ = G_ * K_ + H_ * A["shipFee"]
+    CP_ = G_ * A["coupon"]                                   # 할인쿠폰(실측 5.6%)
+    vat_mult = 1.1 if A["feeVatExcl"] == "Y" else 1.0
+    P_ = (G_ - CP_) * K_ * vat_mult + H_ * A["shipFee"]      # ★정산 실측 공식
     imp = I_ * A["impVat"] if A["customsMode"] == "정식통관" else 0
-    Q_ = ((G_ + H_) * 0.015 if A["bizType"] == "간이과세"
-          else (G_ + H_) / 11 - (L_ + M_ + N_ + P_) / 11 - imp)
-    R_ = G_ + H_ - I_ - L_ - M_ - N_ - P_ - Q_
+    Q_ = ((G_ - CP_ + H_) * 0.015 if A["bizType"] == "간이과세"
+          else (G_ - CP_ + H_) / 11 - (L_ + M_ + N_ + P_) / 11 - imp)
+    R_ = G_ - CP_ + H_ - I_ - L_ - M_ - N_ - P_ - Q_
 
     # 소득세율: 세율표에서 연 과세표준에 맞는 구간(지방포함 = 세율×1.1)
     rate = 0
@@ -135,7 +151,7 @@ def main() -> int:
     T_ = G_ * A["etc"]
     U_ = R_ - S_ - T_
 
-    print(f"     공급가={I_:,.0f} 마케팅={N_:,.0f} 수수료={P_:,.0f} 부가세={Q_:,.0f}")
+    print(f"     공급가={I_:,.0f} 쿠폰={CP_:,.0f} 마케팅={N_:,.0f} 수수료={P_:,.0f} 부가세={Q_:,.0f}")
     print(f"     1차합계={R_:,.0f} 소득세율={rate*100:.1f}% 소득세={S_:,.0f} 기타={T_:,.0f}")
     print(f"     → 마진={U_:,.0f} ({U_/G_*100:.1f}%)")
     check(rate > 0, f"소득세율이 세율표에서 결정됨 ({rate*100:.1f}%)")

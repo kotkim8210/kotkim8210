@@ -111,17 +111,30 @@ def build_assumptions(ws) -> dict:
          "자동 계산: 종합소득세 + 지방소득세 10%", PCT, is_input=False)
     item("vatRate", "부가가치세율", 0.10, "기본 10%", PCT)
 
-    section("② 수입 / 원가")
+    section("② 수입 / 원가  ★LCL 인보이스 4건 실측 반영")
     item("fx", "환율 CNY→KRW (체감)", 300,
-         "원본 V3의 '=원가×300' 관례 유지. 실환율(≈195)에 국제운임·관세·통관을 얹은 체감환율", NUM)
+         "★실측 검증: LCL 3건 역산 결과 248/278/349원 → 평균 291원. 300원 가정은 타당(보수적)", NUM)
     item("customsMode", "수입 통관 방식", "정식통관",
          "정식통관 / 구매대행. 정식통관이면 수입부가세를 매입세액으로 공제")
     item("importVatCredit", "수입 매입세액 공제율", 0.10,
          "정식통관 시 공급가 대비 공제율(≈10%). 구매대행·직송금이면 공제 0", PCT)
+    item("dutyRate", "관세율", 0.0,
+         "★실측: 한중FTA 원산지증명서(CO) 발급 시 관세 0원(4건 중 3건). CO 미발급 1건만 관세 부과", PCT)
+    item("logiFixed", "수입 고정비(건당)", 111980,
+         "★실측: 통관수수료 33,000 + 도크이용료 24,200 + B/L발급 21,780 + CO발급 33,000", NUM)
+    item("logiPerCbm", "수입 변동비(원/CBM)", 118000,
+         "★실측: 해운운임+중국내륙+핸들링+기타 합계 ÷ CBM (3건 평균 118,000 · 오차 0.2~2%)", NUM)
+    item("palletFee", "팔레트비(개당)", 38500, "★실측: 38,500원/개 (약 1.5CBM당 1개)", NUM)
 
-    section("③ 쿠팡 수수료 / 비용")
-    item("feeDefault", "판매수수료 기본(%)", 0.108,
-         "카테고리별 4~10.8%. 상품별로 K열에서 덮어쓸 수 있음", PCT)
+    section("③ 쿠팡 수수료 / 비용  ★정산내역 683건 실측 반영")
+    item("feeDefault", "서비스이용율(VAT별도)", 0.106,
+         "★실측: 683건 중 652건이 10.6%, 19건 5.8%, 11건 10.8%. 판매액 대비 실질 10.86%", PCT)
+    item("feeVatExcl", "수수료율 VAT 별도인가", "N",
+         "★실측 공식: 판매수수료 = (판매액−할인쿠폰) × 서비스이용율 × 1.1 [683건 중 400건 표본 100% 일치]. "
+         "기본 N: 이 시트의 K열은 VAT 포함 실부담률입니다(로켓그로스 30% all-in, 마켓플레이스 12%≈10.6%×1.1). K열에 서비스이용율(10.6%) 원값을 넣을 때만 Y로 바꾸세요")
+    item("couponRate", "판매자 할인쿠폰율", 0.056,
+         "★실측: 판매액 27,435,450 중 쿠폰 1,535,610 = 5.6%. 즉시할인+다운로드 쿠폰. "
+         "쿠폰은 수수료 계산 전에 차감되고 정산액도 그만큼 줄어든다", PCT)
     item("shipFeeRate", "배송비 수수료율", 0.0363,
          "원본 V3의 3.63% 유지(배송비에 부과되는 수수료)", PCT)
     item("mktRate", "마케팅(광고) 기본(%)", 0.15,
@@ -157,13 +170,15 @@ def build_assumptions(ws) -> dict:
     item("channel", "기본 판매방식", "로켓그로스",
          "로켓그로스 / 마켓플레이스. 행별로 다르면 소싱현황 AJ열에서 덮어쓰기")
     item("rgAllIn", "로켓그로스 통합요율(K열)", 0.30,
-         "판매수수료+입출고+배송+보관을 뭉뚱그린 실부담률. 검산: 수수료10.8%+출고2,500+입고500+보관300 ≈ 28.6%")
+         "판매수수료+입출고비+배송비 통합 실부담률. ★검산(공식요율): 수수료 10.86% + 입출고 1,375 + 배송 2,200 = 판매가 2만원 기준 28.7% → 30% 가정 타당. 이 값을 K열에 쓸 땐 위 '수수료율 VAT 별도'를 N으로")
     item("stockDays", "예상 재고 보관일수", 45,
          "쿠팡 센터 보관 예상일. 무료보관(30일, 의류·신발·악세 45일) 초과분에 보관료 부과", NUM)
     item("freeStockDays", "무료 보관일수", 30, "카테고리에 따라 30일 또는 45일", NUM)
-    item("saver", "로켓그로스 세이버 구독", "N",
-         "Y면 월 99,000원으로 반품비·보관료 방어. 월 반품 20건↑ 또는 재고회전 30일↑이면 유리")
-    item("saverFee", "세이버 월 구독료", 99000, "구독 시 월 고정비(판매수량으로 분산 판단)", NUM)
+    item("rgPromo", "신규 프로모션 적용중", "N",
+         "Y면 입출고비·배송비 0원(첫 판매 개시 후 90일간, 최대 90일 또는 누적매출 2억까지). "
+         "프로모션 중이면 K열 통합요율을 판매수수료만(약 11%)으로 낮추세요")
+    item("saver", "로켓그로스 세이버 적용", "N",
+         "Y면 보관 60일까지 무료 + 반품 회수·재입고 무제한 무료. 90일 이후에도 270일간 0원 프로모션 중")
 
     section("⑦ 목표")
     item("monthTarget", "월 목표 이익(원)", 500000, "원본 V3의 '월 목표금액' 계승", NUM)
@@ -253,14 +268,12 @@ def build_tax_table(ws):
 # =========================================================================== #
 # 2-b) 로켓그로스 요금표 시트
 # =========================================================================== #
+# 쿠팡 공식 '로켓그로스 비용 구성' 페이지 실제 고지값 (사용자 제공 캡처 기준)
 RG_TIERS = [
-    # (단계, 기준, 입고비, 출고비, 보관료/일)
-    ("초소형", "20cm 이하 · 500g 미만", 100, 600, 10),
-    ("소형", "30cm 이하 · 1kg 미만", 200, 1000, 15),
-    ("중형", "50cm 이하 · 3kg 미만", 300, 1600, 20),
-    ("대형", "60cm 이하 · 5kg 미만", 500, 2200, 30),
-    ("특대형", "80cm 이하 · 10kg 미만", 650, 2800, 40),
-    ("초대형", "80cm 초과 또는 10kg 이상", 800, 3500, 50),
+    # (사이즈 유형, 예시, 입출고비, 배송비)
+    ("Large Size 1", "전자레인지 크기", 1375, 2200),
+    ("Large Size 2", "의자 크기", 1375, 4100),
+    ("Extra Large Size", "서랍장 크기", 1375, 5600),
 ]
 
 
@@ -271,46 +284,144 @@ def build_rg_table(ws, ref: dict):
         ws.column_dimensions[col].width = w
 
     ws.merge_cells("B2:G2")
-    ws["B2"] = "로켓그로스 입출고·보관 요금 (2025.1.6 개편 — 사이즈+무게 6단계)"
+    ws["B2"] = "로켓그로스 비용 구성 — 쿠팡 공식 고지값"
     ws["B2"].font = F_TITLE
     ws["B2"].fill = FILL_TITLE
     ws["B2"].alignment = Alignment(horizontal="center", vertical="center")
 
-    for i, h in enumerate(["사이즈 단계", "기준", "입고비", "출고비", "보관료(일)", "물류비 합계"], start=2):
+    for i, h in enumerate(["사이즈 유형", "예시", "입출고비", "배송비", "프로모션 적용", "실적용 물류비"], start=2):
         c = ws.cell(row=3, column=i, value=h)
         c.font = F_HEAD
         c.fill = FILL_HEAD
         c.border = BORDER
         c.alignment = Alignment(horizontal="center")
 
-    for i, (tier, basis, inb, outb, stor) in enumerate(RG_TIERS):
+    for i, (tier, basis, inout, ship) in enumerate(RG_TIERS):
         r = 4 + i
         ws.cell(row=r, column=2, value=tier)
         ws.cell(row=r, column=3, value=basis).font = F_NOTE
-        ws.cell(row=r, column=4, value=inb).number_format = NUM
-        ws.cell(row=r, column=5, value=outb).number_format = NUM
-        ws.cell(row=r, column=6, value=stor).number_format = NUM
-        # 물류비 합계 = 입고비 + 출고비 + 보관료×(예상재고일 − 무료보관일, 음수면 0)
+        ws.cell(row=r, column=4, value=inout).number_format = NUM
+        ws.cell(row=r, column=5, value=ship).number_format = NUM
+        ws.cell(row=r, column=6, value=f'=가정!{ref["rgPromo"]}')
+        # 프로모션(첫 90일) 적용 중이면 입출고비·배송비 0원
         ws.cell(row=r, column=7,
-                value=f'=D{r}+E{r}+F{r}*MAX(0,가정!{ref["stockDays"]}-가정!{ref["freeStockDays"]})'
-                ).number_format = NUM
+                value=f'=IF(가정!{ref["rgPromo"]}="Y",0,D{r}+E{r})').number_format = NUM
         for c in range(2, 8):
             cell = ws.cell(row=r, column=c)
             cell.border = BORDER
             if cell.font.name != FONT:
                 cell.font = F_BODY
 
-    n = 4 + len(RG_TIERS)
+    n = 4 + len(RG_TIERS) + 1
+    ws.cell(row=n, column=2, value="그 외 비용 (무료 조건)").font = Font(name=FONT, size=10, bold=True)
+    n += 1
+    for i, h in enumerate(["항목", "기본", "프로모션(첫 90일)", "로켓세이버"], start=2):
+        c = ws.cell(row=n, column=i, value=h)
+        c.font = F_HEAD
+        c.fill = FILL_HEAD
+        c.border = BORDER
+    etc = [
+        ("보관비", "매 입고시 30일 무료", "최대 90일 무료", "보관 60일까지 무료"),
+        ("반품 회수비", "매달 20건 무료", "무료", "무제한 무료"),
+        ("반품 재입고비", "매달 20개 무료", "무료", "무제한 무료"),
+        ("반출비", "매달 20개 무료", "무료", "매달 20개 무료"),
+    ]
+    for i, row in enumerate(etc):
+        rr = n + 1 + i
+        for j, v in enumerate(row):
+            c = ws.cell(row=rr, column=2 + j, value=v)
+            c.font = F_BODY if j == 0 else F_NOTE
+            c.border = BORDER
+
+    n2 = n + 1 + len(etc) + 1
     notes = [
-        "※ 입고비 100~800원 / 출고비 600~3,500원 / 보관료 일 10~50원 (공개 자료 기반 대표값 — 쿠팡 wing에서 실요율 확인 후 교정하세요).",
-        "※ 무료보관: 일반 30일, 의류·신발·악세서리 45일. 초과분부터 보관료가 붙습니다.",
-        "※ 2025년부터 반품 회수·재입고 요금이 별도 부과됩니다(위 표에 미포함 — 보수적으로 여유를 두세요).",
-        "※ 입출고비·배송비 프로모션은 2027.1.31까지 유효.",
-        "※ 'G열 물류비 합계'를 소싱현황 L열(물류비)에 넣으면 정밀 계산이 됩니다.",
-        "※ 로켓그로스는 고객 택배비를 셀러가 부담하지 않습니다(쿠팡이 배송). 대신 출고비가 나갑니다.",
+        "※ 판매수수료는 '판매자배송과 동일'(카테고리별). 위 입출고비·배송비는 판매된 상품에만 부과됩니다.",
+        "※ 프로모션: 첫 판매 개시 후 90일간 로켓그로스 시작비용 0원 — 최대 90일 또는 누적매출 2억원 달성 시까지.",
+        "※ 로켓그로스 세이버: 90일 이후에도 270일간 0원 프로모션(보관 60일 미경과 상품 대상).",
+        "※ 프로모션 신청기간 2026.07.01~07.31 · 대상: 기간 내 판매 개시한 로켓그로스 신규 판매자.",
+        "※ 부가서비스: 반출 배송 90일 무료(최대 10만원), 바코드 부착·오류수정은 별도.",
+        "※ 카테고리·사이즈유형·판매가에 따라 최종 비용이 결정되므로, wing의 '입출고/배송 비용 확인하기'로 상품별 실요율을 확인하세요.",
+        "",
+        "▶ 검산: 판매가 20,000원 · Large Size 1 기준",
+        "   판매수수료 10.86%(2,172) + 입출고비 1,375 + 배송비 2,200 = 5,747원 = 판매가의 28.7%",
+        "   → 소싱현황 K열의 통합요율 30% 가정이 실제와 부합합니다(프로모션 종료 후 기준).",
     ]
     for i, t in enumerate(notes):
-        ws.cell(row=n + 1 + i, column=2, value=t).font = F_NOTE
+        ws.cell(row=n2 + i, column=2, value=t).font = F_NOTE
+
+
+# =========================================================================== #
+# 2-c) 수입실적 시트 (LCL 인보이스 4건 실측)
+# =========================================================================== #
+LCL = [
+    # 날짜, CARTONS, KGS, CBM, 관세, 세금(부가세/기타세금), 총액, 비고
+    ("2026-01-08", 1, 178.0, 1.91, 0, 103030, 478208, "FTA CO 발급 → 관세 0"),
+    ("2026-02-06", 1, 186.0, 1.61, 0, 139310, 481368, "FTA CO 발급 → 관세 0"),
+    ("2026-02-12", 1, 110.0, 1.15, 48050, 52860, 359628, "CO 미발급 → 관세 48,050"),
+    ("2026-03-09", 4, 638.0, 5.87, 0, 358220, 687883, "해운운임 별도 청구건(세금+부대비 위주)"),
+]
+
+
+def build_import_actuals(ws, ref: dict):
+    ws.title = "수입실적"
+    ws.sheet_view.showGridLines = False
+    for col, w in zip("ABCDEFGHIJ", [3, 13, 9, 9, 9, 11, 11, 12, 12, 34]):
+        ws.column_dimensions[col].width = w
+
+    ws.merge_cells("B2:J2")
+    ws["B2"] = "수입 실적 (FNH LOGISTICS LCL 인보이스 4건) — 가정값의 실측 근거"
+    ws["B2"].font = F_TITLE
+    ws["B2"].fill = FILL_TITLE
+    ws["B2"].alignment = Alignment(horizontal="center", vertical="center")
+
+    heads = ["통관일", "박스", "중량(kg)", "CBM", "관세", "세금", "총액", "순물류비", "원/CBM", "비고"]
+    for i, h in enumerate(heads, start=2):
+        c = ws.cell(row=3, column=i, value=h)
+        c.font = F_HEAD
+        c.fill = FILL_HEAD
+        c.border = BORDER
+        c.alignment = Alignment(horizontal="center")
+
+    for i, (d, ct, kg, cbm, duty, tax, total, note) in enumerate(LCL):
+        r = 4 + i
+        vals = [d, ct, kg, cbm, duty, tax, total]
+        for j, v in enumerate(vals):
+            c = ws.cell(row=r, column=2 + j, value=v)
+            c.font = F_BODY
+            c.border = BORDER
+            if j >= 4:
+                c.number_format = NUM
+        ws.cell(row=r, column=9, value=f"=H{r}-F{r}-G{r}").number_format = NUM   # 순물류비
+        ws.cell(row=r, column=10, value=f'=IF(E{r}=0,"",I{r}/E{r})').number_format = NUM
+        ws.cell(row=r, column=9).border = BORDER
+        ws.cell(row=r, column=10).border = BORDER
+        ws.cell(row=r, column=11, value=note).font = F_NOTE
+
+    n = 4 + len(LCL) + 1
+    lines = [
+        ("물류비 구조 (회귀 결과 — 오차 0.2~2%)", True),
+        ("  순물류비 = 고정비 111,980원/건  +  118,000원/CBM  +  팔레트 38,500원/개(약 1.5CBM당 1개)", False),
+        ("     고정비 내역: 통관수수료 33,000 + 도크이용료 24,200 + B/L발급 21,780 + 원산지증명서(CO) 33,000", False),
+        ("     변동비 내역: 해운운임 + 중국 위해항 운송료 + HANDLING CHARGE + 중국해관 인상비(1CBM당 20위안)", False),
+        ("", False),
+        ("관세 — 한중FTA가 핵심", True),
+        ("  4건 중 3건이 관세 0원. 원산지증명서(CO, 발급비 33,000원)를 받으면 관세가 면제됩니다.", False),
+        ("  CO를 안 받은 2026-02-12 건만 관세 48,050원 부과 → CO 발급비 33,000원을 아끼려다 48,050원을 냈습니다.", False),
+        ("  ▶ 결론: 중국 수입은 FTA CO를 반드시 챙기세요. 가정 시트의 관세율 기본값을 0%로 둔 근거입니다.", False),
+        ("", False),
+        ("체감환율 300원 검증 (수입부가세로 CIF 역산 → 물품가 산출)", True),
+        ("  2026-01-08: 물품가 879,410원(4,510위안) + 물류 375,178 → 랜디드 1,254,588 → 278원/위안", False),
+        ("  2026-02-06: 물품가 1,265,910원(6,492위안) + 물류 342,058 → 랜디드 1,607,968 → 248원/위안", False),
+        ("  2026-02-12: 물품가 389,700원(1,998위안) + 물류 258,718 + 관세 48,050 → 696,468 → 349원/위안", False),
+        ("  ▶ 평균 291원/위안. 기존 '원가×300' 관례는 실측과 부합하며 약간 보수적(안전)입니다.", False),
+        ("", False),
+        ("소량 수입의 함정", True),
+        ("  고정비 111,980원은 화물 크기와 무관하게 붙습니다. 1.15CBM 건은 고정비만 전체의 31%였습니다.", False),
+        ("  ▶ CBM을 키울수록 개당 물류비가 급감합니다. 소량 테스트 수입은 원가가 구조적으로 불리합니다.", False),
+    ]
+    for i, (t, bold) in enumerate(lines):
+        c = ws.cell(row=n + i, column=2, value=t)
+        c.font = Font(name=FONT, size=9, bold=True) if bold else F_NOTE
 
 
 # =========================================================================== #
@@ -354,6 +465,7 @@ COLS = [
     ("AJ", 13.0, "판매방식"),
     ("AK", 12.0, "사이즈단계"),
     ("AL", 14.0, "권장물류비"),
+    ("AM", 12.0, "할인쿠폰"),
 ]
 SOURCING_IN = {"AA", "AB", "AC", "AD", "AE"}
 SOURCING_OUT = {"AF", "AG", "AH", "AI"}
@@ -434,16 +546,20 @@ def build_sourcing(ws, ref: dict, products: list[dict]):
         # 마케팅: 광고믹스 스위치에 따라 (판매가×마케팅%) 또는 (개당 실질 광고비)
         ws[f"N{r}"] = (f'=IF({G}!{A["useAdMix"]}="Y",{G}!{A["adBlended"]},'
                        f'G{r}*{G}!{A["mktRate"]})')
-        # 수수료: 판매가×수수료% + 배송비×배송수수료율   (원본 V3 구조 유지)
-        ws[f"P{r}"] = f'=(G{r}*K{r})+(H{r}*{G}!{A["shipFeeRate"]})'
+        # 할인쿠폰(AM): 실측상 판매액의 5.6%가 쿠폰으로 빠지고, 수수료도 쿠폰 차감 후 금액에 부과된다
+        ws[f"AM{r}"] = f'=G{r}*{G}!{A["couponRate"]}'
+        # 수수료: (판매가−쿠폰) × 요율 × [VAT별도면 1.1] + 배송비×배송수수료율
+        #   ★정산내역 400건 표본 100% 일치 검증된 공식
+        ws[f"P{r}"] = (f'=((G{r}-AM{r})*K{r}*IF({G}!{A["feeVatExcl"]}="Y",1.1,1))'
+                       f'+(H{r}*{G}!{A["shipFeeRate"]})')
         # 부가세: 일반과세 = 매출세액 − 매입세액 / 간이과세 = 매출×1.5%
         ws[f"Q{r}"] = (
-            f'=IF({G}!{A["bizType"]}="간이과세",(G{r}+H{r})*0.015,'
-            f'(G{r}+H{r})/11'
+            f'=IF({G}!{A["bizType"]}="간이과세",(G{r}-AM{r}+H{r})*0.015,'
+            f'(G{r}-AM{r}+H{r})/11'
             f'-((L{r}+M{r}+N{r}+P{r})/11)'
             f'-IF({G}!{A["customsMode"]}="정식통관",I{r}*{G}!{A["importVatCredit"]},0))'
         )
-        ws[f"R{r}"] = f"=G{r}+H{r}-I{r}-L{r}-M{r}-N{r}-P{r}-Q{r}"
+        ws[f"R{r}"] = f"=G{r}-AM{r}+H{r}-I{r}-L{r}-M{r}-N{r}-P{r}-Q{r}"
         ws[f"S{r}"] = f'=MAX(0,R{r})*{G}!{A["incomeTaxRate"]}'
         ws[f"T{r}"] = f'=G{r}*{G}!{A["etcRate"]}'
         ws[f"U{r}"] = f"=R{r}-S{r}-T{r}"
@@ -575,8 +691,9 @@ def main() -> int:
     ref = build_assumptions(wb.active)
     build_tax_table(wb.create_sheet())
     build_rg_table(wb.create_sheet(), ref)
+    build_import_actuals(wb.create_sheet(), ref)
     build_sourcing(wb.create_sheet(), ref, products)
-    wb.move_sheet("소싱현황", offset=-3)  # 소싱현황을 첫 시트로
+    wb.move_sheet("소싱현황", offset=-4)  # 소싱현황을 첫 시트로
     OUT.parent.mkdir(parents=True, exist_ok=True)
     wb.save(OUT)
     print(f"wrote {OUT}  (상품 {len(products)}건, 총 {N_ROWS}행)")
