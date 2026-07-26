@@ -180,7 +180,17 @@ def build_assumptions(ws) -> dict:
     item("saver", "로켓그로스 세이버 적용", "N",
          "Y면 보관 60일까지 무료 + 반품 회수·재입고 무제한 무료. 90일 이후에도 270일간 0원 프로모션 중")
 
-    section("⑦ 목표")
+    section("⑦ 밀크런 (내 창고→쿠팡센터 입고)  ★정산 20건 실측")
+    item("mrPerPallet", "밀크런 팔레트당 단가", 29590,
+         "★실측: 26,900원(VAT별도) + 세액 2,690 = 29,590원. 3팔레트 건은 25,555원/팔레트로 소폭 할인", NUM)
+    item("mrBoxPerPallet", "팔레트당 박스 수", 10,
+         "★실측 평균 10.0개(249박스/25팔레트). 이 값이 클수록 개당 입고비 급감 — 6개면 4,932원/박스, "
+         "14개면 2,114원/박스로 2.3배 차이", NUM)
+    item("mrUnitPerBox", "박스당 상품 수", 20, "내 상품 기준 1박스에 몇 개 들어가는지", NUM)
+    item("mrPerUnit", "→ 개당 밀크런비", None,
+         "= 팔레트당 단가 ÷ (팔레트당 박스수 × 박스당 상품수). L열(물류비)에 포함시킬 금액", NUM, is_input=False)
+
+    section("⑧ 목표")
     item("monthTarget", "월 목표 이익(원)", 500000, "원본 V3의 '월 목표금액' 계승", NUM)
 
     # 자동 계산 셀 채우기
@@ -189,6 +199,9 @@ def build_assumptions(ws) -> dict:
     )
     ws[ref["adCostPerSale"].replace("$", "")] = f"=IFERROR({ref['cpc']}/{ref['cvr']},0)"
     ws[ref["adBlended"].replace("$", "")] = f"={ref['adCostPerSale']}*{ref['adShare']}"
+    ws[ref["mrPerUnit"].replace("$", "")] = (
+        f"=IFERROR({ref['mrPerPallet']}/({ref['mrBoxPerPallet']}*{ref['mrUnitPerBox']}),0)"
+    )
 
     r += 1
     ws.cell(row=r, column=2, value="색상 범례").font = Font(name=FONT, size=9, bold=True)
@@ -421,6 +434,105 @@ def build_import_actuals(ws, ref: dict):
     ]
     for i, (t, bold) in enumerate(lines):
         c = ws.cell(row=n + i, column=2, value=t)
+        c.font = Font(name=FONT, size=9, bold=True) if bold else F_NOTE
+
+
+# =========================================================================== #
+# 2-d) 밀크런 실적 시트 (쿠팡 밀크런 정산 20건 실측)
+# =========================================================================== #
+MILKRUN = [
+    # 픽업일, 요금타입, 팔레트, 박스, 발생금액, 총액(VAT포함)
+    ("2026.03.11", "밀크런이용", 2, 17, 53800, 59180),
+    ("2026.03.11", "취소금액", 1, 6, 32500, 35750),
+    ("2026.03.12", "밀크런이용", 2, 16, 53800, 59180),
+    ("2026.03.16", "밀크런이용", 1, 6, 26900, 29590),
+    ("2026.03.23", "미청구", 1, 7, 0, 0),
+    ("2026.03.23", "밀크런이용", 1, 7, 26900, 29590),
+    ("2026.04.01", "밀크런이용", 1, 6, 26900, 29590),
+    ("2026.04.01", "밀크런이용", 1, 13, 26900, 29590),
+    ("2026.04.09", "밀크런이용", 1, 6, 26900, 29590),
+    ("2026.04.09", "밀크런이용", 1, 12, 26900, 29590),
+    ("2026.04.15", "밀크런이용", 3, 37, 76665, 84332),
+    ("2026.04.22", "밀크런이용", 1, 14, 26900, 29590),
+    ("2026.04.22", "밀크런이용", 1, 6, 26900, 29590),
+    ("2026.04.22", "미청구", 2, 15, 0, 0),
+    ("2026.04.25", "미청구", 2, 25, 0, 0),
+    ("2026.04.25", "미청구", 2, 18, 0, 0),
+    ("2026.04.27", "밀크런이용", 2, 25, 53800, 59180),
+    ("2026.04.27", "밀크런이용", 2, 18, 53800, 59180),
+    ("2026.04.29", "밀크런이용", 3, 36, 76665, 84332),
+    ("2026.04.29", "밀크런이용", 2, 24, 53800, 59180),
+]
+
+
+def build_milkrun(ws, ref: dict):
+    ws.title = "밀크런실적"
+    ws.sheet_view.showGridLines = False
+    for col, w in zip("ABCDEFGH", [3, 13, 12, 8, 8, 12, 14, 11]):
+        ws.column_dimensions[col].width = w
+
+    ws.merge_cells("B2:H2")
+    ws["B2"] = "밀크런 정산 실적 (내 창고 → 쿠팡 물류센터 입고 운송) 20건"
+    ws["B2"].font = F_TITLE
+    ws["B2"].fill = FILL_TITLE
+    ws["B2"].alignment = Alignment(horizontal="center", vertical="center")
+
+    for i, h in enumerate(["픽업일", "요금타입", "팔레트", "박스", "발생금액", "총액(VAT포함)", "박스당"], start=2):
+        c = ws.cell(row=3, column=i, value=h)
+        c.font = F_HEAD
+        c.fill = FILL_HEAD
+        c.border = BORDER
+        c.alignment = Alignment(horizontal="center")
+
+    for i, (d, ft, pal, box, amt, tot) in enumerate(MILKRUN):
+        r = 4 + i
+        for j, v in enumerate([d, ft, pal, box, amt, tot]):
+            c = ws.cell(row=r, column=2 + j, value=v)
+            c.font = F_BODY
+            c.border = BORDER
+            if j >= 4:
+                c.number_format = NUM
+        c = ws.cell(row=r, column=8, value=f'=IF(E{r}=0,"",G{r}/E{r})')
+        c.number_format = NUM
+        c.border = BORDER
+
+    last = 4 + len(MILKRUN) - 1
+    n = last + 2
+    ws.cell(row=n, column=2, value="합계 (청구건만)").font = Font(name=FONT, size=10, bold=True)
+    for i, (lab, formula, fmt) in enumerate([
+        ("청구 건수", f'=COUNTIFS(G4:G{last},">0")', NUM),
+        ("팔레트 합계", f'=SUMIFS(D4:D{last},G4:G{last},">0")', NUM),
+        ("박스 합계", f'=SUMIFS(E4:E{last},G4:G{last},">0")', NUM),
+        ("총액 합계", f'=SUMIFS(G4:G{last},G4:G{last},">0")', NUM),
+        ("→ 팔레트당 단가", f'=IFERROR(D{n+4}/D{n+2},"")', NUM),
+        ("→ 박스당 단가", f'=IFERROR(D{n+4}/D{n+3},"")', NUM),
+        ("→ 팔레트당 평균 박스", f'=IFERROR(D{n+3}/D{n+2},"")', '0.0'),
+    ], start=1):
+        rr = n + i
+        ws.cell(row=rr, column=2, value=lab).font = F_BODY
+        c = ws.cell(row=rr, column=4, value=formula)
+        c.font = F_CALC
+        c.number_format = fmt
+        c.border = BORDER
+
+    n2 = n + 9
+    lines = [
+        ("핵심: 팔레트를 꽉 채울수록 개당 입고비가 급감합니다", True),
+        ("  밀크런은 팔레트 단위 과금(26,900원/팔레트, VAT 포함 29,590원)이라 박스 수와 무관합니다.", False),
+        ("  실측 편차:  6박스/팔레트 → 4,932원/박스   vs   14박스/팔레트 → 2,114원/박스  (2.3배)", False),
+        ("  ▶ 입고 전에 팔레트 적재율을 최대로 올리는 것이 개당 원가를 낮추는 가장 쉬운 레버입니다.", False),
+        ("", False),
+        ("전체 원가 사슬 (이 계산기가 반영하는 3개 구간)", True),
+        ("  중국 1688 ──[LCL 해상]──▶ 내 창고 ──[밀크런]──▶ 쿠팡센터 ──[로켓그로스]──▶ 고객", False),
+        ("     물품가×환율      고정 111,980 + 118,000/CBM    29,590/팔레트    입출고 1,375 + 배송 2,200~5,600", False),
+        ("", False),
+        ("기타 관찰", True),
+        ("  · 미청구(무료) 4건 — 팔레트 7개·박스 65개분. 프로모션 또는 조건 충족 건으로 보입니다.", False),
+        ("  · 3팔레트 건은 76,665원 = 25,555원/팔레트로 소폭 할인(대량 인센티브 추정).", False),
+        ("  · 2026-03-11 '취소금액' 32,500원 1건 — 취소 수수료도 원가에 잡히니 주의.", False),
+    ]
+    for i, (t, bold) in enumerate(lines):
+        c = ws.cell(row=n2 + i, column=2, value=t)
         c.font = Font(name=FONT, size=9, bold=True) if bold else F_NOTE
 
 
@@ -692,8 +804,9 @@ def main() -> int:
     build_tax_table(wb.create_sheet())
     build_rg_table(wb.create_sheet(), ref)
     build_import_actuals(wb.create_sheet(), ref)
+    build_milkrun(wb.create_sheet(), ref)
     build_sourcing(wb.create_sheet(), ref, products)
-    wb.move_sheet("소싱현황", offset=-4)  # 소싱현황을 첫 시트로
+    wb.move_sheet("소싱현황", offset=-5)  # 소싱현황을 첫 시트로
     OUT.parent.mkdir(parents=True, exist_ok=True)
     wb.save(OUT)
     print(f"wrote {OUT}  (상품 {len(products)}건, 총 {N_ROWS}행)")
