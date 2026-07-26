@@ -130,10 +130,20 @@ def _raw_json(page) -> str | None:
             v = None
         if v:
             return v
-    try:
-        html = page.get_all_text() if hasattr(page, "get_all_text") else str(page)
-    except Exception:  # noqa: BLE001
-        return None
+    # 정규식 폴백은 **원본 HTML**에서 찾아야 한다.
+    # 주의: get_all_text()는 <script> 안의 내용을 돌려주지 않는다(빈 문자열) → 쓰면 안 됨.
+    html = None
+    for attr in ("html_content", "body"):
+        try:
+            v = getattr(page, attr, None)
+            v = v() if callable(v) else v
+            if v:
+                html = v if isinstance(v, str) else str(v)
+                break
+        except Exception:  # noqa: BLE001
+            continue
+    if html is None:
+        html = str(page)
     m = _JSON_BLOB.search(html or "")
     return m.group(1) if m else None
 

@@ -54,8 +54,9 @@ class FetchOptions:
     timeout: int = 30000              # ms
     wait: int = 0                     # 로드 후 추가 대기 (ms)
     wait_selector: str | None = None  # 이 선택자가 나타날 때까지 대기
-    disable_resources: bool = False   # 불필요 리소스 차단(속도↑)
-    block_images: bool = False
+    # 불필요 리소스 차단(속도↑). scrapling의 disable_resources는 image/font/media 등을
+    # 함께 드롭하므로 별도의 이미지 차단 옵션은 두지 않는다(0.4.11에 block_images 인자 없음).
+    disable_resources: bool = False
     adaptive: bool = True             # 적응형 선택자 활성화
     extra: dict = field(default_factory=dict)  # 버전별 추가 인자 통과용
 
@@ -130,14 +131,20 @@ def fetch(url: str, opts: FetchOptions | None = None):
         kwargs["wait_selector"] = opts.wait_selector
     if opts.disable_resources:
         kwargs["disable_resources"] = True
-    if opts.block_images:
-        kwargs["block_images"] = True
     kwargs.update(opts.extra)
     return _call(cls.fetch, url, kwargs)
 
 
-def with_retry(fn: Callable, *, tries: int = 3, base_delay: float = 2.0, what: str = "요청"):
-    """네트워크·차단 실패에 대비한 지수 백오프 재시도."""
+class FetchBlocked(RuntimeError):
+    """재시도를 모두 소진했을 때 올리는, 사람이 읽을 수 있는 실패."""
+
+
+def with_retry(fn: Callable, *, tries: int = 2, base_delay: float = 2.0, what: str = "요청"):
+    """네트워크·차단 실패에 대비한 지수 백오프 재시도.
+
+    주의: Scrapling 페처는 내부적으로도 3회 재시도한다. 여기서 tries를 크게 잡으면
+    (내부 3회 × 외부 tries) 만큼 곱해져 차단된 사이트에서 매우 느려진다 → 기본 2.
+    """
     last: Exception | None = None
     for i in range(1, tries + 1):
         try:
@@ -150,29 +157,40 @@ def with_retry(fn: Callable, *, tries: int = 3, base_delay: float = 2.0, what: s
             if i < tries:
                 time.sleep(base_delay * (2 ** (i - 1)) + random.uniform(0, 1))
     assert last is not None
-    raise last
+    raise FetchBlocked(f"{what}: {tries}회 시도 모두 실패 — {type(last).__name__}: {last}") from last
 
 
 # --------------------------------------------------------------------------- #
 # 적응형 선택자 헬퍼
 # --------------------------------------------------------------------------- #
+def _adaptive_enabled(page) -> bool:
+    """이 페이지에서 Scrapling 적응형 기능이 실제로 켜져 있는지 확인.
+
+    켜져 있지 않은데 auto_save/adaptive 인자를 넘기면 Scrapling이 인자를 무시하며
+    선택자마다 WARNING을 찍는다 → 미리 확인해 불필요한 호출과 로그 소음을 없앤다.
+    """
+    return bool(getattr(page, "_Selector__adaptive_enabled", False))
+
+
 def _sel(page, selector: str, adaptive: bool = True):
     """selector로 요소를 찾는다. 비면 adaptive 재배치를 시도하고, 최종적으로 평범한 css로 폴백."""
-    if adaptive:
-        # 1) 정상 경로 — 첫 성공 시 선택자 지문을 저장(auto_save)
-        try:
-            res = page.css(selector, auto_save=True)
-            if res:
-                return res
-        except Exception:  # noqa: BLE001 - 저장소 미설정 등
-            pass
-        # 2) 레이아웃이 바뀐 경우 — 저장된 지문으로 재배치
-        try:
-            res = page.css(selector, adaptive=True)
-            if res:
-                return res
-        except Exception:  # noqa: BLE001
-            pass
+    if not (adaptive and _adaptive_enabled(page)):
+        return page.css(selector)  # 적응형 미지원 → 평범한 css 한 번만
+
+    # 1) 정상 경로 — 첫 성공 시 선택자 지문을 저장(auto_save)
+    try:
+        res = page.css(selector, auto_save=True)
+        if res:
+            return res
+    except Exception:  # noqa: BLE001 - 저장소 미설정 등
+        pass
+    # 2) 레이아웃이 바뀐 경우 — 저장된 지문으로 재배치
+    try:
+        res = page.css(selector, adaptive=True)
+        if res:
+            return res
+    except Exception:  # noqa: BLE001
+        pass
     # 3) 평범한 css (항상 동작)
     return page.css(selector)
 

@@ -153,8 +153,50 @@ def test_naver_json() -> None:
     check(b.get("url") == "https://cr.shopping.naver.com/9002", "crUrl 대체 URL")
 
 
+def test_naver_regex_fallback() -> None:
+    """__NEXT_DATA__ script 태그가 없고 인라인 JS에만 상태가 있는 경우.
+
+    회귀 방지: 예전엔 get_all_text()로 HTML을 읽으려 해서(스크립트 내용이 비어 있음)
+    이 폴백 경로가 항상 실패했다. html_content를 써야 한다.
+    """
+    print("[네이버 정규식 폴백]")
+    html = (
+        "<html><body><script>window.__NEXT_DATA__ = "
+        '{"a":{"productName":"폴백 상품","price":12345,"mallName":"몰A",'
+        '"imageUrl":"https://i/x.jpg"}};</script></body></html>'
+    )
+    page = Selector(html)
+    check(page.css("script#__NEXT_DATA__::text").get() is None, "script#__NEXT_DATA__ 태그는 없음")
+    rows = naver_shopping.extract_from_json(page)
+    check(len(rows) == 1, f"인라인 JS에서 1건 추출 (실제 {len(rows)})")
+    check(rows and rows[0]["name"] == "폴백 상품", "폴백으로 상품명 추출")
+    check(rows and rows[0]["price"] == 12345, "폴백으로 가격 추출")
+
+
+def test_sel_no_adaptive() -> None:
+    """적응형이 꺼진 페이지에서 _sel이 경고 없이 한 번만 조회하는지."""
+    print("[_sel 적응형 감지]")
+    from crawler import common
+
+    page = Selector(COUPANG_HTML)
+    check(common._adaptive_enabled(page) is False, "plain Selector → 적응형 꺼짐 감지")
+    got = common._sel(page, "ul#productList li.search-product", adaptive=True)
+    check(len(got) == 2, "적응형 꺼져 있어도 정상 조회")
+
+    page_a = Selector(COUPANG_HTML, adaptive=True)
+    check(common._adaptive_enabled(page_a) is True, "adaptive=True → 적응형 켜짐 감지")
+    check(len(common._sel(page_a, "ul#productList li.search-product", True)) == 2, "적응형 경로 조회")
+
+
 def main() -> int:
-    for t in (test_to_int, test_coupang_search, test_coupang_detail, test_naver_json):
+    for t in (
+        test_to_int,
+        test_coupang_search,
+        test_coupang_detail,
+        test_naver_json,
+        test_naver_regex_fallback,
+        test_sel_no_adaptive,
+    ):
         t()
     print(f"\n결과: {_checks - _fails}/{_checks} 통과", "✅" if _fails == 0 else f"❌ {_fails} 실패")
     return 1 if _fails else 0

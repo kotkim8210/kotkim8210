@@ -21,7 +21,18 @@ import json
 import sys
 
 from crawler import common, coupang, naver_shopping
-from crawler.common import FetchOptions
+from crawler.common import FetchBlocked, FetchOptions
+
+BLOCK_HELP = """
+❌ 페이지를 가져오지 못했습니다.
+
+흔한 원인과 대처:
+  1) 사이트의 봇 차단      → --no-headless 로 실행해 화면을 확인하고, 주거용 프록시(--proxy)를 쓰세요.
+                             (쿠팡은 데이터센터 IP를 403으로, 네이버는 418로 막습니다)
+  2) 네트워크/프록시 환경  → 방화벽·프록시가 헤드리스 브라우저의 HTTPS를 막는지 확인하세요.
+  3) 브라우저 미설치       → pip install "scrapling[fetchers]" && scrapling install
+  4) 너무 잦은 요청        → 잠시 후 재시도하고, --no-delay 는 쓰지 마세요.
+"""
 
 
 def _add_common_args(p: argparse.ArgumentParser) -> None:
@@ -37,7 +48,8 @@ def _add_common_args(p: argparse.ArgumentParser) -> None:
     p.add_argument("--proxy", help="프록시 URL (예: http://user:pass@host:port)")
     p.add_argument("--timeout", type=int, default=30, help="타임아웃(초, 기본 30)")
     p.add_argument("--wait", type=int, default=0, help="로드 후 추가 대기(ms)")
-    p.add_argument("--fast", action="store_true", help="이미지·불필요 리소스 차단(속도↑)")
+    p.add_argument("--fast", action="store_true",
+                   help="불필요 리소스(이미지·폰트·미디어 등) 차단으로 속도↑")
     p.add_argument("--no-delay", action="store_true", help="페이지 간 예의 지연 끄기")
     p.add_argument("-v", "--verbose", action="store_true", help="디버그 로그")
 
@@ -52,7 +64,6 @@ def _opts_from_args(a: argparse.Namespace) -> FetchOptions:
         timeout=a.timeout * 1000,
         wait=a.wait,
         disable_resources=a.fast,
-        block_images=a.fast,
     )
 
 
@@ -62,7 +73,16 @@ def _output(rows, args) -> None:
         print(f"✅ {len(rows)}건 저장 → {path}", file=sys.stderr)
     else:
         print(json.dumps(rows, ensure_ascii=False, indent=2))
-    print(f"총 {len(rows)}건", file=sys.stderr)
+        print(f"총 {len(rows)}건", file=sys.stderr)
+
+    if not rows:
+        # 요청은 성공했는데 0건 → 대개 선택자가 깨졌거나 차단 페이지를 받은 경우다.
+        print(
+            "\n⚠️  0건입니다. 페이지는 받았지만 상품을 찾지 못했습니다.\n"
+            "   · 차단 페이지를 받았을 수 있습니다 → --no-headless 로 화면을 확인해 보세요.\n"
+            "   · 사이트 구조가 바뀌었을 수 있습니다 → config/selectors.json 에서 선택자를 교정하세요.",
+            file=sys.stderr,
+        )
 
 
 def main(argv=None) -> int:
@@ -86,22 +106,31 @@ def main(argv=None) -> int:
     opts = _opts_from_args(args)
     delay = not args.no_delay
 
-    if args.site == "coupang":
-        if getattr(args, "product_id", None):
-            _output([coupang.product(args.product_id, opts)], args)
+    try:
+        if args.site == "coupang":
+            if getattr(args, "product_id", None):
+                _output([coupang.product(args.product_id, opts)], args)
+                return 0
+            if not args.query:
+                pc.error("검색어(--query) 또는 --product-id 중 하나가 필요합니다.")
+            rows = coupang.search(args.query, args.pages, opts, args.limit, delay)
+            _output(rows, args)
             return 0
-        if not args.query:
-            pc.error("검색어(--query) 또는 --product-id 중 하나가 필요합니다.")
-        rows = coupang.search(args.query, args.pages, opts, args.limit, delay)
-        _output(rows, args)
-        return 0
 
-    if args.site == "naver":
-        if not args.query:
-            pn.error("검색어(--query)가 필요합니다.")
-        rows = naver_shopping.search(args.query, args.pages, opts, args.limit, delay)
-        _output(rows, args)
-        return 0
+        if args.site == "naver":
+            if not args.query:
+                pn.error("검색어(--query)가 필요합니다.")
+            rows = naver_shopping.search(args.query, args.pages, opts, args.limit, delay)
+            _output(rows, args)
+            return 0
+    except FetchBlocked as exc:
+        # 재시도를 모두 소진한 경우 — 트레이스백 대신 원인과 대처를 보여준다.
+        print(f"\n{exc}", file=sys.stderr)
+        print(BLOCK_HELP, file=sys.stderr)
+        return 2
+    except KeyboardInterrupt:
+        print("\n중단했습니다.", file=sys.stderr)
+        return 130
 
     return 1
 
