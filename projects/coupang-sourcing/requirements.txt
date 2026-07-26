@@ -1,0 +1,10 @@
+# 쿠팡 자동 소싱기
+#
+# 마진계산기(margin)만 쓰면 설치 불필요 — 표준 라이브러리만 사용.
+# 경쟁강도 크롤링(eval/xhs)에는 자매 프로젝트의 크롤러가 필요:
+#   pip install "scrapling[fetchers]>=0.4" && scrapling install
+#
+# 검색량(네이버 검색광고 API)은 표준 라이브러리(urllib)로 호출하므로 추가 설치 없음.
+# 키만 환경변수로: NAVER_AD_API_KEY / NAVER_AD_SECRET_KEY / NAVER_AD_CUSTOMER_ID
+
+scrapling[fetchers]>=0.4

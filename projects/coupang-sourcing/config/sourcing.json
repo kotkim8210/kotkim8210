@@ -1,0 +1,18 @@
+{
+  "_설명": "소싱 스코어 가중치·마진 안전선·기본 비용 가정. 가중치 합은 1이 되도록.",
+  "margin_floor": 0.10,
+  "weights": {
+    "demand": 0.30,
+    "entry": 0.30,
+    "low_ad": 0.15,
+    "delivery": 0.10,
+    "margin": 0.15
+  },
+  "defaults": {
+    "outbound_shipping": 3000,
+    "packaging": 200,
+    "return_rate": 0.02,
+    "vat_mode": "none"
+  },
+  "_비용주의": "outbound_shipping은 '무료배송'이라도 셀러가 실제 부담하는 택배비다(소형 통상 2,500~3,500). 0으로 두면 마진이 과대평가되니, 배송비를 판매가에 녹였더라도 이 값은 실제 택배원가로 유지할 것."
+}

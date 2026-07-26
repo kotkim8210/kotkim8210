@@ -1,0 +1,7 @@
+out/
+__pycache__/
+*.pyc
+.scrapling/
+# 개인 API 키·비공개 소싱 데이터는 커밋 금지
+.env
+config/xhs_manual.local.json
