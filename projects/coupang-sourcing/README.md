@@ -176,10 +176,33 @@ python tests/test_pipeline.py   # 경쟁강도·기회점수·파이프라인 �
 - **라이브 크롤링 미검증(이 저장소 기준)**: 개발 샌드박스 프록시가 스텔스 브라우저를 차단해, 실제 쿠팡 수집은 사용자 PC에서 검증해야 합니다(`coupang-naver-crawler` README 참고). 마진·점수 로직은 오프라인 테스트로 검증됨.
 - **KC/법적 판단은 참고용**: §0은 공식 자료 요약이며, 최종 인증 여부는 품목별로 국가기술표준원·안전인증기관에 확인하세요.
 
+## 8. 엑셀 마진계산기 V4 (일반사업자) — `excel/`
+
+사용자의 **마진계산기 V3.0(법인 기준)** 을 이어받아 **개인 일반사업자 기준**으로 고치고, 소싱 판정을 붙인 워크북입니다. 자세한 내용은 [`excel/README.md`](excel/README.md).
+
+| V3 (법인) | → V4 (일반사업자) |
+|---|---|
+| 소득세 `1차합계×16%` 고정 | **종합소득세 누진 + 지방소득세** 자동 (연 과세표준 → 세율표) |
+| 부가세 `마진×10%` 근사 | **매출세액 − 매입세액** 정밀 (+간이과세 옵션, 수입 매입세액 공제) |
+| 환율 `=원가×300` 셀마다 하드코딩 | **가정 시트 1칸**으로 분리 |
+| 적자에도 세금이 음수 | `MAX(0, 이익)` 으로 수정 |
+| 소싱 판정 없음 | **경쟁사가·리뷰·검색량·광고침투율 → 기회점수·GO/검토/SKIP** |
+
+```bash
+python excel/build_calculator.py                       # 워크북 재생성
+python excel/fill_sourcing.py excel/마진계산기_V4_일반사업자.xlsx --rows 8-30   # 연두칸 자동 채움
+```
+
+---
+
 ## 구조
 ```
 coupang-sourcing/
-├── source.py                  # CLI (margin / eval / xhs)
+├── source.py                  # CLI (margin / import / eval / xhs)
+├── excel/                     # 마진계산기 V4 워크북 + 생성기 + 자동채움
+│   ├── build_calculator.py
+│   ├── fill_sourcing.py
+│   └── 마진계산기_V4_일반사업자.xlsx
 ├── config/
 │   ├── coupang_fees.json       # 카테고리별 수수료(교정 가능)
 │   ├── sourcing.json           # 점수 가중치·마진 안전선·비용 가정

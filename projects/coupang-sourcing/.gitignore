@@ -5,3 +5,11 @@ __pycache__/
 # 개인 API 키·비공개 소싱 데이터는 커밋 금지
 .env
 config/xhs_manual.local.json
+
+# ⚠️ 이 저장소는 공개(public)입니다.
+# 아래 파일들에는 상품 원가(위안)·1688 공급처 URL·판매가 등 영업비밀이 들어갑니다.
+# 커밋하면 소싱 리스트가 그대로 공개되므로 제외합니다.
+excel/products.json
+excel/*.xlsx
+# 빈 템플릿(실데이터 없음)만 예외적으로 커밋
+!excel/calc_v4_template.xlsx
