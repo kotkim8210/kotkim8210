@@ -13,6 +13,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from sourcing.margin import (  # noqa: E402
     BundleSourcing,
     CoupangCost,
+    ImportSourcing,
+    ad_cost_from_cpc,
+    ad_cost_from_roas,
     breakeven_price,
     compute,
     verdict,
@@ -102,8 +105,72 @@ def test_free_vs_paid_shipping():
           (round(free["순마진"]), round(paid["순마진"])))
 
 
+def test_import_cost_breakdown():
+    print("[1688 직수입 원가 분해]")
+    # 개당 8 CNY × 500개, 환율 195, 내륙 200 CNY, 국제운임 40만원, 관세 8%, 통관 3만
+    imp = ImportSourcing(
+        unit_price_cny=8, qty=500, fx_rate=195, china_domestic_cny=200,
+        intl_shipping=400000, duty_rate=0.08, customs_fee=30000, vat_deductible=True,
+    )
+    # 물품가 = (8×500 + 200) × 195 = 4200 × 195 = 819,000
+    check(approx(imp.goods_krw, 819000), "물품가 819,000원", imp.goods_krw)
+    # CIF = 819,000 + 400,000 = 1,219,000
+    check(approx(imp.cif, 1219000), "CIF 1,219,000원", imp.cif)
+    # 관세 = CIF × 8% = 97,520
+    check(approx(imp.duty, 97520), "관세 97,520원", imp.duty)
+    # 수입부가세 = (CIF+관세) × 10% = 131,652
+    check(approx(imp.import_vat, 131652), "수입부가세 131,652원", imp.import_vat)
+    # 랜디드총액 = CIF + 관세 + 통관 = 1,346,520 (부가세는 공제되어 제외)
+    check(approx(imp.landed_total, 1346520), "랜디드총액 1,346,520원(부가세 제외)", imp.landed_total)
+    check(approx(imp.landed_unit_cost, 2693.04, 1), "개당 랜디드 2,693원", imp.landed_unit_cost)
+    check(approx(imp.vat_credit_per_unit, 263.3, 1), "개당 공제 매입세액 263원", imp.vat_credit_per_unit)
+
+    # 간이/면세 사업자면 수입부가세가 원가에 포함되어 더 비싸진다
+    imp2 = ImportSourcing(unit_price_cny=8, qty=500, fx_rate=195, china_domestic_cny=200,
+                          intl_shipping=400000, duty_rate=0.08, customs_fee=30000, vat_deductible=False)
+    check(imp2.landed_unit_cost > imp.landed_unit_cost, "공제불가면 개당 원가 상승",
+          (round(imp2.landed_unit_cost), round(imp.landed_unit_cost)))
+    check(imp2.vat_credit_per_unit == 0, "공제불가면 매입세액 0")
+
+
+def test_vat_modes():
+    print("[부가세 모드별 차이]")
+    src = BundleSourcing(bundle_price=9000, bundle_qty=5, inbound_shipping=3000)
+    base = dict(commission_rate=0.108, outbound_shipping=3000, packaging=200, return_rate=0.02)
+    none_r = compute(9900, src, CoupangCost(**base, vat_mode="none"))
+    simp_r = compute(9900, src, CoupangCost(**base, vat_mode="simplified"))
+    norm_r = compute(9900, src, CoupangCost(**base, vat_mode="normal"))
+    check(none_r["순마진"] > simp_r["순마진"], "부가세 미반영이 가장 낙관적",
+          (round(none_r["순마진"]), round(simp_r["순마진"])))
+    check(norm_r["순마진"] < none_r["순마진"], "일반과세는 순마진을 깎는다",
+          (round(norm_r["순마진"]), round(none_r["순마진"])))
+    # 일반과세 부가세 = 매출/11 − (매입세액 + (택배+포장)/11)
+    expect = 9900 / 11 - (src.vat_credit_per_unit + (3000 + 200) / 11)
+    check(approx(norm_r["비용상세"]["부가세"], expect, 1), "일반과세 부가세 = 매출세액-매입세액",
+          round(norm_r["비용상세"]["부가세"]))
+
+
+def test_ad_cost_models():
+    print("[광고비 모델]")
+    # CPC 300원, 전환율 3% → 판매 1건당 광고비 10,000원
+    check(approx(ad_cost_from_cpc(300, 0.03), 10000), "CPC300·전환3% → 10,000원/건",
+          ad_cost_from_cpc(300, 0.03))
+    # 전환율 1%면 3만원 — 마진을 통째로 먹음
+    check(approx(ad_cost_from_cpc(300, 0.01), 30000), "전환1% → 30,000원/건")
+    # 목표 ROAS 500% → 판매가의 20%
+    check(approx(ad_cost_from_roas(20000, 5), 4000), "ROAS500%·2만원 → 4,000원")
+
+    # 광고비를 넣으면 마진이 실제로 깎이는지
+    src = BundleSourcing(bundle_price=9000, bundle_qty=5, inbound_shipping=3000)
+    no_ad = compute(9900, src, CoupangCost(commission_rate=0.108, outbound_shipping=3000, ad_cost_per_unit=0))
+    with_ad = compute(9900, src, CoupangCost(commission_rate=0.108, outbound_shipping=3000, ad_cost_per_unit=2000))
+    check(approx(no_ad["순마진"] - with_ad["순마진"], 2000), "광고비 2,000원만큼 순마진 감소",
+          round(no_ad["순마진"] - with_ad["순마진"]))
+
+
 def main() -> int:
-    for t in (test_bundle_math, test_seamless_panty_single_sale, test_breakeven, test_free_vs_paid_shipping):
+    for t in (test_bundle_math, test_seamless_panty_single_sale, test_breakeven, test_free_vs_paid_shipping,
+              test_import_cost_breakdown, test_vat_modes, test_ad_cost_models):
         t()
     print(f"\n결과: {_checks - _fails}/{_checks} 통과", "✅" if _fails == 0 else f"❌ {_fails} 실패")
     return 1 if _fails else 0
