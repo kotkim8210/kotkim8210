@@ -86,10 +86,15 @@ def main() -> int:
                     if sheets[sheet][f"{col}{rownum}"].value is None:
                         rg_dangling.append(f"G{r}→{sheet}!{col}{rownum}")
         check(not rg_dangling, "요금표 물류비 수식의 가정 참조 유효", rg_dangling)
-        check(rg["B4"].value == "Large Size 1" and rg["B6"].value == "Extra Large Size",
-              "요금표 3개 사이즈 유형 존재", rg["B4"].value)
-        check(rg["D4"].value == 1375 and rg["E4"].value == 2200,
-              "공식 고지값(입출고비 1,375 / 배송비 2,200) 반영", (rg["D4"].value, rg["E4"].value))
+        check(rg["B4"].value == "극소형" and rg["B5"].value == "소형",
+              "요금표에 실측 사이즈(극소형·소형) 존재", (rg["B4"].value, rg["B5"].value))
+        check(rg["D4"].value == 1000 and rg["E4"].value == 1551,
+              "CFS 실측 단가(입출고 1,000 / 배송 1,551) 반영", (rg["D4"].value, rg["E4"].value))
+        # 판매가별 통합요율 표가 실제로 만들어졌는지(저가 상품 경고의 근거)
+        found = any(isinstance(rg.cell(row=rr, column=2).value, str)
+                    and "판매가별 통합 부담률" in rg.cell(row=rr, column=2).value
+                    for rr in range(1, rg.max_row + 1))
+        check(found, "판매가별 통합 부담률 표 존재(저가 상품 위험 표시)")
 
     # ── 2) 금지 함수 ────────────────────────────────────────────────────
     print("[2] LibreOffice 비호환 함수")

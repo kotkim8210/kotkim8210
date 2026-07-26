@@ -174,6 +174,12 @@ def build_assumptions(ws) -> dict:
     item("stockDays", "예상 재고 보관일수", 45,
          "쿠팡 센터 보관 예상일. 무료보관(30일, 의류·신발·악세 45일) 초과분에 보관료 부과", NUM)
     item("freeStockDays", "무료 보관일수", 30, "카테고리에 따라 30일 또는 45일", NUM)
+    item("rgLogiUnit", "개당 물류비(실측)", 2551,
+         "★실측: 극소형 입출고 1,000 + 배송 1,551 = 2,551원(할인 후). 소형은 3,133원. "
+         "정액이므로 판매가가 낮을수록 부담률이 급등합니다", NUM)
+    item("rgMinPrice", "로켓그로스 최소 권장가", 15000,
+         "★실측 근거: 이 아래면 물류비 비중이 17%를 넘어 통합 부담률이 30%를 초과합니다. "
+         "저가 상품은 묶음 구성으로 객단가를 올리거나 마켓플레이스로 전환하세요", NUM)
     item("rgPromo", "신규 프로모션 적용중", "N",
          "Y면 입출고비·배송비 0원(첫 판매 개시 후 90일간, 최대 90일 또는 누적매출 2억까지). "
          "프로모션 중이면 K열 통합요율을 판매수수료만(약 11%)으로 낮추세요")
@@ -281,12 +287,12 @@ def build_tax_table(ws):
 # =========================================================================== #
 # 2-b) 로켓그로스 요금표 시트
 # =========================================================================== #
-# 쿠팡 공식 '로켓그로스 비용 구성' 페이지 실제 고지값 (사용자 제공 캡처 기준)
+# ★CFS 입출고비·배송비 정산내역 10개 파일(27,318개 판매) 실측 — 할인 적용 후 실제 청구액
 RG_TIERS = [
-    # (사이즈 유형, 예시, 입출고비, 배송비)
-    ("Large Size 1", "전자레인지 크기", 1375, 2200),
-    ("Large Size 2", "의자 크기", 1375, 4100),
-    ("Extra Large Size", "서랍장 크기", 1375, 5600),
+    # (사이즈, 근거, 입출고비, 배송비)
+    ("극소형", "실측 25,031개 (전체의 92%)", 1000, 1551),
+    ("소형", "실측 2,291개", 1149, 1984),
+    ("(참고)공식고지", "할인 전 정가 — Large Size 1", 1375, 2200),
 ]
 
 
@@ -297,12 +303,12 @@ def build_rg_table(ws, ref: dict):
         ws.column_dimensions[col].width = w
 
     ws.merge_cells("B2:G2")
-    ws["B2"] = "로켓그로스 비용 구성 — 쿠팡 공식 고지값"
+    ws["B2"] = "로켓그로스 물류비 — CFS 정산 27,318개 실측 (할인 적용 후)"
     ws["B2"].font = F_TITLE
     ws["B2"].fill = FILL_TITLE
     ws["B2"].alignment = Alignment(horizontal="center", vertical="center")
 
-    for i, h in enumerate(["사이즈 유형", "예시", "입출고비", "배송비", "프로모션 적용", "실적용 물류비"], start=2):
+    for i, h in enumerate(["사이즈", "근거", "입출고비", "배송비", "프로모션 적용", "개당 물류비"], start=2):
         c = ws.cell(row=3, column=i, value=h)
         c.font = F_HEAD
         c.fill = FILL_HEAD
@@ -346,21 +352,60 @@ def build_rg_table(ws, ref: dict):
             c.font = F_BODY if j == 0 else F_NOTE
             c.border = BORDER
 
+    # ★ 핵심: 물류비는 정액이라 판매가가 낮을수록 부담률이 폭증 → 판매가별 통합요율 표
     n2 = n + 1 + len(etc) + 1
+    ws.cell(row=n2, column=2,
+            value="★ 판매가별 통합 부담률 (판매수수료 10.86% + 물류비 정액 2,551원)").font = \
+        Font(name=FONT, size=10, bold=True)
+    n2 += 1
+    for i, h in enumerate(["판매가", "물류비", "물류비 비중", "수수료", "통합 부담률", "30% 가정 대비"], start=2):
+        c = ws.cell(row=n2, column=i, value=h)
+        c.font = F_HEAD
+        c.fill = FILL_HEAD
+        c.border = BORDER
+    for i, price in enumerate([5000, 8000, 10000, 12000, 15000, 20000, 30000, 50000]):
+        r = n2 + 1 + i
+        ws.cell(row=r, column=2, value=price).number_format = NUM
+        ws.cell(row=r, column=3, value="=$D$4+$E$4").number_format = NUM      # 극소형 실측
+        ws.cell(row=r, column=4, value=f"=C{r}/B{r}").number_format = PCT
+        ws.cell(row=r, column=5, value=f'=가정!{ref["feeDefault"]}*1.1').number_format = PCT
+        ws.cell(row=r, column=6, value=f"=D{r}+E{r}").number_format = PCT
+        ws.cell(row=r, column=7, value=f'=F{r}-가정!{ref["rgAllIn"]}').number_format = PCT
+        for c in range(2, 8):
+            ws.cell(row=r, column=c).border = BORDER
+            ws.cell(row=r, column=c).font = F_BODY
+    ws.conditional_formatting.add(
+        f"G{n2+1}:G{n2+8}",
+        CellIsRule(operator="greaterThan", formula=["0.03"],
+                   font=Font(name=FONT, size=9, color="9C0006", bold=True),
+                   fill=PatternFill("solid", fgColor="FFC7CE")))
+
+    n3 = n2 + 10
     notes = [
-        "※ 판매수수료는 '판매자배송과 동일'(카테고리별). 위 입출고비·배송비는 판매된 상품에만 부과됩니다.",
-        "※ 프로모션: 첫 판매 개시 후 90일간 로켓그로스 시작비용 0원 — 최대 90일 또는 누적매출 2억원 달성 시까지.",
-        "※ 로켓그로스 세이버: 90일 이후에도 270일간 0원 프로모션(보관 60일 미경과 상품 대상).",
-        "※ 프로모션 신청기간 2026.07.01~07.31 · 대상: 기간 내 판매 개시한 로켓그로스 신규 판매자.",
-        "※ 부가서비스: 반출 배송 90일 무료(최대 10만원), 바코드 부착·오류수정은 별도.",
-        "※ 카테고리·사이즈유형·판매가에 따라 최종 비용이 결정되므로, wing의 '입출고/배송 비용 확인하기'로 상품별 실요율을 확인하세요.",
-        "",
-        "▶ 검산: 판매가 20,000원 · Large Size 1 기준",
-        "   판매수수료 10.86%(2,172) + 입출고비 1,375 + 배송비 2,200 = 5,747원 = 판매가의 28.7%",
-        "   → 소싱현황 K열의 통합요율 30% 가정이 실제와 부합합니다(프로모션 종료 후 기준).",
+        ("★ 30% 고정 가정의 한계 — 실측으로 드러난 것", True),
+        ("  물류비는 개당 정액(극소형 2,551원)이라 판매가가 낮을수록 부담률이 폭증합니다.", False),
+        ("  실측 상품별 통합 부담률:", False),
+        ("     브라끈 4,990원      → 61.6%  (30% 가정 대비 +31.6%p)  ⚠️ 심각한 과소평가", False),
+        ("     이불보관함 8,600원   → 49.8%  (+19.8%p)  ⚠️", False),
+        ("     압축파우치 10,520원  → 35.4%  (+5.4%p)   ⚠️", False),
+        ("     꼬마정원등 14,300원  → 28.7%  (−1.3%p)   ✅ 30% 가정이 맞는 구간", False),
+        ("     계단등 16,700원     → 25.3%  (−4.7%p)   💰 여유", False),
+        ("     문주등 56,000원     → 14.2%  (−15.8%p)  💰 매우 여유", False),
+        ("", False),
+        ("▶ 결론: 로켓그로스는 판매가 1.5만원 이상에서 유리합니다.", True),
+        ("   1만원 이하 저가 상품은 물류비만 판매가의 25~50%를 먹어 마진이 남지 않습니다.", False),
+        ("   저가 상품은 ①묶음 구성으로 객단가를 올리거나 ②마켓플레이스(셀러배송)로 전환하세요.", False),
+        ("", False),
+        ("그 외", True),
+        ("  · 위 입출고비·배송비는 할인 적용 후 실제 청구액입니다(정가 대비 입출고 −39%, 배송 −12%).", False),
+        ("  · 판매수수료는 '판매자배송과 동일'(카테고리별). 판매된 상품에만 부과됩니다.", False),
+        ("  · 프로모션: 첫 판매 개시 후 90일간 입출고비·배송비 0원(최대 90일 또는 누적매출 2억까지).", False),
+        ("  · 로켓세이버: 90일 이후에도 270일간 0원(보관 60일 미경과 상품). 반품 회수·재입고 무제한 무료.", False),
+        ("  · 상품별 실요율은 wing의 '입출고/배송 비용 확인하기'에서 확인하세요.", False),
     ]
-    for i, t in enumerate(notes):
-        ws.cell(row=n2 + i, column=2, value=t).font = F_NOTE
+    for i, (t, bold) in enumerate(notes):
+        c = ws.cell(row=n3 + i, column=2, value=t)
+        c.font = Font(name=FONT, size=9, bold=True) if bold else F_NOTE
 
 
 # =========================================================================== #
