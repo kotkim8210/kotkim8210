@@ -3,9 +3,9 @@ title: 진행 중인 프로젝트 색인 (브랜치별 산출물 지도)
 slug: my-projects
 tags: [프로젝트, 색인, 사업, 콘텐츠, 브랜치]
 created: 2026-06-13
-updated: 2026-06-13
+updated: 2026-07-26
 sources: [2026-06-13-branch-inventory.md]
-related: [[video-skills]], [[claude-code-skills]], [[session-independence]]
+related: [[video-skills]], [[claude-code-skills]], [[session-independence]], [[web-scraping-scrapling]]
 confidence: high
 status: active
 ---
@@ -38,6 +38,7 @@ status: active
 - [[video-skills]] — youtube-shorts·osmu 스킬이 콘텐츠 프로젝트(인스타·유튜브) 운영을 뒷받침.
 - [[session-independence]] — 이 색인 자체가 "세션이 흩어져도 하나의 뇌에서 전체를 본다"는 원칙의 실현.
 - [[claude-code-skills]] — 프로젝트마다 `.claude/` 설정이 달라 스킬 스코프 규칙의 영향을 받음.
+- [[web-scraping-scrapling]] — `projects/coupang-naver-crawler/` 신규 산출물. 홍보처 크롤러·쿠팡파트너스와 같은 수집·커머스 축.
 
 ## 미해결/모순 (Open Questions)
 - [ ] 각 프로젝트를 독립 레포로 분리할지, 이 레포 서브폴더로 유지할지 결정.

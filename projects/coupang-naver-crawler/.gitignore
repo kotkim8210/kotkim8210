@@ -1,0 +1,6 @@
+# 크롤링 결과물 · 파이썬 캐시
+out/
+*.json.tmp
+__pycache__/
+*.pyc
+.scrapling/

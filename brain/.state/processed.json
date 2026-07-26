@@ -41,6 +41,13 @@
         "video-skills",
         "my-projects"
       ]
+    },
+    {
+      "file": "brain/inbox/2026-07-26-scrapling-web-scraping.md",
+      "ingested_at": "2026-07-26T09:30Z",
+      "topics": [
+        "web-scraping-scrapling"
+      ]
     }
   ]
 }

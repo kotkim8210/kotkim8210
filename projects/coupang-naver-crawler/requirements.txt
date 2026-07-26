@@ -1,0 +1,9 @@
+# 쿠팡·네이버쇼핑 크롤러 의존성
+#
+# 파서만 필요하면(오프라인 테스트 등):  pip install scrapling
+# 실제 크롤링(반봇 우회 포함)에는 fetchers extra + 브라우저 설치가 필요하다:
+#
+#   pip install "scrapling[fetchers]>=0.4"
+#   scrapling install     # camoufox/chromium 등 스텔스 브라우저 내려받기
+#
+scrapling[fetchers]>=0.4
