@@ -153,7 +153,19 @@ def build_assumptions(ws) -> dict:
     item("goScore", "GO 기준 점수", 65, "이 이상이면 GO", SCORE)
     item("holdScore", "검토 기준 점수", 45, "이 이상이면 검토, 미만이면 SKIP", SCORE)
 
-    section("⑥ 목표")
+    section("⑥ 로켓그로스 (판매방식)")
+    item("channel", "기본 판매방식", "로켓그로스",
+         "로켓그로스 / 마켓플레이스. 행별로 다르면 소싱현황 AJ열에서 덮어쓰기")
+    item("rgAllIn", "로켓그로스 통합요율(K열)", 0.30,
+         "판매수수료+입출고+배송+보관을 뭉뚱그린 실부담률. 검산: 수수료10.8%+출고2,500+입고500+보관300 ≈ 28.6%")
+    item("stockDays", "예상 재고 보관일수", 45,
+         "쿠팡 센터 보관 예상일. 무료보관(30일, 의류·신발·악세 45일) 초과분에 보관료 부과", NUM)
+    item("freeStockDays", "무료 보관일수", 30, "카테고리에 따라 30일 또는 45일", NUM)
+    item("saver", "로켓그로스 세이버 구독", "N",
+         "Y면 월 99,000원으로 반품비·보관료 방어. 월 반품 20건↑ 또는 재고회전 30일↑이면 유리")
+    item("saverFee", "세이버 월 구독료", 99000, "구독 시 월 고정비(판매수량으로 분산 판단)", NUM)
+
+    section("⑦ 목표")
     item("monthTarget", "월 목표 이익(원)", 500000, "원본 V3의 '월 목표금액' 계승", NUM)
 
     # 자동 계산 셀 채우기
@@ -239,6 +251,69 @@ def build_tax_table(ws):
 
 
 # =========================================================================== #
+# 2-b) 로켓그로스 요금표 시트
+# =========================================================================== #
+RG_TIERS = [
+    # (단계, 기준, 입고비, 출고비, 보관료/일)
+    ("초소형", "20cm 이하 · 500g 미만", 100, 600, 10),
+    ("소형", "30cm 이하 · 1kg 미만", 200, 1000, 15),
+    ("중형", "50cm 이하 · 3kg 미만", 300, 1600, 20),
+    ("대형", "60cm 이하 · 5kg 미만", 500, 2200, 30),
+    ("특대형", "80cm 이하 · 10kg 미만", 650, 2800, 40),
+    ("초대형", "80cm 초과 또는 10kg 이상", 800, 3500, 50),
+]
+
+
+def build_rg_table(ws, ref: dict):
+    ws.title = "로켓그로스요금표"
+    ws.sheet_view.showGridLines = False
+    for col, w in zip("ABCDEFG", [3, 12, 30, 12, 12, 14, 16]):
+        ws.column_dimensions[col].width = w
+
+    ws.merge_cells("B2:G2")
+    ws["B2"] = "로켓그로스 입출고·보관 요금 (2025.1.6 개편 — 사이즈+무게 6단계)"
+    ws["B2"].font = F_TITLE
+    ws["B2"].fill = FILL_TITLE
+    ws["B2"].alignment = Alignment(horizontal="center", vertical="center")
+
+    for i, h in enumerate(["사이즈 단계", "기준", "입고비", "출고비", "보관료(일)", "물류비 합계"], start=2):
+        c = ws.cell(row=3, column=i, value=h)
+        c.font = F_HEAD
+        c.fill = FILL_HEAD
+        c.border = BORDER
+        c.alignment = Alignment(horizontal="center")
+
+    for i, (tier, basis, inb, outb, stor) in enumerate(RG_TIERS):
+        r = 4 + i
+        ws.cell(row=r, column=2, value=tier)
+        ws.cell(row=r, column=3, value=basis).font = F_NOTE
+        ws.cell(row=r, column=4, value=inb).number_format = NUM
+        ws.cell(row=r, column=5, value=outb).number_format = NUM
+        ws.cell(row=r, column=6, value=stor).number_format = NUM
+        # 물류비 합계 = 입고비 + 출고비 + 보관료×(예상재고일 − 무료보관일, 음수면 0)
+        ws.cell(row=r, column=7,
+                value=f'=D{r}+E{r}+F{r}*MAX(0,가정!{ref["stockDays"]}-가정!{ref["freeStockDays"]})'
+                ).number_format = NUM
+        for c in range(2, 8):
+            cell = ws.cell(row=r, column=c)
+            cell.border = BORDER
+            if cell.font.name != FONT:
+                cell.font = F_BODY
+
+    n = 4 + len(RG_TIERS)
+    notes = [
+        "※ 입고비 100~800원 / 출고비 600~3,500원 / 보관료 일 10~50원 (공개 자료 기반 대표값 — 쿠팡 wing에서 실요율 확인 후 교정하세요).",
+        "※ 무료보관: 일반 30일, 의류·신발·악세서리 45일. 초과분부터 보관료가 붙습니다.",
+        "※ 2025년부터 반품 회수·재입고 요금이 별도 부과됩니다(위 표에 미포함 — 보수적으로 여유를 두세요).",
+        "※ 입출고비·배송비 프로모션은 2027.1.31까지 유효.",
+        "※ 'G열 물류비 합계'를 소싱현황 L열(물류비)에 넣으면 정밀 계산이 됩니다.",
+        "※ 로켓그로스는 고객 택배비를 셀러가 부담하지 않습니다(쿠팡이 배송). 대신 출고비가 나갑니다.",
+    ]
+    for i, t in enumerate(notes):
+        ws.cell(row=n + 1 + i, column=2, value=t).font = F_NOTE
+
+
+# =========================================================================== #
 # 3) 소싱현황 시트
 # =========================================================================== #
 COLS = [
@@ -276,10 +351,13 @@ COLS = [
     ("AG", 11.0, "가격여유"),
     ("AH", 10.0, "기회점수"),
     ("AI", 10.0, "판정"),
+    ("AJ", 13.0, "판매방식"),
+    ("AK", 12.0, "사이즈단계"),
+    ("AL", 14.0, "권장물류비"),
 ]
 SOURCING_IN = {"AA", "AB", "AC", "AD", "AE"}
 SOURCING_OUT = {"AF", "AG", "AH", "AI"}
-INPUT_COLS = {"C", "E", "F", "G", "H", "J", "K", "L", "M", "X", "Y", "Z"}
+INPUT_COLS = {"C", "E", "F", "G", "H", "J", "K", "L", "M", "X", "Y", "Z", "AJ", "AK"}
 
 
 def build_sourcing(ws, ref: dict, products: list[dict]):
@@ -348,7 +426,8 @@ def build_sourcing(ws, ref: dict, products: list[dict]):
                 ws[f"I{r}"] = f"=J{r}*{G}!{A['fx']}"
         else:
             ws[f"H{r}"] = 0
-            ws[f"K{r}"] = f"={G}!{A['feeDefault']}"
+            ws[f"K{r}"] = (f'=IF({G}!{A["channel"]}="로켓그로스",'
+                           f'{G}!{A["rgAllIn"]},{G}!{A["feeDefault"]})')
             ws[f"I{r}"] = f"=J{r}*{G}!{A['fx']}"
 
         # ── 계산 열 ──────────────────────────────────────────────────
@@ -394,6 +473,12 @@ def build_sourcing(ws, ref: dict, products: list[dict]):
             f'IF(U{r}<=0,"역마진",'
             f'IF(AH{r}>={G}!{A["goScore"]},"GO",'
             f'IF(AH{r}>={G}!{A["holdScore"]},"검토","SKIP"))))'
+        )
+        # 판매방식(비우면 가정의 기본값) · 사이즈단계로 권장 물류비 자동 조회
+        ws[f"AL{r}"] = (
+            f'=IF(AK{r}="","",'
+            f'IFERROR(INDEX(로켓그로스요금표!$G$4:$G$9,'
+            f'MATCH(AK{r},로켓그로스요금표!$B$4:$B$9,0)),"단계명 확인"))'
         )
 
         # ── 서식 ────────────────────────────────────────────────────
@@ -489,8 +574,9 @@ def main() -> int:
     wb = Workbook()
     ref = build_assumptions(wb.active)
     build_tax_table(wb.create_sheet())
+    build_rg_table(wb.create_sheet(), ref)
     build_sourcing(wb.create_sheet(), ref, products)
-    wb.move_sheet("소싱현황", offset=-2)  # 소싱현황을 첫 시트로
+    wb.move_sheet("소싱현황", offset=-3)  # 소싱현황을 첫 시트로
     OUT.parent.mkdir(parents=True, exist_ok=True)
     wb.save(OUT)
     print(f"wrote {OUT}  (상품 {len(products)}건, 총 {N_ROWS}행)")

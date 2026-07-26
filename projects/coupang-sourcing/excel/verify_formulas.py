@@ -19,7 +19,7 @@ from pathlib import Path
 from openpyxl import load_workbook
 
 BANNED = ("XLOOKUP", "XMATCH", "FILTER(", "UNIQUE(", "SORT(", "SEQUENCE(", "TEXTJOIN", "IFS(")
-XREF = re.compile(r"(가정|세율표)!\$?([A-Z]+)\$?(\d+)")
+XREF = re.compile(r"(가정|세율표|로켓그로스요금표)!\$?([A-Z]+)\$?(\d+)")
 
 _ok = 0
 _bad = 0
@@ -65,11 +65,28 @@ def main() -> int:
             if isinstance(c.value, str) and c.value.startswith("="):
                 for sheet, col, rownum in XREF.findall(c.value):
                     refs.add((sheet, col, int(rownum)))
+    sheets = {"가정": g, "세율표": t, "로켓그로스요금표": wb["로켓그로스요금표"] if "로켓그로스요금표" in wb.sheetnames else None}
     for sheet, col, rownum in sorted(refs):
-        target = (g if sheet == "가정" else t)[f"{col}{rownum}"]
-        if target.value is None:
+        target_ws = sheets.get(sheet)
+        if target_ws is None:
+            dangling.append(f"{sheet}(시트없음)")
+            continue
+        if target_ws[f"{col}{rownum}"].value is None:
             dangling.append(f"{sheet}!{col}{rownum}")
     check(not dangling, f"참조 {len(refs)}개 모두 값 있는 셀을 가리킴", dangling)
+
+    # 로켓그로스 요금표 자체의 가정 참조도 확인
+    if "로켓그로스요금표" in wb.sheetnames:
+        rg = wb["로켓그로스요금표"]
+        rg_dangling = []
+        for r in range(4, 10):
+            f = rg[f"G{r}"].value
+            if isinstance(f, str):
+                for sheet, col, rownum in XREF.findall(f):
+                    if sheets[sheet][f"{col}{rownum}"].value is None:
+                        rg_dangling.append(f"G{r}→{sheet}!{col}{rownum}")
+        check(not rg_dangling, "요금표 물류비 수식의 가정 참조 유효", rg_dangling)
+        check(rg["B4"].value == "초소형" and rg["B9"].value == "초대형", "요금표 6단계 존재")
 
     # ── 2) 금지 함수 ────────────────────────────────────────────────────
     print("[2] LibreOffice 비호환 함수")
