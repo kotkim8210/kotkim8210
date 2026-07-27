@@ -113,6 +113,53 @@ def cmd_trend(a) -> int:
     return 0
 
 
+def _month(period: str) -> str:
+    """데이터랩 period('2025070')에서 월 두 자리를 뽑는다."""
+    return period[4:6]
+
+
+def cmd_winter(a) -> int:
+    """★겨울 생존력 스캔 — 여름 대비 겨울 수요 비율로 비수기 대비 상품을 찾는다.
+
+    태양광처럼 여름에 몰리는 라인만 있으면 1~2월 캐시플로가 붕괴한다.
+    겨울/여름 비율이 90% 이상인 키워드가 비수기를 메워준다.
+    """
+    kstart, kend = _default_range(1)
+    rows = dl.keyword_rank_pages(a.cid, kstart, kend, pages=a.pages, count=20)
+    if not rows:
+        print("인기검색어 조회 실패.", file=sys.stderr)
+        return 1
+    if a.filter:
+        keys = [k.strip() for k in a.filter.split(",") if k.strip()]
+        rows = [r for r in rows if any(k in r["keyword"] for k in keys)]
+    rows = rows[: a.top]
+
+    print(f"\n겨울 생존력 스캔 · cid={a.cid}")
+    print(f"{'순위':>4} {'키워드':<16}{'여름':>7}{'겨울':>7}{'겨울/여름':>9}  판정")
+    print("-" * 60)
+    out = []
+    for r in rows:
+        tr = dl.keyword_trend(a.cid, r["keyword"], "2025-07-01", "2026-06-30", "month")
+        vals = [(_month(p["period"]), p["value"]) for p in tr
+                if isinstance(p.get("value"), (int, float))]
+        if not vals:
+            continue
+        su = [v for m, v in vals if m in ("06", "07", "08")]
+        wi = [v for m, v in vals if m in ("12", "01", "02")]
+        sa = sum(su) / len(su) if su else 0
+        wa = sum(wi) / len(wi) if wi else 0
+        ratio = wa / sa * 100 if sa else 0
+        vd = "겨울 강함 ✅" if ratio >= 90 else ("유지 ⚠️" if ratio >= 70 else "겨울 붕괴 ❗")
+        print(f"{r['rank']:>4} {r['keyword']:<16}{sa:>7.1f}{wa:>7.1f}{ratio:>8.0f}%  {vd}")
+        out.append({"rank": r["rank"], "keyword": r["keyword"],
+                    "summer": round(sa, 1), "winter": round(wa, 1), "ratio": round(ratio)})
+        dl.polite()
+    print("\n겨울/여름 90%+ = 비수기에도 팔림. 70% 미만 = 겨울 대비 상품이 따로 필요.")
+    if a.json:
+        print(json.dumps(out, ensure_ascii=False))
+    return 0
+
+
 def cmd_scan(a) -> int:
     """카테고리 인기검색어를 훑고, 상위 키워드의 계절 진폭까지 붙여 한 표로."""
     kstart, kend = _default_range(1)
@@ -159,7 +206,8 @@ def main(argv=None) -> int:
     p.add_argument("--name", required=True)
     p.add_argument("--depth", type=int, default=2)
 
-    for name, helptext in (("top", "인기검색어 TOP N"), ("scan", "소싱 스캔(인기+계절)")):
+    for name, helptext in (("top", "인기검색어 TOP N"), ("scan", "소싱 스캔(인기+계절)"),
+                           ("winter", "겨울 생존력 스캔")):
         p = sub.add_parser(name, help=helptext)
         p.add_argument("--cid", required=True)
         p.add_argument("--pages", type=int, default=5)
@@ -170,6 +218,7 @@ def main(argv=None) -> int:
             p.add_argument("--age", default=""); p.add_argument("--json", action="store_true")
         else:
             p.add_argument("--top", type=int, default=15)
+            p.add_argument("--json", action="store_true")
 
     p = sub.add_parser("trend", help="계절 트렌드")
     p.add_argument("--cid", required=True)
@@ -179,7 +228,7 @@ def main(argv=None) -> int:
 
     a = ap.parse_args(argv)
     return {"cat": cmd_cat, "find": cmd_find, "top": cmd_top,
-            "trend": cmd_trend, "scan": cmd_scan}[a.cmd](a)
+            "trend": cmd_trend, "scan": cmd_scan, "winter": cmd_winter}[a.cmd](a)
 
 
 if __name__ == "__main__":
