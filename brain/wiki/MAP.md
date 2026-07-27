@@ -4,10 +4,10 @@
 > 클로드는 이 인덱스로 위치를 좁힌 뒤 관련 주제 문서 1~3개만 펼쳐 몇 초 만에 답한다.
 
 ## 📊 통계
-- 주제 문서: **10**
+- 주제 문서: **12**
 - 누적 통찰(insights): **4**
 - 보관(archive): 0
-- 마지막 수집(ingest): 2026-06-13 (branch-inventory → video-skills·my-projects 신설)
+- 마지막 수집(ingest): 2026-07-26 (coupang-sourcing-margin → coupang-sourcing 신설)
 - 마지막 드림 시퀀스: 2026-06-14 (드림 #2 — 구식 항목 정리·브랜치 감사)
 
 ## 📚 주제 색인 (Topic Index)
@@ -24,6 +24,8 @@
 ### 내 작업·자산 (브랜치 색인)
 - [[my-projects]] — 흩어진 브랜치별 실제 프로젝트 지도(인스타·당근·성경저널·쿠팡·홍보처크롤러). `#프로젝트 #색인 #사업`
 - [[video-skills]] — 영상·유튜브 스킬 3종(watch·youtube-shorts·osmu) 색인. `#스킬 #영상 #유튜브`
+- [[web-scraping-scrapling]] — Scrapling(반봇 우회·적응형) 학습 → 쿠팡·네이버쇼핑 크롤러. `#크롤링 #scrapling #커머스`
+- [[coupang-sourcing]] — 쿠팡 소싱 점수화 + 묶음 마진게이트 + KC 팩트체크. `#쿠팡 #소싱 #마진 #사업`
 
 ### 워크플로 3단계
 - [[data-dumping]] — (1단계/수집기) 분류 없이 무가공 투입 → 정리 시간 제로화. `#수집기 #1단계`
@@ -56,6 +58,16 @@ my-projects ──(콘텐츠 운영 도구)──► video-skills
    └ 인스타/유튜브 콘텐츠 프로젝트 ◄─ youtube-shorts·osmu 스킬이 뒷받침
 my-projects ══(흩어짐의 해소)══ session-independence
    └ 17개 브랜치로 흩어진 작업을 brain 색인 하나로 = "하나의 뇌" 목표 실현
+
+web-scraping-scrapling ──(수집·커머스 계열)──► my-projects
+   └ 홍보처 이메일 크롤러·쿠팡파트너스와 같은 축(상품 데이터 수집 보강)
+web-scraping-scrapling ══(영상→실행코드)══ video-skills
+   └ 유튜브 학습을 산출물로 전환한 같은 패턴(watch/osmu ↔ Scrapling 크롤러)
+
+coupang-sourcing ──(크롤러를 데이터소스로)──► web-scraping-scrapling
+   └ 소싱기가 Scrapling 크롤러 위에 분석·마진판정 레이어를 얹음
+coupang-sourcing ══(마진원리 계승)══ my-projects
+   └ 당근 옥수수 마진추적기(시세−공급−수수료)를 쿠팡·묶음 아비트라지로 확장
 ```
 
 ## ⚠️ 미해결 모순 / 확인필요
