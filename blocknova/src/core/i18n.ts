@@ -25,6 +25,8 @@ const en: Dict = {
   keyboard_hint: '← → move · 1/2/3 select · Enter place · P pause',
   nova_boom: 'NOVA!',
   perfect: 'PERFECT CLEAR!',
+  praise_x2: 'DOUBLE!',
+  praise_x3: 'TRIPLE!!',
   skip: 'Skip',
   coach_drag: '{action} & drag this piece',
   coach_drop: 'Drop it here!',
@@ -123,6 +125,8 @@ const ko: Dict = {
   keyboard_hint: '← → 이동 · 1/2/3 선택 · Enter 배치 · P 일시정지',
   nova_boom: '노바!',
   perfect: '퍼펙트 클리어!',
+  praise_x2: '더블!',
+  praise_x3: '트리플!!',
   skip: '건너뛰기',
   coach_drag: '이 조각을 드래그!',
   coach_drop: '여기에 놓아요!',
@@ -210,6 +214,12 @@ function currentLang(): 'en' | 'ko' {
 }
 
 export const lang = currentLang();
+
+/** Grouped digits ("12,480") — the en-US convention; Korean uses the same
+ *  3-digit comma grouping, so one formatter serves both locales. */
+export function fmt(n: number): string {
+  return n.toLocaleString('en-US');
+}
 
 export function t(key: string, vars: Record<string, string | number> = {}): string {
   const dict = lang === 'ko' ? ko : en;

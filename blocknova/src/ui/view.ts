@@ -4,7 +4,7 @@ import type { PieceDef } from '../engine/pieces';
 import type { PetArt } from '../engine/petart';
 import { PET_TILES } from '../engine/pets';
 import { NOVA_FULL } from '../engine/game';
-import { t } from '../core/i18n';
+import { fmt, t } from '../core/i18n';
 import { prefersReducedMotion } from '../core/device';
 import { mulberry32 } from '../engine/rng';
 
@@ -564,7 +564,7 @@ export class View {
     if (this.scoreTween) cancelAnimationFrame(this.scoreTween);
     if (!animate || this.reducedMotion) {
       this.displayedScore = score;
-      this.scoreEl.textContent = String(score);
+      this.scoreEl.textContent = fmt(score);
       return;
     }
     // ui-spec §5: count up over ~300ms, never an instant jump.
@@ -575,7 +575,7 @@ export class View {
       const p = Math.min(1, (now - start) / dur);
       const eased = 1 - (1 - p) * (1 - p);
       this.displayedScore = Math.round(from + (score - from) * eased);
-      this.scoreEl.textContent = String(this.displayedScore);
+      this.scoreEl.textContent = fmt(this.displayedScore);
       if (p < 1) this.scoreTween = requestAnimationFrame(step);
       else this.scoreTween = null;
     };
@@ -583,7 +583,7 @@ export class View {
   }
 
   setBest(best: number, flash = false): void {
-    this.bestEl.textContent = String(best);
+    this.bestEl.textContent = fmt(best);
     if (flash) {
       this.scoreEl.classList.remove('gold-flash');
       void this.scoreEl.offsetWidth;
@@ -789,9 +789,11 @@ export class View {
     setTimeout(() => node.remove(), 800);
   }
 
-  /** Big center word punch (nova, rank-ups). */
-  wordPunch(text: string, px = 44): void {
-    const word = el('div', 'nova-word', text);
+  /** Big center word punch (nova, rank-ups, combo praise). `cool` swaps the
+   *  gold gradient for the ice-cyan one — lower praise tiers, so gold stays
+   *  reserved for the top of the escalation ladder. */
+  wordPunch(text: string, px = 44, cool = false): void {
+    const word = el('div', 'nova-word' + (cool ? ' cool' : ''), text);
     word.style.fontSize = `${px}px`;
     this.boardEl.appendChild(word);
     setTimeout(() => word.remove(), 950);
@@ -917,7 +919,7 @@ export class View {
       return;
     }
     this.overTitle.textContent = data.title;
-    this.overScore.textContent = String(data.score);
+    this.overScore.textContent = fmt(data.score);
     this.overBest.textContent = data.metaLine;
     this.overNewBest.textContent = data.isNewBest ? t('new_best') : '';
     this.overBanner.textContent = data.banner ?? '';

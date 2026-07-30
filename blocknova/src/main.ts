@@ -18,7 +18,7 @@ import { PETS, petProgress } from './engine/pets';
 import { store, type QuestsStore } from './core/storage';
 import { SoundEngine } from './core/audio';
 import { prefersReducedMotion, vibrate } from './core/device';
-import { t } from './core/i18n';
+import { fmt, t } from './core/i18n';
 import { ads } from './ads/adapter';
 import { View } from './ui/view';
 import { DragController } from './ui/drag';
@@ -357,14 +357,22 @@ function handleMove(move: MoveResult, prevBoard: number[], pieceColor: number): 
     view.popCells(removed, colorLookup, !move.nova);
     sound.clear(move.combo);
     vibrate(30);
-    view.floatScore(`+${move.gained}`, move.nova);
-    // combo praise ladder — the visual arousal escalation to match the
-    // pitch-up sound (Great! → Amazing! → Unstoppable! → COSMIC!)
-    if (move.combo >= 2) {
-      const tier = Math.min(5, move.combo);
-      view.floatScore(t(`praise_${tier}`), tier >= 4, { px: 12 + tier * 4, topPct: 0.46 });
-    }
+    view.floatScore(`+${fmt(move.gained)}`, move.nova);
     const lines = move.clearedRows.length + move.clearedCols.length;
+    // one big center reinforcement word per move — the loudest applicable
+    // moment wins: nova and perfect-clear own their turn outright. Combo
+    // ladder (Great! → Amazing! → Unstoppable! → COSMIC!) outranks the
+    // multi-line calls (DOUBLE!/TRIPLE!!); low tiers ice-cyan, top tiers gold.
+    if (!move.nova && !move.perfectClear) {
+      if (move.combo >= 2) {
+        const tier = Math.min(5, move.combo);
+        view.wordPunch(t(`praise_${tier}`), 30 + tier * 4, tier < 4);
+      } else if (lines >= 3) {
+        view.wordPunch(t('praise_x3'), 44);
+      } else if (lines >= 2) {
+        view.wordPunch(t('praise_x2'), 38, true);
+      }
+    }
     if (lines >= 2 && !move.nova) {
       view.edgeGlow();
       sound.bigClear();
@@ -381,6 +389,7 @@ function handleMove(move: MoveResult, prevBoard: number[], pieceColor: number): 
   if (mode === 'classic' && move.newBest && startingBest > 0) {
     view.setBest(game.best, true);
     sound.fanfare();
+    vibrate([20, 30, 60]); // reward buzz — new record is a phone-in-hand moment
     ads.happytime(); // new record
   } else {
     view.setBest(game.best);
@@ -391,7 +400,7 @@ function handleMove(move: MoveResult, prevBoard: number[], pieceColor: number): 
   updatePace(move.newBest);
 
   if (move.perfectClear) {
-    view.floatScore(t('perfect'), true);
+    view.wordPunch(t('perfect'), 32); // rare +1000 moment — full center-stage gold
     view.confetti();
     ads.happytime(); // perfect clear
   }
@@ -491,13 +500,13 @@ function finishGame(): void {
   const close = startingBest > 0 && gap > 0 && gap <= startingBest * 0.15;
   const gapText =
     startingBest > 0 && gap > 0
-      ? { text: t('best_gap', { n: gap }) + (close ? ` · ${t('one_more')}` : ''), gold: close }
+      ? { text: t('best_gap', { n: fmt(gap) }) + (close ? ` · ${t('one_more')}` : ''), gold: close }
       : undefined;
 
   view.showGameOver({
     title: t('game_over'),
     score: game.score,
-    metaLine: `${t('best')} ${game.best}`,
+    metaLine: `${t('best')} ${fmt(game.best)}`,
     isNewBest,
     banner: isNewBest && startingBest === 0 ? t('first_best') : '',
     gapText,
@@ -730,11 +739,11 @@ function showStatsModal(): void {
   const unlocked = petProgress(store.pets().cells).unlocked;
   view.showStats(
     [
-      { label: t('st_best'), value: String(store.best().classic) },
-      { label: t('st_games'), value: String(s.games) },
-      { label: t('st_total'), value: String(s.totalScore) },
-      { label: t('st_lines'), value: String(s.linesTotal) },
-      { label: t('st_nova'), value: String(s.novaTotal) },
+      { label: t('st_best'), value: fmt(store.best().classic) },
+      { label: t('st_games'), value: fmt(s.games) },
+      { label: t('st_total'), value: fmt(s.totalScore) },
+      { label: t('st_lines'), value: fmt(s.linesTotal) },
+      { label: t('st_nova'), value: fmt(s.novaTotal) },
       { label: t('st_level'), value: `Lv.${meta.level} ${rankFor(meta.level)}` },
       { label: t('st_streak'), value: `🔥${streak.current} (max ${streak.max})` },
       { label: t('st_shields'), value: '🛡'.repeat(streak.shields) || '—' },
