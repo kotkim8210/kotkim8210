@@ -1,0 +1,1688 @@
+@import 'tailwindcss';
+
+/* ui-spec.md §1 — Cosmic Glass tokens */
+@theme {
+  --color-bg: #17171c;
+  --color-deep: #232041;
+  --color-ink: #edeaf7;
+  --color-dim: #9a97ac;
+  --color-nova: #f5c518;
+  --color-nova-hi: #ffe9a0;
+  --color-danger: #f87171;
+  --radius-cell: 7px;
+  --radius-panel: 18px;
+  --font-sans: Pretendard, system-ui, sans-serif;
+}
+
+:root {
+  --gem-0: #22d3ee;
+  --gem-1: #8b5cf6;
+  --gem-2: #34d399;
+  --gem-3: #f472b6;
+  --gem-4: #f59e0b;
+  --gem-5: #60a5fa;
+  --cell-gap: 3px;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(120% 90% at 50% -10%, #232041 0%, #17171c 55%);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  /* portal rule: no long-press selection/zoom */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---- starfield (2 layers of box-shadow dots, GPU-cheap drift) ---- */
+.stars {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+.stars.a {
+  animation: drift 120s linear infinite;
+}
+.stars.b {
+  width: 3px;
+  height: 3px;
+  animation: drift 200s linear infinite;
+}
+@keyframes drift {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50vh);
+  }
+}
+.fx-lite .stars.b,
+.reduced-motion .stars.a,
+.reduced-motion .stars.b {
+  animation: none;
+}
+.fx-lite .stars.b {
+  display: none;
+}
+/* backdrop blur is the single heaviest style on low-end devices */
+.fx-lite .panel,
+.fx-lite .overlay {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* ---- glass panel ---- */
+.panel {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-panel);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* ---- app column ---- */
+.app-col {
+  position: relative;
+  z-index: 1;
+  height: 100dvh;
+  max-width: 26.5rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  padding: 0 16px calc(8px + env(safe-area-inset-bottom));
+  gap: 8px;
+}
+
+.logo-nova {
+  background: linear-gradient(90deg, var(--color-nova), var(--color-nova-hi));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---- board ---- */
+.board-wrap {
+  flex: 1 1 0;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+}
+.board {
+  position: relative;
+  width: min(100%, calc(100dvh - 296px));
+  max-width: 26.5rem;
+  aspect-ratio: 1;
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+  gap: var(--cell-gap);
+  padding: 8px;
+  touch-action: none;
+}
+
+.cell {
+  position: relative;
+  border-radius: var(--radius-cell);
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.45); /* recessed socket */
+}
+
+.cell.gem,
+.mini-cell.gem,
+.pop-cell {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.28), transparent 42%), var(--gem);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 12px -3px var(--gem);
+}
+.cell.gem::after,
+.mini-cell.gem::after {
+  content: '';
+  position: absolute;
+  top: 18%;
+  left: 18%;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+}
+.mini-cell {
+  position: relative;
+  border-radius: 4px;
+}
+
+/* per-color micro-glyphs (ui-spec §6 색+형태 이중 구분 + a cute paw-print
+   nod to the Cosmic Friends). Dot arrangements differ per gem color so
+   color-blind players can tell pieces apart by pattern alone. */
+.cell.gem::before,
+.mini-cell.gem::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.42;
+  background-repeat: no-repeat;
+}
+/* g0 — single star dot */
+.g0::before {
+  background-image: radial-gradient(circle 1.6px at 50% 60%, #fff 95%, transparent 100%);
+}
+/* g1 — two dots, diagonal */
+.g1::before {
+  background-image: radial-gradient(circle 1.4px at 36% 42%, #fff 95%, transparent 100%),
+    radial-gradient(circle 1.4px at 64% 66%, #fff 95%, transparent 100%);
+}
+/* g2 — paw print (3-dot triangle) 🐾 */
+.g2::before {
+  background-image: radial-gradient(circle 1.3px at 36% 44%, #fff 95%, transparent 100%),
+    radial-gradient(circle 1.3px at 64% 44%, #fff 95%, transparent 100%),
+    radial-gradient(circle 1.7px at 50% 66%, #fff 95%, transparent 100%);
+}
+/* g3 — heart-ish (two top dots + wide bottom dot) */
+.g3::before {
+  background-image: radial-gradient(circle 1.5px at 40% 46%, #fff 95%, transparent 100%),
+    radial-gradient(circle 1.5px at 60% 46%, #fff 95%, transparent 100%),
+    radial-gradient(circle 1.2px at 50% 63%, #fff 95%, transparent 100%);
+  opacity: 0.34;
+}
+/* g4 — four dots, square */
+.g4::before {
+  background-image: radial-gradient(circle 1.2px at 38% 42%, #fff 95%, transparent 100%),
+    radial-gradient(circle 1.2px at 62% 42%, #fff 95%, transparent 100%),
+    radial-gradient(circle 1.2px at 38% 64%, #fff 95%, transparent 100%),
+    radial-gradient(circle 1.2px at 62% 64%, #fff 95%, transparent 100%);
+}
+/* g5 — twin horizontal dots (little eyes) */
+.g5::before {
+  background-image: radial-gradient(circle 1.6px at 38% 54%, #fff 95%, transparent 100%),
+    radial-gradient(circle 1.6px at 62% 54%, #fff 95%, transparent 100%);
+}
+
+/* ghost preview + invalid state */
+.cell.ghost-ok {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.22), transparent 42%), var(--gem);
+  opacity: 0.55;
+  border: 1px dashed rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 14px -2px var(--gem);
+}
+.cell.ghost-bad {
+  background: color-mix(in srgb, var(--color-danger) 38%, transparent);
+  border: 1px dashed color-mix(in srgb, var(--color-danger) 80%, transparent);
+  box-shadow: none;
+  opacity: 0.8;
+}
+/* occupied cell under an invalid footprint: keep the gem visible, flag in red */
+.cell.gem.ghost-bad {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.28), transparent 42%), var(--gem);
+  border: 1px dashed color-mix(in srgb, var(--color-danger) 90%, transparent);
+  box-shadow: 0 0 10px -2px var(--color-danger);
+  opacity: 0.7;
+}
+
+/* keyboard cursor */
+.cell.kb-cursor {
+  outline: 2px solid var(--color-nova);
+  outline-offset: 1px;
+  z-index: 1;
+}
+
+/* ---- tray ---- */
+.tray {
+  flex: none;
+  height: 96px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  touch-action: none;
+}
+.slot {
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-panel);
+  transition: transform 0.15s ease;
+  position: relative;
+}
+.slot.selected {
+  outline: 2px solid var(--color-nova);
+  outline-offset: -2px;
+}
+.slot .mini {
+  display: grid;
+  gap: 2px;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.slot.dim .mini {
+  opacity: 0.3;
+  filter: grayscale(1);
+}
+.slot.drag-src .mini {
+  opacity: 0.25;
+}
+/* idle pulse — affordance for placeable pieces only (ui-spec §5) */
+.slot.pulse .mini {
+  animation: idle-pulse 1.8s ease-in-out infinite;
+}
+@keyframes idle-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+.fx-lite .slot.pulse .mini,
+.reduced-motion .slot.pulse .mini {
+  animation: none;
+}
+
+/* desktop hover lift */
+@media (pointer: fine) {
+  .slot {
+    cursor: grab;
+  }
+  .slot:active {
+    cursor: grabbing;
+  }
+  .slot:not(.dim):hover {
+    transform: translateY(-2px);
+  }
+  .slot:not(.dim):hover .mini {
+    filter: drop-shadow(0 0 10px rgba(245, 197, 24, 0.35));
+  }
+}
+
+/* device-branched UI (CLAUDE.md absolute rules) */
+@media (pointer: coarse) {
+  .fine-only {
+    display: none !important;
+  }
+}
+@media (pointer: fine) {
+  .coarse-only {
+    display: none !important;
+  }
+}
+
+/* ---- drag clone ---- */
+.drag-clone {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 50;
+  display: grid;
+  gap: var(--cell-gap);
+  pointer-events: none;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.45));
+}
+.drag-clone .mini-cell {
+  border-radius: var(--radius-cell);
+}
+.drag-clone.bad .mini-cell {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-danger) 80%, transparent);
+}
+
+/* ---- HUD ---- */
+.hud-score {
+  font-size: 2.25rem;
+  line-height: 1;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+.combo-badge {
+  transform: scale(0);
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.combo-badge.on {
+  transform: scale(1);
+}
+
+/* nova meter */
+.nova-track {
+  position: relative;
+  height: 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+.nova-fill {
+  height: 100%;
+  width: 100%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--color-nova), var(--color-nova-hi));
+  /* transform-only animation (ui-spec §5) */
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+.nova-track.ready .nova-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 80%
+  );
+  transform: translateX(-100%);
+  animation: shimmer 1.6s linear infinite;
+}
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+/* READY swaps the wordmark instead of stacking next to it (112px box) */
+.nova-ready-label {
+  display: none;
+}
+.nova-ready-label.on {
+  display: inline;
+  animation: gold-pulse 1.2s ease-in-out infinite;
+}
+.nova-logo.off {
+  display: none;
+}
+@keyframes gold-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+.reduced-motion .nova-track.ready .nova-fill::after,
+.reduced-motion .nova-ready-label.on {
+  animation: none;
+}
+
+/* ---- effects overlays ---- */
+.pop-cell {
+  position: absolute;
+  z-index: 10;
+  border-radius: var(--radius-cell);
+  pointer-events: none;
+  animation: cell-pop 0.22s ease forwards;
+}
+@keyframes cell-pop {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  45% {
+    transform: scale(1.25);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+.spark {
+  position: absolute;
+  z-index: 11;
+  width: 5px;
+  height: 5px;
+  border-radius: 2px;
+  pointer-events: none;
+  animation: spark-fly 0.5s ease-out forwards;
+}
+@keyframes spark-fly {
+  from {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translate(var(--dx), var(--dy)) scale(0.3);
+    opacity: 0;
+  }
+}
+
+.float-score {
+  position: absolute;
+  z-index: 12;
+  font-weight: 900;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: float-up 0.7s ease-out forwards;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+/* translateX(-50%) must live inside the keyframes — the animation replaces
+   any inline transform for its whole duration */
+@keyframes float-up {
+  from {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+  to {
+    transform: translate(-50%, -34px);
+    opacity: 0;
+  }
+}
+
+/* nova blast: white flash → gold ring → shake */
+.flash {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: white;
+  pointer-events: none;
+  animation: flash-out 0.24s ease-out forwards;
+}
+.flash.gold {
+  background: radial-gradient(circle at 50% 45%, rgba(255, 233, 160, 0.9), rgba(245, 197, 24, 0.35) 55%, transparent 80%);
+  animation-duration: 0.5s;
+  animation-delay: 0.05s;
+  animation-fill-mode: both;
+}
+@keyframes flash-out {
+  0% {
+    opacity: 0.85;
+  }
+  25% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* board punch on detonation */
+.board-punch {
+  animation: board-punch 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes board-punch {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.035);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* expanding gold bloom from the blast center */
+.nova-bloom {
+  position: absolute;
+  z-index: 11;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(255, 233, 160, 0.85) 0%, rgba(245, 197, 24, 0.4) 45%, transparent 70%);
+  animation: bloom-out 0.6s ease-out forwards;
+}
+@keyframes bloom-out {
+  from {
+    transform: scale(0.15);
+    opacity: 1;
+  }
+  to {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+/* radial sparks + light streaks flying out of the center */
+.nova-spark {
+  position: absolute;
+  z-index: 13;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: var(--gem, var(--color-nova));
+  box-shadow: 0 0 8px var(--gem, var(--color-nova));
+  animation: nova-spark-fly var(--dur, 0.7s) cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+@keyframes nova-spark-fly {
+  from {
+    transform: translate(0, 0) scale(1.2);
+    opacity: 1;
+  }
+  to {
+    transform: translate(var(--dx), var(--dy)) scale(0.2);
+    opacity: 0;
+  }
+}
+.nova-streak {
+  position: absolute;
+  z-index: 12;
+  width: 46%;
+  height: 3px;
+  border-radius: 2px;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(255, 233, 160, 0.95), transparent);
+  transform-origin: left center;
+  animation: streak-out 0.45s ease-out forwards;
+}
+@keyframes streak-out {
+  0% {
+    transform: rotate(var(--ang)) scaleX(0.1);
+    opacity: 1;
+  }
+  60% {
+    transform: rotate(var(--ang)) scaleX(1.05);
+    opacity: 0.9;
+  }
+  100% {
+    transform: rotate(var(--ang)) scaleX(1.15);
+    opacity: 0;
+  }
+}
+
+/* big NOVA word punch */
+.nova-word {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  z-index: 14;
+  pointer-events: none;
+  font-size: 44px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  background: linear-gradient(90deg, var(--color-nova), var(--color-nova-hi), var(--color-nova));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 18px rgba(245, 197, 24, 0.9));
+  animation: word-punch 0.9s cubic-bezier(0.2, 1.4, 0.4, 1) forwards;
+}
+/* lower praise tiers: ice-cyan gradient — gold stays reserved for the top
+   of the escalation ladder (Unstoppable!/COSMIC!/NOVA!/PERFECT) */
+.nova-word.cool {
+  background: linear-gradient(90deg, var(--gem-0), #eafcff, var(--gem-0));
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 0 14px rgba(34, 211, 238, 0.75));
+}
+/* reduced-motion: same word, gentle fade instead of the scale punch */
+.reduced-motion .nova-word {
+  animation: word-soft 0.9s ease forwards;
+}
+@keyframes word-soft {
+  0% {
+    transform: translateX(-50%);
+    opacity: 0;
+  }
+  25%,
+  75% {
+    transform: translateX(-50%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-50%);
+    opacity: 0;
+  }
+}
+@keyframes word-punch {
+  0% {
+    transform: translateX(-50%) scale(0.3) rotate(-6deg);
+    opacity: 0;
+  }
+  18% {
+    transform: translateX(-50%) scale(1.35) rotate(2deg);
+    opacity: 1;
+  }
+  32% {
+    transform: translateX(-50%) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  75% {
+    transform: translateX(-50%) scale(1.02);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-50%) scale(1.1);
+    opacity: 0;
+  }
+}
+
+/* stronger detonation shake (upgraded from ±3px on publisher request) */
+.shake-hard {
+  animation: shake-hard 0.22s linear;
+}
+@keyframes shake-hard {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0);
+  }
+  20% {
+    transform: translate(5px, -4px) rotate(0.4deg);
+  }
+  40% {
+    transform: translate(-5px, 3px) rotate(-0.4deg);
+  }
+  60% {
+    transform: translate(4px, 4px) rotate(0.3deg);
+  }
+  80% {
+    transform: translate(-3px, -3px) rotate(-0.2deg);
+  }
+}
+.reduced-motion .shake-hard,
+.reduced-motion .board-punch {
+  animation: none;
+}
+
+/* nova meter detonation flash before the drain */
+.nova-track.detonate .nova-fill {
+  background: white;
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.9);
+}
+.nova-ring {
+  position: absolute;
+  z-index: 12;
+  border: 3px solid var(--color-nova);
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: 0 0 24px var(--color-nova), inset 0 0 18px rgba(245, 197, 24, 0.5);
+  animation: ring-out 0.48s ease-out forwards;
+}
+@keyframes ring-out {
+  from {
+    transform: scale(0.1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+.shake {
+  animation: shake 0.14s linear;
+}
+@keyframes shake {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(3px, -3px);
+  }
+  50% {
+    transform: translate(-3px, 2px);
+  }
+  75% {
+    transform: translate(2px, 3px);
+  }
+}
+.reduced-motion .shake {
+  animation: none;
+}
+
+/* edge glow flash on multi-line clears */
+.edge-glow {
+  position: fixed;
+  inset: 0;
+  z-index: 39;
+  pointer-events: none;
+  box-shadow: inset 0 0 60px 10px rgba(245, 197, 24, 0.45);
+  animation: flash-out 0.12s ease-out forwards;
+}
+
+/* ---- overlays ---- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  background: rgba(23, 23, 28, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.overlay.on {
+  opacity: 1;
+  pointer-events: auto;
+}
+.overlay .sheet {
+  width: min(88vw, 22rem);
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  padding: 24px;
+  text-align: center;
+}
+
+.btn {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-ink);
+  transition: transform 0.12s ease, background 0.12s ease;
+}
+.btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.btn:active {
+  transform: scale(0.97);
+}
+.btn.gold {
+  background: linear-gradient(90deg, var(--color-nova), var(--color-nova-hi));
+  color: #201a05;
+  border: none;
+}
+.btn:focus-visible,
+.icon-btn:focus-visible {
+  outline: 2px solid var(--color-nova);
+  outline-offset: 2px;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-ink);
+  font-size: 15px;
+}
+/* 44px+ touch targets on touch devices (ui-spec §6) */
+@media (pointer: coarse) {
+  .icon-btn {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* ---- desktop ambient sides (ui-spec §2) ---- */
+.ambient {
+  display: none;
+}
+@media (min-width: 768px) {
+  .ambient {
+    display: block;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: calc(50vw - 13.25rem);
+    z-index: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(35, 32, 65, 0.9), rgba(23, 23, 28, 0.2));
+  }
+  .ambient.left {
+    left: 0;
+  }
+  .ambient.right {
+    right: 0;
+  }
+  .ambient .gem-sil {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 36px;
+    opacity: 0.1;
+    filter: blur(2px);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.35), transparent 45%), var(--gem);
+  }
+}
+
+/* new-best gold flash on the score */
+.gold-flash {
+  animation: gold-flash 0.25s ease-in-out 2;
+}
+@keyframes gold-flash {
+  50% {
+    color: var(--color-nova);
+    text-shadow: 0 0 18px rgba(245, 197, 24, 0.8);
+  }
+}
+
+/* ---- Phase 2 juice ---- */
+
+/* placement squash & stretch (ui-spec §5): scale .92 → 1.05 → 1, 120ms */
+.cell.placed {
+  animation: squash 0.12s ease-out;
+}
+@keyframes squash {
+  0% {
+    transform: scale(0.92);
+  }
+  60% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.reduced-motion .cell.placed {
+  animation: none;
+}
+
+/* confetti (new best / perfect / daily survived) — ≤24, 12 in lite mode */
+.confetto {
+  position: fixed;
+  top: -12px;
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  z-index: 65;
+  pointer-events: none;
+  animation: confetti-fall var(--dur, 1.4s) ease-in forwards;
+}
+@keyframes confetti-fall {
+  from {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(105vh) rotate(var(--spin, 540deg));
+    opacity: 0.7;
+  }
+}
+
+/* second nova ring for a beefier detonation */
+.nova-ring.late {
+  animation-duration: 0.62s;
+  animation-delay: 0.08s;
+  border-width: 2px;
+  opacity: 0;
+  animation-fill-mode: both;
+}
+/* reduced-motion nova fallback: gold fade only (ui-spec §5) */
+.nova-fade {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(245, 197, 24, 0.28);
+  pointer-events: none;
+  animation: flash-out 0.6s ease-out forwards;
+}
+
+/* ---- coach marks (game-design §11) ---- */
+.coach {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+}
+.coach .spot {
+  position: absolute;
+  border-radius: 16px;
+  box-shadow: 0 0 0 9999px rgba(10, 9, 20, 0.62);
+  border: 2px solid var(--color-nova);
+  transition: all 0.25s ease;
+}
+.coach .tip {
+  position: absolute;
+  max-width: 220px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(35, 32, 65, 0.95);
+  border: 1px solid rgba(245, 197, 24, 0.5);
+  color: var(--color-ink);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  transition: all 0.25s ease;
+}
+.coach .arrow {
+  position: absolute;
+  font-size: 26px;
+  color: var(--color-nova);
+  text-shadow: 0 0 12px rgba(245, 197, 24, 0.8);
+  animation: bounce 0.8s ease-in-out infinite;
+  transition: all 0.25s ease;
+}
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(8px);
+  }
+}
+.reduced-motion .coach .arrow {
+  animation: none;
+}
+.coach .skip {
+  position: absolute;
+  top: calc(10px + env(safe-area-inset-top));
+  right: 12px;
+  pointer-events: auto;
+  padding: 8px 16px;
+  min-height: 44px;
+  min-width: 64px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-ink);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* bonus pre-charge chip floats over the meter, out of the head row's flow */
+.bonus-chip {
+  position: absolute;
+  right: 0;
+  bottom: -7px;
+  z-index: 2;
+  font-size: 12px;
+  font-weight: 800;
+  color: #201a05;
+  background: linear-gradient(90deg, var(--color-nova), var(--color-nova-hi));
+  border-radius: 8px;
+  padding: 1px 6px;
+  white-space: nowrap;
+  animation: gold-pulse 1.2s ease-in-out infinite;
+}
+
+/* gold "unplayed daily" dot on the header button */
+.badge-dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-nova), var(--color-nova-hi));
+  box-shadow: 0 0 6px rgba(245, 197, 24, 0.9);
+}
+
+/* ---- daily ---- */
+.stars-row {
+  font-size: 26px;
+  letter-spacing: 4px;
+}
+.stars-row .off {
+  opacity: 0.25;
+  filter: grayscale(1);
+}
+.mode-chip {
+  font-size: 12px;
+  font-weight: 800;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgba(245, 197, 24, 0.14);
+  border: 1px solid rgba(245, 197, 24, 0.45);
+  color: var(--color-nova);
+}
+
+/* ---- Phase 3: retention meta ---- */
+
+/* PB pace bar (ui-spec §3): h-1 track, gem[5] fill, gold 100% tick */
+.pace-track {
+  position: relative;
+  height: 4px;
+  margin: 4px 0 2px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.07);
+  overflow: visible;
+}
+.pace-fill {
+  height: 100%;
+  width: 100%;
+  border-radius: 2px;
+  background: var(--gem-5);
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 0.25s ease;
+}
+.pace-tick {
+  position: absolute;
+  right: 0;
+  top: -2px;
+  width: 2px;
+  height: 8px;
+  background: var(--color-nova);
+  border-radius: 1px;
+}
+.pace-track.flash .pace-fill {
+  background: var(--color-nova);
+  box-shadow: 0 0 10px rgba(245, 197, 24, 0.9);
+}
+
+/* LevelChip (ui-spec §3): capsule + thin conic XP ring */
+.lv-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.lv-ring {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: conic-gradient(var(--color-nova) calc(var(--p) * 360deg), rgba(255, 255, 255, 0.14) 0);
+  display: grid;
+  place-items: center;
+}
+.lv-ring::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #1d1b2e;
+}
+.lv-rank {
+  color: var(--color-dim);
+  font-weight: 700;
+}
+@media (max-width: 430px) {
+  .lv-rank,
+  .mode-chip {
+    display: none;
+  }
+}
+
+/* streak flame chip in the HUD */
+.streak-chip {
+  margin-left: 8px;
+  color: var(--color-ink);
+  font-weight: 800;
+}
+.streak-chip .shield {
+  margin-left: 2px;
+  font-size: 10px;
+}
+
+/* quest pills (pause sheet): progress bar with last-10% glow */
+.quest-pill {
+  text-align: left;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 8px;
+}
+.quest-pill .q-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 13px;
+  font-weight: 700;
+}
+.quest-pill .q-count {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-dim);
+  font-size: 13px;
+}
+.quest-pill .q-track {
+  height: 5px;
+  margin-top: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+.quest-pill .q-fill {
+  height: 100%;
+  width: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--gem-1), var(--gem-5));
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+/* goal gradient: glow once the bar enters the last 10% */
+.quest-pill.near .q-fill {
+  background: linear-gradient(90deg, var(--color-nova), var(--color-nova-hi));
+  box-shadow: 0 0 10px rgba(245, 197, 24, 0.8);
+}
+.quest-pill.done {
+  border-color: rgba(245, 197, 24, 0.5);
+}
+.quest-pill.done .q-check {
+  color: var(--color-nova);
+  animation: check-pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes check-pop {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+/* stats modal grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 12px 0;
+}
+.stat-tile {
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  text-align: center;
+}
+.stat-tile .v {
+  font-size: 18px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+.stat-tile .k {
+  font-size: 12px;
+  color: var(--color-dim);
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+/* game over: near-miss + next pieces + highlight chips */
+.gap-line {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--color-danger);
+}
+.gap-line.gold {
+  color: var(--color-nova);
+  text-shadow: 0 0 12px rgba(245, 197, 24, 0.6);
+}
+.next-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  min-height: 44px;
+  margin: 6px 0 2px;
+}
+.hl-row {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 4px 0;
+}
+.hl-chip {
+  font-size: 13px;
+  font-weight: 800;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: rgba(245, 197, 24, 0.12);
+  border: 1px solid rgba(245, 197, 24, 0.4);
+  color: var(--color-nova-hi);
+}
+
+/* ---- cute layer: drag feel + cosmic pets ---- */
+
+/* pickup pop on the drag clone */
+.drag-clone.pop-in {
+  animation: pop-in 0.14s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes pop-in {
+  0% {
+    scale: 0.7;
+  }
+  60% {
+    scale: 1.08;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+/* valid ghost breathes gently — "yes, right here!" */
+.cell.ghost-ok {
+  animation: ghost-breathe 1.1s ease-in-out infinite;
+}
+@keyframes ghost-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+.reduced-motion .cell.ghost-ok {
+  animation: none;
+}
+
+/* sparkle trail while dragging */
+.trail-star {
+  position: fixed;
+  z-index: 49;
+  font-size: 11px;
+  pointer-events: none;
+  animation: trail-fall 0.55s ease-in forwards;
+}
+@keyframes trail-fall {
+  from {
+    transform: translateY(0) scale(1) rotate(0);
+    opacity: 0.9;
+  }
+  to {
+    transform: translateY(26px) scale(0.4) rotate(70deg);
+    opacity: 0;
+  }
+}
+
+/* puzzle card — the pixel-art friend uncovering tile by tile, board corner */
+.egg {
+  position: absolute;
+  top: -16px;
+  right: -8px;
+  z-index: 16;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
+}
+.egg .card {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 9px;
+  overflow: hidden;
+  border: 2px solid rgba(245, 197, 24, 0.55);
+  background: #17141f;
+}
+.egg .card canvas {
+  position: absolute;
+  inset: 2px;
+  width: 36px;
+  height: 36px;
+  image-rendering: pixelated;
+}
+.egg .covers {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+}
+.egg .covers i {
+  background: linear-gradient(145deg, #2c2749, #201c38);
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.egg .covers i.open {
+  opacity: 0;
+  transform: scale(0.4) rotate(28deg);
+}
+.egg.near .card {
+  animation: egg-wobble 0.8s ease-in-out infinite;
+}
+.egg.blink .card {
+  box-shadow: 0 0 12px var(--color-nova);
+}
+@keyframes egg-wobble {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  25% {
+    transform: rotate(-7deg);
+  }
+  75% {
+    transform: rotate(7deg);
+  }
+}
+.egg.wiggle .card {
+  animation: egg-wobble 0.7s ease-in-out 2;
+}
+.egg.hatch .card {
+  animation: egg-hatch 0.5s ease-out;
+}
+@keyframes egg-hatch {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.35) rotate(-12deg);
+  }
+  70% {
+    transform: scale(0.9) rotate(10deg);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.reduced-motion .egg.near .card,
+.reduced-motion .egg.hatch .card {
+  animation: none;
+}
+
+/* energy motes: cleared cells feed the puzzle card */
+.mote {
+  position: fixed;
+  z-index: 48;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, var(--color-nova-hi), var(--color-nova));
+  box-shadow: 0 0 8px var(--color-nova);
+  transition: transform 0.55s cubic-bezier(0.3, 0, 0.6, 1), opacity 0.55s ease;
+  opacity: 1;
+}
+.mote.fly {
+  opacity: 0.1;
+}
+
+/* puzzle-complete cinematic: zoom the finished pixel art center-screen */
+.reveal {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  background: rgba(12, 10, 22, 0.82);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.reveal.on {
+  opacity: 1;
+  pointer-events: auto;
+}
+.reveal .frame {
+  text-align: center;
+  animation: reveal-pop 0.55s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.reduced-motion .reveal .frame {
+  animation: none;
+}
+@keyframes reveal-pop {
+  0% {
+    transform: scale(0.15) rotate(-8deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.08) rotate(2deg);
+  }
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+.reveal canvas {
+  width: 192px;
+  height: 192px;
+  image-rendering: pixelated;
+  border-radius: 20px;
+  border: 3px solid rgba(245, 197, 24, 0.7);
+  background: radial-gradient(120% 90% at 50% 0%, #2b2452 0%, #17141f 70%);
+  box-shadow: 0 0 40px rgba(245, 197, 24, 0.35), 0 18px 50px rgba(0, 0, 0, 0.6);
+}
+.reveal .r-title {
+  margin-top: 14px;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--color-dim);
+  letter-spacing: 0.12em;
+}
+.reveal .r-name {
+  font-size: 26px;
+  font-weight: 900;
+  background: linear-gradient(90deg, var(--color-nova), var(--color-nova-hi));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.reveal .r-flavor {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--color-ink);
+  opacity: 0.85;
+  max-width: 260px;
+}
+
+/* tray refill: pieces bounce in with a stagger */
+.slot .mini.spawn {
+  animation: mini-spawn 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+@keyframes mini-spawn {
+  0% {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.reduced-motion .slot .mini.spawn {
+  animation: none;
+}
+
+/* pet gallery grid (stats modal) */
+.pets-span {
+  grid-column: 1 / -1;
+}
+.pets-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  margin: 10px 0 4px;
+}
+.pet-cell {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+.pet-cell.locked {
+  opacity: 0.35;
+  filter: grayscale(1);
+  font-size: 14px;
+}
+.pet-cell.fresh {
+  border-color: rgba(245, 197, 24, 0.6);
+  box-shadow: 0 0 10px -2px var(--color-nova);
+}
+
+/* muted state is visible at a glance */
+.icon-btn.muted {
+  border-color: color-mix(in srgb, var(--color-danger) 55%, transparent);
+  color: var(--color-danger);
+}
+
+/* ---- zero-boredom layer: micro-feedback for every second ---- */
+
+/* "almost!" — a line that reached 7-8/9 cells shimmers gold once */
+.cell.almost::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-cell);
+  background: rgba(245, 197, 24, 0.38);
+  opacity: 0;
+  animation: fade-pulse 0.5s ease-out;
+  pointer-events: none;
+}
+@keyframes fade-pulse {
+  0% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* danger state: board ≥70% full — real information, not fake pressure */
+.board.danger::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-panel);
+  box-shadow: inset 0 0 34px 4px rgba(248, 113, 113, 0.28);
+  animation: danger-breathe 1.6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes danger-breathe {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.reduced-motion .board.danger::after,
+.fx-lite .board.danger::after {
+  animation: none;
+  opacity: 0.5;
+}
+
+/* hot streak: score burns gold while a combo is alive */
+.hud-score.hot {
+  color: #ffd75e;
+  text-shadow: 0 0 16px rgba(245, 197, 24, 0.7);
+}
+
+/* nova gauge 80%+: warm slow shimmer before the READY blaze */
+.nova-track.warm .nova-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 80%
+  );
+  transform: translateX(-100%);
+  animation: shimmer 2.8s linear infinite;
+}
+.reduced-motion .nova-track.warm .nova-fill::after {
+  animation: none;
+}
+
+/* ambient life: random gem twinkle */
+.cell.twinkle::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-cell);
+  background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.75) 50%, transparent 70%);
+  opacity: 0;
+  animation: fade-pulse 0.6s ease-out;
+  pointer-events: none;
+}
+
+/* ambient life: shooting star across the cosmos */
+.shooting-star {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: 70px;
+  height: 2px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.9), transparent);
+  transform: translate(var(--sx), var(--sy)) rotate(24deg);
+  opacity: 0;
+  animation: star-shoot 0.8s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes star-shoot {
+  0% {
+    transform: translate(var(--sx), var(--sy)) rotate(24deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(calc(var(--sx) + 180px), calc(var(--sy) + 80px)) rotate(24deg);
+    opacity: 0;
+  }
+}
+
+/* board wake ripple on a fresh game */
+.cell.wake {
+  animation: cell-wake 0.26s ease-out backwards;
+}
+@keyframes cell-wake {
+  from {
+    transform: scale(0.65);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.reduced-motion .cell.wake {
+  animation: none;
+}
+
+/* idle nudge: placeable pieces wave at the player */
+.slot.nudge .mini {
+  animation: nudge-hop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 2;
+}
+@keyframes nudge-hop {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-6px) scale(1.06);
+  }
+}
+.reduced-motion .slot.nudge .mini {
+  animation: none;
+}
+
+/* ---- toast ---- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  transform: translateX(-50%) translateY(20px);
+  z-index: 80;
+  padding: 10px 18px;
+  border-radius: 14px;
+  background: rgba(35, 32, 65, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: var(--color-ink);
+  font-size: 14px;
+  font-weight: 700;
+  opacity: 0;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  pointer-events: none;
+}
+.toast.on {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}

@@ -1,0 +1,22 @@
+{
+  "name": "blocknova",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "build:portal": "tsc --noEmit && VITE_ADS=crazygames vite build --outDir dist-portal && node scripts/portal-zip.mjs",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.0",
+    "adm-zip": "^0.5.16",
+    "tailwindcss": "^4.1.0",
+    "typescript": "^5.8.0",
+    "vite": "^6.3.0",
+    "vitest": "^3.1.0"
+  }
+}

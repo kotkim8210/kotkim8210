@@ -1,0 +1,117 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>〔게임 이름〕 — 와이어프레임 (파스텔 키치 예시)</title>
+<style>
+/* 자체 완결 — 외부 요청 0. 토큰은 docs/ui-spec.md §2와 동일하게 유지할 것 */
+:root{
+  --bg:#FFF7EE; --panel:#FFFFFF; --ink:#5B4A43; --dim:#A79A92;
+  --accent:#FF9EC3; --danger:#F97B7B;
+  --p0:#7DD8E0; --p1:#B7A8F0; --p2:#8FDCA8; --p3:#FFA8C8; --p4:#FFCF8A; --p5:#93BDF5;
+  --r-cell:8px; --r-panel:20px;
+}
+*{box-sizing:border-box;margin:0}
+body{font-family:Pretendard,system-ui,sans-serif;background:var(--bg);color:var(--ink);padding:24px}
+h1{font-size:20px;margin-bottom:4px}
+.note{color:var(--dim);font-size:13px;margin-bottom:20px}
+.row{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.frame{width:380px;background:var(--panel);border-radius:28px;padding:16px;
+  box-shadow:0 8px 24px rgba(91,74,67,.10), inset 0 0 0 1px rgba(91,74,67,.06)}
+.cap{font-size:12px;color:var(--dim);margin-bottom:8px}
+.hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.logo{font-weight:900;letter-spacing:.5px}.logo b{color:var(--accent)}
+.icon{width:44px;height:44px;border-radius:14px;background:var(--bg);display:grid;place-items:center;
+  font-size:18px;border:1px solid rgba(91,74,67,.08)}
+.hud{background:var(--bg);border-radius:var(--r-panel);padding:10px 14px;display:flex;
+  justify-content:space-between;align-items:center;margin-bottom:12px}
+.score{font-size:26px;font-weight:900}.sub{font-size:11px;color:var(--dim);font-weight:700}
+.meter{width:100px}.meter .bar{height:10px;border-radius:6px;background:rgba(91,74,67,.08);overflow:hidden}
+.meter .fill{height:100%;width:50%;border-radius:6px;background:linear-gradient(90deg,var(--accent),#FFC8DE)}
+.board{display:grid;grid-template-columns:repeat(9,1fr);gap:3px;background:var(--bg);
+  border-radius:var(--r-panel);padding:8px;margin-bottom:12px}
+.cell{aspect-ratio:1;border-radius:var(--r-cell);background:rgba(91,74,67,.05);
+  box-shadow:inset 0 2px 4px rgba(91,74,67,.06);position:relative}
+.gem{box-shadow:none;border:1px solid rgba(91,74,67,.10)}
+.gem::before{content:'';position:absolute;top:3px;left:4px;width:4px;height:4px;border-radius:50%;
+  background:rgba(255,255,255,.85)} /* 사탕 광택 점 */
+.gem::after{position:absolute;inset:0;display:grid;place-items:center;font-size:9px;opacity:.55}
+.g0{background:var(--p0)}.g0::after{content:'♥'} .g1{background:var(--p1)}.g1::after{content:'🐾'}
+.g2{background:var(--p2)}.g2::after{content:'••'} .g3{background:var(--p3)}.g3::after{content:'★'}
+.g4{background:var(--p4)}.g4::after{content:'^^'} .g5{background:var(--p5)}.g5::after{content:'◦◦'}
+.ghost{background:rgba(143,220,168,.4);outline:2px dashed var(--p2)}
+.tray{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.slot{background:var(--bg);border-radius:var(--r-panel);min-height:84px;display:grid;place-items:center}
+.slot.sel{outline:3px solid var(--accent)}
+.mini{display:grid;gap:2px}.mini i{width:16px;height:16px;border-radius:5px;display:block}
+.bubble{position:relative;background:var(--ink);color:#fff;font-size:12px;font-weight:700;
+  padding:8px 12px;border-radius:14px;width:max-content;margin:6px 0}
+.bubble::after{content:'';position:absolute;bottom:-6px;left:22px;border:6px solid transparent;
+  border-top-color:var(--ink);border-bottom:0}
+.mascot{font-size:34px;line-height:1}
+.mrow{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.btn{display:block;width:100%;padding:14px;border:0;border-radius:18px;font-weight:900;font-size:15px;
+  background:var(--accent);color:#fff;margin-top:8px}
+.btn.ghost-btn{background:var(--bg);color:var(--ink)}
+.sheet{background:var(--bg);border-radius:var(--r-panel);padding:16px;text-align:center}
+.big{font-size:30px;font-weight:900}.gap{color:var(--accent);font-weight:900}
+.chips{display:flex;gap:6px;justify-content:center;margin:8px 0}
+.chip{background:var(--panel);border-radius:10px;padding:6px 10px;font-size:12px;font-weight:700;
+  border:1px solid rgba(91,74,67,.08)}
+.dex{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.dexcard{aspect-ratio:1;background:var(--bg);border-radius:16px;display:grid;place-items:center;font-size:26px}
+.dexcard.lock{filter:grayscale(1);opacity:.35}
+.footnote{font-size:11px;color:var(--dim);text-align:center;margin-top:8px}
+</style></head><body>
+<h1>〔게임 이름〕 와이어프레임 — 파스텔 키치 예시</h1>
+<p class="note">무드 A(파스텔) 기준 예시. 토큰·규칙은 docs/ui-spec.md가 진실 공급원 · 프레임 380px · 외부 요청 0</p>
+<div class="row">
+
+<section><p class="cap">① 게임 화면 (홈 겸용) — 첫 실행: 골든 퍼스트 무브 + 코치 말풍선</p>
+<div class="frame">
+  <div class="hdr"><span class="logo">〔BUBBLE <b>POP</b>〕</span>
+    <div style="display:flex;gap:6px"><span class="icon">📅</span><span class="icon">🔊</span><span class="icon">⏸</span></div></div>
+  <div class="hud"><div><div class="score">0</div><div class="sub">BEST 1,240</div></div>
+    <div class="meter"><div class="sub">〔시그니처 게이지〕 ⚡</div><div class="bar"><div class="fill"></div></div></div></div>
+  <div class="board" id="board1">
+    <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    <div class="cell gem g0"></div><div class="cell gem g0"></div><div class="cell gem g3"></div><div class="cell gem g3"></div><div class="cell gem g4"></div><div class="cell gem g4"></div><div class="cell gem g1"></div><div class="cell gem g1"></div><div class="cell ghost"></div>
+    <div class="cell gem g2"></div><div class="cell gem g2"></div><div class="cell gem g5"></div><div class="cell gem g5"></div><div class="cell gem g0"></div><div class="cell gem g0"></div><div class="cell gem g3"></div><div class="cell gem g3"></div><div class="cell ghost"></div>
+    <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+  </div>
+  <div class="bubble">이 조각을 여기에! 한 번에 두 줄이 터져요 ✨</div>
+  <div class="tray">
+    <div class="slot sel"><div class="mini" style="grid-template-columns:repeat(1,16px)"><i style="background:var(--p3)"></i><i style="background:var(--p3)"></i></div></div>
+    <div class="slot"><div class="mini" style="grid-template-columns:repeat(2,16px)"><i style="background:var(--p0)"></i><i style="background:var(--p0)"></i><i style="background:var(--p0)"></i><i style="background:var(--p0)"></i></div></div>
+    <div class="slot"><div class="mini" style="grid-template-columns:repeat(2,16px)"><i style="background:var(--p1)"></i><i style="background:transparent"></i><i style="background:var(--p1)"></i><i style="background:var(--p1)"></i></div></div>
+  </div>
+  <p class="footnote">모바일: "Tap & drag" · 데스크톱: "Click & drag" 자동 전환 · 380px 무스크롤</p>
+</div></section>
+
+<section><p class="cap">③ 게임오버 시트 — 근접실패 응원 + 마스코트 표정 변화</p>
+<div class="frame">
+  <div class="sheet">
+    <div class="mrow" style="justify-content:center"><span class="mascot">〔🥺→😤〕</span>
+      <div style="text-align:left"><div class="big">1,180</div><div class="sub">BEST 1,240</div></div></div>
+    <div class="bubble" style="margin:8px auto">아깝다! <span style="color:#FFC8DE">Best까지 −60</span> · 한 판이면 넘어요!</div>
+    <div class="sub" style="margin-top:6px">다음에 나올 조각이었어요</div>
+    <div class="chips"><span class="chip">🟪 L자</span><span class="chip">🟦 2줄</span><span class="chip">🟨 점</span></div>
+    <button class="btn">💖 이어하기 (광고)</button>
+    <button class="btn ghost-btn">다시 하기</button>
+    <p class="footnote">골드(핑크) 버튼은 화면당 1개 · 인터스티셜은 게임오버 2회당, 이 시트가 뜬 후에만</p>
+  </div>
+</div></section>
+
+<section><p class="cap">④ 수집 도감 — 플레이 누적으로 한 칸씩 공개</p>
+<div class="frame">
+  <div class="hdr"><span class="logo">〔마스코트〕 도감</span><span class="icon">✕</span></div>
+  <div class="dex">
+    <div class="dexcard">🐰</div><div class="dexcard">🐥</div><div class="dexcard lock">?</div><div class="dexcard lock">?</div>
+    <div class="dexcard lock">?</div><div class="dexcard lock">?</div><div class="dexcard lock">?</div><div class="dexcard lock">?</div>
+  </div>
+  <div class="bubble" style="margin-top:12px">다음 친구까지 〔120〕칸! 오늘 한 판이면 만나요 🎀</div>
+  <p class="footnote">〔이모지는 자리표시 — 실제로는 자체 픽셀아트/SVG〕</p>
+</div></section>
+
+</div>
+<p class="note" style="margin-top:20px">② 일시정지·⑤ 데일리·⑥ 통계 시트는 ③과 동일한 시트 문법(라운드 패널 + 마스코트 + 버튼 1+1)으로 구성.</p>
+<script>/* 보드를 9×9 정사각형으로 채움 (와이어프레임 편의용 — 실제 게임은 정식 렌더러) */
+const b1=document.getElementById('board1');while(b1.children.length<81){const d=document.createElement('div');d.className='cell';b1.appendChild(d);}</script>
+</body></html>
