@@ -1,0 +1,131 @@
+# 전역 설정
+version: "0.1.0"
+
+paths:
+  data_root: "./data"
+  bronze: "./data/bronze"     # 원본 무손실 — 절대 수정하지 않음
+  silver: "./data/silver"     # 정규화 테이블
+  gold: "./data/gold"         # 피처·점수·신호
+  cache: "./data/cache"
+  reports: "./reports"
+
+market:
+  timezone: "Asia/Seoul"
+  base_currency: KRW
+  # 장중에는 아무것도 하지 않는다. 중장기 시스템에 장중 데이터는
+  # 신호를 개선하지 않고 추격매매 충동만 만든다. (의도된 설계)
+  intraday_collection: false
+
+# ─────────────────────────────────────────────────────────────
+# API 쿼터 — 초과하면 차단되므로 사전에 토큰버킷으로 막는다
+# ⚠️ 실제 한도는 각 서비스 발급 페이지에서 확인할 것 [확인필요]
+# ─────────────────────────────────────────────────────────────
+rate_limits:
+  dart:
+    daily: 20000              # [확인필요]
+    per_second: 5
+    reserve_pct: 20           # deepdive 요청용 확보분
+  naver:
+    daily: 25000              # [확인필요] API별로 별도 집계
+    per_second: 10
+    reserve_pct: 10
+  krx:
+    per_second: 2             # 비공식 경로 — 보수적으로
+  policy:
+    per_second: 2
+
+quota_policy:
+  warn_at_pct: 80             # 경고 + 비필수(텍스트) 후순위
+  halt_optional_at_pct: 95    # 필수(재무·시세)만 유지
+
+retry:
+  max_attempts: 4
+  backoff_seconds: [2, 4, 8, 16]
+  jitter: true
+  retry_on: [429, 500, 502, 503, 504, timeout]
+  never_retry_on: [400, 401, 403, 404]
+
+cache_ttl:
+  corp_code_days: 30
+  company_profile_days: 30
+  price_historical: never_expire      # 과거 일봉은 불변 데이터
+  price_today_hours: 1
+  financials: never_expire            # rcept_no 단위로 불변
+  disclosure_list_hours: 6
+  text_hours: 24
+  policy_days: 7
+
+# ─────────────────────────────────────────────────────────────
+# 스크리닝 — 2단계 전략
+# 전 종목 텍스트 수집은 비용·차단 양쪽에서 지속 불가능하다.
+# ─────────────────────────────────────────────────────────────
+screening:
+  stage1_axes: [F, D, S, T]
+  stage1_shortlist: 80        # 이 종목에 대해서만 텍스트 수집
+  stage2_axes: [Q, C, E]
+  final_top_n: 30
+
+# ─────────────────────────────────────────────────────────────
+# 텍스트 소스 — 공식 API 우선, 스크래핑 최소화
+# ─────────────────────────────────────────────────────────────
+text:
+  official_sources:
+    naver_search: true
+    naver_datalab: true       # ⭐hype_z 측정 — 과열 판정의 주 근거
+    rss: true
+  # 기본 비활성. 켜려면 명시적으로 true로 바꿔야 하며,
+  # 그 경우에도 robots.txt 준수·요청 간격·재배포 금지가 어댑터에 강제된다.
+  optional_sources:
+    stock_forums: false
+  policy:
+    respect_robots_txt: true
+    min_request_interval_sec: 2
+    store_raw_locally_only: true
+    report_aggregates_only: true    # 리포트에는 집계 통계만
+
+sentiment:
+  method: lexicon_then_model
+  min_documents: 20           # 미만이면 판정 불가(None). 0으로 처리하지 않는다
+  evidence_ratio_weighting: true
+
+schedule:                     # KST
+  policy_collect: "07:00"
+  master_update: "08:30"
+  price_flow_collect: "16:00"
+  disclosure_collect: "16:30"
+  screen: "17:00"
+  text_collect: "17:30"
+  scenario_update: "18:00"
+  weekly_eventstudy: "SAT 09:00"
+  weekly_mine: "SUN 09:00"
+
+report:
+  formats: [markdown, json]   # 항상 둘 다 생성 (§7 요구)
+  charts: true
+  guard_forbidden_expressions: true    # 금칙어 발견 시 렌더링 실패
+  require_confidence: true
+  require_assumptions: true
+  require_risks: true
+
+audit:
+  enabled: true               # INV-4 — 끄면 신호를 재현할 수 없다
+  record_input_hash: true
+  record_axis_attribution: true
+  record_config_hash: true
+
+backtest:
+  rebalance: weekly
+  rebalance_day: FRI
+  # 편향 검사 실패 시 성과 수치를 아예 출력하지 않는다
+  block_results_on_bias_failure: true
+  walk_forward:
+    train_years: 3
+    test_years: 1
+    step_years: 1
+  validation:
+    purged_kfold: true
+    embargo_days: 250         # 보유기간(약 12개월) 만큼
+    random_control_runs: 1000
+    require_percentile: 95    # 랜덤 대조군 상위 5% 밖이면 알파 주장 불가
+    deflated_sharpe: true
+  trials_registry: "./data/gold/trials.parquet"   # 다중검정 보정용 시도 기록

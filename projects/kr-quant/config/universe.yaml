@@ -1,0 +1,39 @@
+# 유니버스 구성
+# 문서: docs/04-backtest.md §4.3
+version: "0.1.0"
+
+markets:
+  include: [KOSPI, KOSDAQ]
+  exclude: [KONEX]              # 유동성 부족
+
+security_types:
+  exclude: [SPAC, REIT, PREFERRED, ETF, ETN, DR]
+
+# ─────────────────────────────────────────────────────────────
+# 생존편향 방지 — 이 설정이 잘못되면 모든 백테스트 결과가 무효다
+# ─────────────────────────────────────────────────────────────
+survivorship:
+  include_delisted: true          # ★필수. 과거 시점 유니버스에 상장폐지 종목 포함
+  require_delisting_history: true # 상폐 이력 데이터 없으면 백테스트 차단
+  liquidation_method: last_trading_price
+
+liquidity_filter:
+  min_market_cap_krw: 50_000_000_000    # 500억
+  min_adtv_60d_krw: 300_000_000         # 3억
+  # 소형주에서 수급 신호는 노이즈가 지배한다. 이 필터가 S축 신뢰도를 지킨다.
+
+listing_age:
+  min_years_soft: 3               # 미만이면 소프트 게이트 감점 (제외는 아님)
+
+sector_classification:
+  standard: KSIC
+  level: mid                      # 중분류
+  preserve_history: true          # ★시점별 분류 이력 보존 (분류 기준 변경 대응)
+
+# 명시적 제외 목록 (필요 시 수동 관리)
+manual_exclude: []
+
+# 거래정지 처리
+trading_halt:
+  price_fill_method: none         # ffill 금지 — 변동성 과소평가 방지
+  indicator_grace_days: 20        # 정지 해제 후 기술지표 유예

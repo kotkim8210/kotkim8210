@@ -1,0 +1,60 @@
+# 거래 비용 · 세금 · 슬리피지
+# 문서: docs/04-backtest.md §4.4
+#
+# ⚠️⚠️ 중요: 증권거래세율은 여러 차례 개정되었다.
+#   단일 고정값을 쓰면 백테스트 전 구간에 잘못된 세율이 적용된다.
+#   반드시 effective_from 시계열로 관리하고, 구현 전 각 시점 세율을 확인할 것. [확인필요]
+version: "0.1.0"
+
+commission:
+  buy_bps: 1.5              # 0.015% — 증권사별 상이. 본인 계좌 기준으로 수정
+  sell_bps: 1.5
+  min_krw: 0
+
+# 매도 시 부과되는 세금 (bps = 0.01%)
+# 각 구간의 실제 세율은 구현 시 반드시 확인하여 채워 넣을 것.
+tax_schedule:
+  - effective_from: "2000-01-01"
+    kospi_bps: null         # [확인필요] 당시 세율 입력
+    kosdaq_bps: null        # [확인필요]
+    note: "미확인 구간 — 값을 채우기 전까지 백테스트는 이 구간을 경고 표시한다"
+  - effective_from: "2025-01-01"
+    kospi_bps: 15           # [확인필요] 증권거래세+농어촌특별세 합산 추정
+    kosdaq_bps: 15          # [확인필요]
+
+# 세율 미확인 구간 처리 정책
+tax_policy:
+  on_missing: warn_and_use_conservative
+  conservative_bps: 30      # 미확인 시 보수적으로 높게 잡는다(낙관 편향 방지)
+
+slippage:
+  base_bps: 10                    # 최소 0.10%
+  impact_coef: 0.3
+  formula: "max(base_bps, impact_coef * (order_value / daily_value_traded) * 10000)"
+
+# ─────────────────────────────────────────────────────────────
+# 체결 가능성 (한국 시장 특수 규칙)
+# 상한가 체결 가정은 백테스트를 극적으로 왜곡한다.
+# ─────────────────────────────────────────────────────────────
+execution:
+  fill_at: next_open              # D일 신호 → D+1 시가 체결 (고정 규약)
+  price_limit_pct: 0.30           # 가격제한폭 ±30%
+  block_fill_if_limit_up_above: 0.29    # 시가가 +29% 이상이면 매수 체결 불가
+  block_fill_if_limit_down_below: -0.29 # 매도 체결 불가
+  block_if_halted: true
+  max_participation_ratio: 0.01   # 주문금액 <= 당일 거래대금 x 1%
+  unfilled_carry_days: 3          # 3일 미체결 시 주문 취소
+  delisting_liquidation: last_trading_price   # 정리매매 종가로 청산
+
+settlement:
+  days: 2                         # T+2
+
+benchmarks:
+  - KOSPI
+  - KOSDAQ
+  - KOSPI200
+  - EQUAL_WEIGHTED_ALL            # 가장 정직한 비교 기준
+
+risk_free:
+  source: cd91                    # Sharpe 계산용 [확인필요 — 데이터 소스]
+  fallback_annual: 0.03

@@ -3,9 +3,9 @@ title: 진행 중인 프로젝트 색인 (브랜치별 산출물 지도)
 slug: my-projects
 tags: [프로젝트, 색인, 사업, 콘텐츠, 브랜치]
 created: 2026-06-13
-updated: 2026-06-13
+updated: 2026-08-05
 sources: [2026-06-13-branch-inventory.md]
-related: [[video-skills]], [[claude-code-skills]], [[session-independence]]
+related: [[video-skills]], [[claude-code-skills]], [[session-independence]], [[kr-quant-system]]
 confidence: high
 status: active
 ---
@@ -22,8 +22,9 @@ status: active
 | **당근스토어 상품등록 자동화** | `gallant-keller-Vlmnq` | 폼 자동채움 북마클릿(7종), 마진 추적기, 당근 수수료 3.3% | 진행 |
 | **성경저널 POD** | `tender-wright-hf5pq1` | 등산저널→성경저널 피벗, 랜딩 7종 HTML, '엄마의 기도 노트' 디자인, GA4 | 진행 |
 | **Next.js 쿠팡파트너스 MVP** | `lean-dev-workflow-i6yeq`, `setup-claude-code-plugin-LIuOs` | Next.js 15 랜딩+A/B, 쿠팡파트너스 수익 페이지 | 진행 |
+| **KR-Quant 주식 자동분석** | `claude/korean-stock-auto-analysis-pmguiy` | `projects/kr-quant/` 설계문서 7종 + 설정 7종 + JSON스키마 2종 (7축 점수·4중게이트·시나리오 상태머신) | 설계완료·구현전 |
 
-(상세: 2026-06-13-branch-inventory.md)
+(상세: 2026-06-13-branch-inventory.md · KR-Quant는 [[kr-quant-system]] 참조)
 
 ## 부가: 인프라/설정 브랜치
 - `optimize-token-settings-4r97O` — settings.json 토큰 절약 최적화
