@@ -18,7 +18,8 @@
 | 6 | [docs/06-pattern-library.md](docs/06-pattern-library.md) | **패턴 라이브러리 초안** (KP-01~12 + ANTI-01~04, **액면분할 해석 매트릭스**) |
 | 7 | [docs/07-report-spec.md](docs/07-report-spec.md) | 출력 형식 **A~F 리포트 템플릿**(+S 시나리오 섹션) + JSON 스키마 |
 | 8 | [docs/08-backtest-results.md](docs/08-backtest-results.md) | ⭐**실측 백테스트 결과** — 이 시스템이 시장을 이기는가 (실제 데이터 검증) |
-| 9 | [docs/09-buffett-system.md](docs/09-buffett-system.md) | ⭐**버핏 방식의 기계적 시스템화** + 버크셔 실적 실증 분석 |
+| 9 | [docs/09-buffett-system.md](docs/09-buffett-system.md) | 버핏 방식의 기계적 시스템화 + **버크셔 실적 실증 분석** (일부 항목 한국 실행 불가 → 10장으로 대체) |
+| 10 | [docs/10-lynch-korea-system.md](docs/10-lynch-korea-system.md) | ⭐**피터 린치 기반 한국형 실행 시스템** — 일반 성인이 주말 2시간으로 실행 가능한 최종본 |
 
 설정 파일(그대로 로드·검증되는 실물):
 `config/settings.yaml` · `scoring.yaml` · `rules.yaml` · `universe.yaml` · `costs.yaml` · `patterns.yaml` · `overheat_lexicon.yaml`
