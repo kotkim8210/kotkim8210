@@ -1,0 +1,169 @@
+# 패턴 라이브러리
+# 문서: docs/06-pattern-library.md
+#
+# ⚠️ status: 가설 인 패턴은 매수 판단에 가중치를 주지 않는다. 리포트 설명에만 쓰인다.
+#    status 전환(가설 → 검증됨)은 사람의 승인을 요구한다. 자동 승격 금지.
+version: "0.1.0"
+
+meta:
+  status_values: [가설, 검증중, 검증됨, 기각]
+  # 패턴은 점수를 만들지 않는다. 점수는 7축이 만들고 패턴은 해석과 우선순위 가점(<=5)에만 쓰인다.
+  max_priority_bonus: 5
+  anti_overrides_kp: true       # ANTI 패턴이 KP 패턴을 항상 이긴다
+
+labeling:                        # krq mine 용
+  horizon_months: 12
+  success_excess_return: 0.30
+  success_max_drawdown: -0.25
+  failure_excess_return: -0.10
+  min_support: 30
+  max_tree_depth: 3              # 해석 가능성 제약 (성능 아님)
+
+patterns:
+  - id: KP-01
+    name: 실적 턴어라운드
+    status: 가설
+    horizon_months: [12, 24]
+    trigger: "op_profit_positive_streak >= 2 AND prev_annual_op_loss
+              AND revenue_yoy > 0 AND debt_ratio_yoy < 0"
+    confirm: "ocf > 0 AND op_profit_ex_oneoff > 0 AND (foreign_net_60d > 0 OR inst_net_60d > 0)"
+    invalidate: "oneoff_gain_ratio > 0.5 OR ocf < 0 OR rights_offering_announced"
+    related_axes: [F2, F4, C3]
+
+  - id: KP-02
+    name: 산업 사이클 저점 반전
+    status: 가설
+    horizon_months: [18, 36]
+    trigger: "sector_op_margin_pct_5y <= 20 AND sector_revenue_yoy_breadth > 0.5
+              AND sector_index_above_ma_m12"
+    confirm: "utilization_improving OR export_volume_yoy > 0 OR product_price_yoy > 0"
+    invalidate: "inventory_turnover_not_improving OR demand_recovery_absent"
+    note: "사이클 저점에서는 PER 대신 PBR·EV/EBITDA를 본다"
+
+  - id: KP-03
+    name: 수주잔고 확장
+    status: 가설
+    horizon_months: [24, 48]
+    trigger: "contract_12m_cumulative / annual_revenue >= 0.5 AND backlog_multiple_rising"
+    confirm: "contract_annualized_impact >= 0.10 AND op_margin_not_declining"
+    invalidate: "op_margin_declining_with_backlog_growth OR contract_cancelled"
+    related_axes: [D5, E2]
+
+  - id: KP-04
+    name: 마진 리레이팅
+    status: 가설
+    horizon_months: [12, 24]
+    trigger: "op_margin_rising_streak >= 4 AND revenue_yoy < 0.15 AND sgna_ratio_falling"
+    confirm: "roic_rising AND margin_driver == 'mix' "
+    invalidate: "rnd_cut OR marketing_cut OR revenue_declining"
+
+  - id: KP-05
+    name: 주주환원 리레이팅
+    status: 가설
+    horizon_months: [12, 36]
+    trigger: "treasury_cancellation_announced OR payout_ratio_rising_streak >= 3"
+    confirm: "cancellation_value / market_cap >= 0.02 AND fcf_covers_return"
+    invalidate: "treasury_disposal_after_acquisition OR policy_reversal"
+    related_axes: [D2]
+
+  - id: KP-06
+    name: 신사업 전환 성공
+    status: 가설
+    horizon_months: [24, 48]
+    trigger: "new_segment_revenue_share_2y_delta >= 0.20 AND new_segment_op_profit > 0"
+    confirm: "segment_revenue_reported_in_financials AND capex_concentrated_new"
+    invalidate: "no_segment_revenue OR repeated_equity_financing"
+    warning: "ANTI-01과 겉모습이 같다. 구분선은 오직 '부문별 매출 계상 여부'."
+
+  - id: KP-07
+    name: 저PBR 자산 재평가
+    status: 가설
+    horizon_months: [12, 36]
+    trigger: "pbr < 0.5 AND (net_cash + investment_property) / market_cap >= 0.5
+              AND realization_catalyst_exists"
+    confirm: "catalyst_specificity == 'board_resolution_or_disclosure'
+              AND owner_interest_aligned"
+    invalidate: "no_catalyst OR core_business_loss_persisting"
+    warning: "촉매 없는 저PBR은 이 패턴이 아니다 (밸류트랩)."
+
+  - id: KP-08
+    name: 과매도 역발상
+    status: 가설
+    horizon_months: [12, 24]
+    trigger: "return_6m_pct <= 10 AND sentiment_pct <= 20 AND F >= 60 AND S4_divergence"
+    confirm: "bad_news_quantified_and_limited AND volume_declining_at_lows
+              AND net_buy_turning_positive"
+    invalidate: "structural_recurring_bad_news OR additional_bad_disclosure OR ocf_deteriorating"
+    related_axes: [C1, C2, C3, C4]
+
+  - id: KP-09
+    name: 장기 박스권 돌파
+    status: 가설
+    horizon_months: [12, 24]
+    trigger: "close > box_104w_high AND breakout_volume_ratio >= 1.5 AND close > ma_m12"
+    confirm: "F >= 60 AND (foreign_net_20d > 0 OR inst_net_20d > 0) AND held_above_4w"
+    invalidate: "reentered_box_within_2w OR breakout_without_volume OR retail_only_flow"
+
+  - id: KP-10
+    name: 액면분할 이벤트 (컨텍스트 의존)
+    status: 가설
+    horizon_months: [6, 24]
+    # 액면분할은 기업가치를 바꾸지 않는다. 해석은 '분할 시점의 위치'가 만든다.
+    interpretation_matrix:
+      - { return_3y_below: 0.5,  valuation_pct_below: 40, verdict: accessibility_gain,
+          score_adjust: 3 }
+      - { return_3y_between: [0.5, 2.0], verdict: neutral, score_adjust: 0 }
+      - { return_3y_above: 2.0, valuation_pct_above: 80, sentiment_pct_above: 80,
+          verdict: peak_signal, activate_rule: SELL_EVENT_PEAK }
+    post_event_verdict:            # 분할 후 60일 사후 확정
+      accessibility_confirmed: "net_buy_60d > 0 AND next_quarter_earnings_improved"
+      peak_confirmed: "net_buy_60d < 0 AND retail_concentration_high"
+    applies_also_to: [무상증자, 주식배당]
+
+  - id: KP-11
+    name: 정책 실현형
+    status: 가설
+    horizon_months: [12, 36]
+    trigger: "lifecycle_stage IN ['budgeted','contracted'] AND E1 >= 60 AND E2 >= 55"
+    confirm: "contract_impact >= 0.10 AND segment_revenue_yoy > 0
+              AND net_buy_60d > 0 AND (T1_monthly_trend OR T2_weekly_reversal)"
+    invalidate: "budget_cut OR policy_withdrawn OR no_contract_within_12m OR E3 >= 70"
+    warning: "①발표·②기대 단계에서는 상태머신이 매수를 물리적으로 차단한다."
+
+  - id: KP-12
+    name: 지연상승형 공시
+    status: 검증중
+    horizon_months: [3, 12]
+    trigger: "event_type_car_class == 'B_delayed_drift'"
+    confirm: "post_event_net_buy_positive AND subsequent_earnings_confirmed"
+    invalidate: "car_1w_spike_then_reversal"   # = A형(즉시급등·소멸)
+    note: "krq eventstudy 결과로 자동 갱신되는 유일한 패턴"
+
+anti_patterns:
+  - id: ANTI-01
+    name: 테마 급등 후 실적 미실현
+    status: 가설
+    trigger: "return_20d >= 0.40 AND volume_multiple >= 3.0 AND NOT earnings_improved_2q"
+    effect: { veto: V1, e4_penalty: high }
+    tell: "사업목적 추가·MOU·LOI는 있으나 부문별 매출은 0"
+
+  - id: ANTI-02
+    name: 반복 희석
+    status: 가설
+    trigger: "rights_offerings_3y >= 2 OR potential_shares / market_cap >= 0.15"
+    effect: { soft_gates: [SG1, SG2], f7_penalty: high }
+    tell: "증자 자금 용도가 '운영자금'·'채무상환' (설비·R&D 아님)"
+
+  - id: ANTI-03
+    name: 기술적 반등 + 재무 악화
+    status: 구조적차단
+    trigger: "T >= 65 AND F < 45"
+    effect: { blocked_by: quad_gate_fundamental }
+    note: "별도 룰 불필요 — 4중 게이트 구조가 이 조합을 자동 배제한다"
+
+  - id: ANTI-04
+    name: 정책 기대 선반영 소멸
+    status: 가설
+    trigger: "E3 >= 70 AND E2 < 40 AND return_since_catalyst > 0.30"
+    effect: { veto: V5, sell_rule: SELL_EXPECTATION_EXHAUSTED }
+    tell: "정책 발표 직후 급등, 이후 수주·예산 근거 없이 횡보"

@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kr-quant.local/schemas/signal.schema.json",
+  "title": "KR-Quant 스크리닝 결과 (krq screen)",
+  "description": "전 종목 스캔 산출물. funnel 필드가 시스템의 건강 진단서 역할을 한다.",
+  "type": "object",
+  "required": ["meta", "funnel", "candidates"],
+  "additionalProperties": false,
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["as_of", "universe_size", "config_hash"],
+      "properties": {
+        "as_of": { "type": "string", "format": "date" },
+        "universe_size": { "type": "integer" },
+        "config_hash": { "type": "string" },
+        "rules_version": { "type": "string" },
+        "track": { "enum": ["all", "value", "scenario"] },
+        "generated_at": { "type": "string", "format": "date-time" }
+      }
+    },
+
+    "funnel": {
+      "type": "object",
+      "description": "2,700 → 30으로 좁혀지는 각 단계의 잔존 수. 어느 날 게이트가 고장 나면(후보가 갑자기 300개) 즉시 드러난다.",
+      "required": ["universe", "after_hard_gates", "after_quad_gate", "after_veto", "final_candidates"],
+      "properties": {
+        "universe": { "type": "integer" },
+        "after_liquidity": { "type": "integer" },
+        "after_hard_gates": { "type": "integer" },
+        "after_quad_gate": { "type": "integer" },
+        "after_veto": { "type": "integer" },
+        "final_candidates": { "type": "integer" },
+        "skipped_insufficient_data": { "type": "integer" }
+      }
+    },
+
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["rank", "code", "name", "total", "grade", "confidence", "axes"],
+        "properties": {
+          "rank": { "type": "integer", "minimum": 1 },
+          "code": { "type": "string", "pattern": "^[0-9A-Z]{6}$" },
+          "name": { "type": "string" },
+          "sector": { "type": "string" },
+          "total": { "type": "number", "minimum": 0, "maximum": 100 },
+          "grade": { "enum": ["S", "A", "B", "C", "D"] },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 100 },
+          "track": { "enum": ["value", "scenario"] },
+          "axes": {
+            "type": "object",
+            "required": ["F", "D", "S", "T", "E", "Q", "C"],
+            "patternProperties": {
+              "^[FDSTEQC]$": { "type": ["number", "null"] }
+            }
+          },
+          "size_pct": { "type": ["number", "null"] },
+          "one_line": {
+            "type": "string",
+            "description": "한 줄 근거. 왜 이 종목이 올라왔는가."
+          },
+          "patterns": { "type": "array", "items": { "type": "string" } },
+          "warnings": { "type": "array", "items": { "type": "string" } },
+          "scenario_state": {
+            "enum": ["WATCH", "CONFIRM_PENDING", "SCALE_IN", "SCALE_UP", "LAPSED", "EXIT", null]
+          },
+          "overheat_veto_count": { "type": "integer", "minimum": 0, "maximum": 5 }
+        }
+      }
+    },
+
+    "excluded_summary": {
+      "type": "object",
+      "description": "게이트별 탈락 종목 수. 임계값 조정의 근거가 된다.",
+      "additionalProperties": { "type": "integer" }
+    },
+
+    "watchlist_updates": {
+      "type": "array",
+      "description": "보유·관심 종목의 매도/경고 신호",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string" },
+          "name": { "type": "string" },
+          "action": { "enum": ["HOLD", "TRIM", "EXIT", "NO_NEW_BUY"] },
+          "pct": { "type": ["number", "null"] },
+          "triggered_rules": { "type": "array", "items": { "type": "string" } },
+          "note": { "type": "string" }
+        }
+      }
+    },
+
+    "scenario_board": {
+      "type": "array",
+      "description": "활성 시나리오별 종목 현황 (krq scenario)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "scenario_id": { "type": "string" },
+          "title": { "type": "string" },
+          "catalyst_type": { "enum": ["policy", "regulation", "budget", "corporate"] },
+          "lifecycle_stage": {
+            "enum": ["proposed", "passed", "promulgated", "effective", "budgeted", "contracted"]
+          },
+          "announced_at": { "type": "string", "format": "date" },
+          "days_since_catalyst": { "type": "integer" },
+          "linked_stocks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": { "type": "string" },
+                "name": { "type": "string" },
+                "link_strength": { "type": "number", "minimum": 0, "maximum": 1 },
+                "state": {
+                  "enum": ["WATCH", "CONFIRM_PENDING", "SCALE_IN", "SCALE_UP", "LAPSED", "EXIT"]
+                },
+                "E": { "type": ["number", "null"] },
+                "confirmations": { "type": "integer", "minimum": 0, "maximum": 4 },
+                "verified_by": { "enum": ["auto", "auto_low", "human"] }
+              }
+            }
+          },
+          "state_counts": {
+            "type": "object",
+            "additionalProperties": { "type": "integer" }
+          }
+        }
+      }
+    },
+
+    "health": {
+      "type": "object",
+      "description": "데이터 파이프라인 상태. 이상 시 결과 신뢰도를 하향한다.",
+      "properties": {
+        "dq_failures": { "type": "array", "items": { "type": "string" } },
+        "quota_used_pct": {
+          "type": "object",
+          "additionalProperties": { "type": "number" }
+        },
+        "stale_sources": { "type": "array", "items": { "type": "string" } },
+        "avg_data_coverage": { "type": "number" }
+      }
+    }
+  }
+}

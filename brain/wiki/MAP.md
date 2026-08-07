@@ -4,10 +4,10 @@
 > 클로드는 이 인덱스로 위치를 좁힌 뒤 관련 주제 문서 1~3개만 펼쳐 몇 초 만에 답한다.
 
 ## 📊 통계
-- 주제 문서: **10**
+- 주제 문서: **11**
 - 누적 통찰(insights): **4**
 - 보관(archive): 0
-- 마지막 수집(ingest): 2026-06-13 (branch-inventory → video-skills·my-projects 신설)
+- 마지막 수집(ingest): 2026-08-05 (KR-Quant 투자 시스템 설계 → kr-quant-system 신설)
 - 마지막 드림 시퀀스: 2026-06-14 (드림 #2 — 구식 항목 정리·브랜치 감사)
 
 ## 📚 주제 색인 (Topic Index)
@@ -22,8 +22,9 @@
 - [[claude-code-skills]] — 스킬 설치 스코프(레포/유저/전역)·지속성, 로컬 PC↔클라우드 구분, 설치 안전. `#클로드코드 #스킬 #환경`
 
 ### 내 작업·자산 (브랜치 색인)
-- [[my-projects]] — 흩어진 브랜치별 실제 프로젝트 지도(인스타·당근·성경저널·쿠팡·홍보처크롤러). `#프로젝트 #색인 #사업`
+- [[my-projects]] — 흩어진 브랜치별 실제 프로젝트 지도(인스타·당근·성경저널·쿠팡·홍보처크롤러·KR퀀트). `#프로젝트 #색인 #사업`
 - [[video-skills]] — 영상·유튜브 스킬 3종(watch·youtube-shorts·osmu) 색인. `#스킬 #영상 #유튜브`
+- [[kr-quant-system]] — 한국주식 중장기 자동분석 7축 점수 시스템 설계(PIT·4중게이트·과열거부권·시나리오). `#투자 #퀀트 #시스템설계`
 
 ### 워크플로 3단계
 - [[data-dumping]] — (1단계/수집기) 분류 없이 무가공 투입 → 정리 시간 제로화. `#수집기 #1단계`
@@ -56,12 +57,22 @@ my-projects ──(콘텐츠 운영 도구)──► video-skills
    └ 인스타/유튜브 콘텐츠 프로젝트 ◄─ youtube-shorts·osmu 스킬이 뒷받침
 my-projects ══(흩어짐의 해소)══ session-independence
    └ 17개 브랜치로 흩어진 작업을 brain 색인 하나로 = "하나의 뇌" 목표 실현
+
+my-projects ──(신규 프로젝트)──► kr-quant-system
+kr-quant-system ══(같은 3단 골격)══ claude-knowledge-system
+   └ 수집기→연결엔진→정제기 = L0 수집→L2·L3 피처/점수→L5 백테스트·패턴마이닝
+kr-quant-system ══(자가 정제의 두 얼굴)══ dream-sequence
+   └ `krq mine`(성공사례→패턴 추출) = 드림 시퀀스와 같은 발상.
+     단 KR-Quant는 자동 승격을 금지하고 사람 승인을 요구 (과최적화 폭주 방지)
+kr-quant-system ──(설정 외부화 = 재현성)──► session-independence
 ```
 
 ## ⚠️ 미해결 모순 / 확인필요
 - [확인필요] [[data-dumping]] — "5분 내 스캔"은 데이터 규모에 따라 달라질 수 있는 예시 수치.
 - [확인필요] 설계 긴장 — '자기 언어 재작성'을 AI가 대신하면 사람의 학습 이득이 줄 수 있음(드림#1, INSIGHTS.md). 완화책 검토 필요.
 - [✅해결 2026-06-14] 기본 브랜치 main 전환 완료(default=main 확인). 새 세션이 통합 뇌를 로드함.
+- [확인필요] [[kr-quant-system]] — DART·네이버 API 쿼터, 증권거래세 시점별 세율, 주요사항보고서 엔드포인트명 미검증.
+- [미해결] [[kr-quant-system]] — 부문별 매출 파싱(정책→종목 매핑의 분모)이 최대 난관. 패턴 12종 전부 `가설` 상태(검증됨 0개).
 - [미해결] [[my-projects]] — 잉여 브랜치 5개(festive-wright·graphify-setup·upbeat-goodall·index-work·merge-brain-into-main)는 main에 완전 병합 → 삭제 가능. 프로젝트·설정 브랜치는 보존. 장기적으로 프로젝트별 독립 레포 분리 검토.
 
 *(이 인덱스는 `/ingest`·`/dream` 실행 시마다 자동 갱신된다.)*

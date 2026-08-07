@@ -1,0 +1,265 @@
+# 게이트 · 매수/매도/경고 룰 (DSL)
+# 문서: docs/03-scoring-rules.md §3.7~3.10
+version: "0.1.0"
+
+# ═════════════════════════════════════════════════════════════
+# 하드 게이트 — 즉시 제외 (점수 계산조차 하지 않음)
+# 원칙: 판정 불가는 "통과"가 아니라 "제외"다. 모르면 안 산다.
+# ═════════════════════════════════════════════════════════════
+hard_gates:
+  - id: G1
+    name: 관리종목·투자환기종목
+    when: "flags.admin_issue OR flags.alert_issue"
+  - id: G2
+    name: 감사의견 비적정·계속기업 불확실성
+    when: "audit_opinion != '적정' OR flags.going_concern_doubt"
+  - id: G3
+    name: 자본잠식
+    when: "capital_impairment_ratio >= 0.50 OR equity < 0"
+  - id: G4
+    name: 상장폐지 심사·거래정지
+    when: "flags.delisting_review OR flags.trading_halted"
+  - id: G5
+    name: 횡령·배임 (자기자본 5% 이상)
+    when: "embezzlement_amount / equity >= 0.05"
+  - id: G6
+    name: 유동성 부족
+    when: "market_cap < 50_000_000_000 OR adtv_60d < 300_000_000"
+  - id: G7
+    name: 대상 외 종목군
+    when: "security_type IN ['SPAC','REIT','PREFERRED','ETF','ETN']"
+  - id: G8
+    name: 불성실공시법인 미해소
+    when: "flags.unfaithful_disclosure_active"
+  - id: G9
+    name: 판정 불가 (데이터 부족)
+    when: "data_coverage < 0.60"
+
+# ═════════════════════════════════════════════════════════════
+# 소프트 게이트 — 감점 + 사이징 축소
+# ═════════════════════════════════════════════════════════════
+soft_gates:
+  - id: SG1
+    name: 대규모 유상증자 이력
+    when: "share_growth_2y >= 0.20"
+    total_penalty: 5
+    size_multiplier: 0.7
+  - id: SG2
+    name: 잠재 희석 과다
+    when: "potential_shares / market_cap >= 0.15"
+    total_penalty: 5
+    size_multiplier: 0.7
+  - id: SG3
+    name: 상장 3년 미만
+    when: "years_since_listing < 3"
+    total_penalty: 3
+    size_multiplier: 0.8
+  - id: SG4
+    name: 지배구조 불안정
+    when: "largest_holder_pct < 0.15 AND owner_changes_3y >= 2"
+    total_penalty: 3
+  - id: SG5
+    name: 반복 실적 미달
+    when: "guidance_miss_streak >= 3"
+    total_penalty: 4
+
+# ═════════════════════════════════════════════════════════════
+# 과열 거부권 (§10-3) — TOTAL 점수를 무시하고 신규 매수를 차단
+# "급등 직후에는 아무리 좋아 보여도 사지 않는다"를 점수 위에 둔다.
+# ═════════════════════════════════════════════════════════════
+overheat_veto:
+  conditions:
+    - id: V1
+      name: 급등+거래폭발+실적 미확인
+      when: "return_20d >= 0.40 AND volume_multiple >= 3.0 AND NOT earnings_improved_2q"
+    - id: V2
+      name: 여론 과열
+      when: "hype_z >= 3.0 OR overheat_lexicon_pct >= 90"
+    - id: V3
+      name: 수급 미전환
+      when: "foreign_net_20d <= 0 AND inst_net_20d <= 0"
+    - id: V4
+      name: 월봉 이격 과다
+      when: "disparity_m12 >= 140"
+    - id: V5
+      name: 기대만 선반영
+      when: "E3 >= 70 AND E2 < 40"
+  thresholds:
+    block_new_buy: 3        # >= 3 → 신규 매수 전면 금지
+    halve_size: 2           # == 2 → 사이징 x0.5 + 경고
+
+# ═════════════════════════════════════════════════════════════
+# 4중 동시충족 게이트 (요구사항 §3 핵심)
+# 재무 / 공시 / (수급·기술) / 역발상 이 동시에 맞아야 한다.
+# ═════════════════════════════════════════════════════════════
+quad_gate:
+  fundamental:
+    # 대안 경로가 적자 탈출 초기 턴어라운드를 살린다
+    when: "F >= 60 OR (F >= 50 AND F_direction >= 70)"
+  disclosure:
+    when: "D >= 55"
+  flow_or_technical:
+    # "수급 개선 또는 추세 전환" — OR이지만 각각 최저선을 둔다
+    when: "(S >= 65 OR T >= 65) AND S >= 50 AND T >= 50"
+  contrarian:
+    when: "C >= 50"
+  total:
+    when: "TOTAL >= 70"
+
+# ═════════════════════════════════════════════════════════════
+# 매수 룰
+# ═════════════════════════════════════════════════════════════
+buy_rules:
+  - id: BLOCK_OVERHEAT
+    priority: 0                     # 최우선 — 모든 매수 룰을 무효화
+    when: "overheat_veto_count >= 3"
+    then:
+      action: NO_NEW_BUY
+      note: "과열 거부권 발동"
+
+  - id: BUY_CORE
+    priority: 10
+    when: "hard_gates_passed AND quad_gate_passed"
+    then:
+      action: BUY_CANDIDATE
+      size: "base_size(TOTAL) * soft_gate_multiplier * liquidity_cap"
+      rank_by: TOTAL
+
+  - id: BUY_CONTRARIAN
+    priority: 20
+    when: "hard_gates_passed AND quad_gate_passed
+           AND C >= 70 AND S4_divergence AND F_direction >= 65"
+    then:
+      action: BUY_CANDIDATE
+      priority_bonus: 5
+      note: "역발상 구간: 감성 하위 + 수급-가격 괴리 동시 성립"
+
+  - id: BUY_SCENARIO
+    priority: 30
+    when: "hard_gates_passed AND quad_gate_passed
+           AND scenario_state IN ['SCALE_IN','SCALE_UP']
+           AND scenario_confirmations >= 3
+           AND E2 >= 55 AND E3 < 70"
+    then:
+      action: BUY_CANDIDATE
+      size_multiplier: 0.8          # 시나리오 불확실성 할인
+      track: scenario
+
+# ═════════════════════════════════════════════════════════════
+# 사이징
+# ═════════════════════════════════════════════════════════════
+sizing:
+  base_size:
+    - { min_total: 85, pct: 8.0 }
+    - { min_total: 75, pct: 6.0 }
+    - { min_total: 70, pct: 4.0 }
+  constraints:
+    max_per_stock_pct: 10.0
+    max_per_sector_pct: 30.0
+    max_per_scenario_pct: 25.0      # 테마 집중 위험 차단
+    liquidity_cap_ratio: 0.01       # 목표금액 <= 60일 평균거래대금 x 1%
+    min_positions: 8
+    max_positions: 15
+
+  tranches:
+    - { n: 1, pct: 40, condition: "BUY_ELIGIBLE 성립" }
+    - { n: 2, pct: 30, condition: "1차 후 2주 경과 AND (주봉20MA 지지 OR 신고가) AND 게이트 유지" }
+    - { n: 3, pct: 30, condition: "분기 실적 개선 확인 OR 외인·기관 60일 순매수 지속" }
+
+# ═════════════════════════════════════════════════════════════
+# 매도 룰 — 한 번에 전량 매도하는 경우는 논리 붕괴뿐이다
+# ═════════════════════════════════════════════════════════════
+sell_rules:
+  - id: SELL_THESIS_BROKEN
+    priority: 0
+    when: "F < 45 OR hard_gate_triggered OR ocf_negative_quarters >= 2"
+    then: { action: EXIT, pct: 100 }
+
+  - id: SELL_OVERHEAT
+    priority: 10
+    when: "sentiment_pct >= 80 AND return_6m >= 0.60
+           AND (rsi_monthly >= 75 OR disparity_m12 >= 140)
+           AND (foreign_net_20d < 0 OR inst_net_20d < 0)"
+    then: { action: TRIM, pct: 33 }
+
+  - id: SELL_FLOW_BREAK
+    priority: 20
+    when: "volume_multiple >= 3.0 AND foreign_net_5d < 0
+           AND inst_net_5d < 0 AND close < ma_w20"
+    then: { action: TRIM, pct: 50 }
+
+  - id: SELL_MOMENTUM_EXHAUSTED
+    priority: 30
+    when: "surprise_streak_ended AND guidance_revised_down AND NOT T1_monthly_trend"
+    then: { action: TRIM, pct: 50 }
+
+  - id: SELL_EVENT_PEAK
+    priority: 40
+    when: "split_or_hype_event AND return_3y >= 2.0
+           AND valuation_pct >= 80 AND sentiment_pct >= 80"
+    then:
+      action: TRIM
+      pct: 33
+      alert: "이벤트가 정점 신호일 가능성 — 이후 60일 수급으로 재판정"
+
+  - id: SELL_EXPECTATION_EXHAUSTED
+    priority: 50
+    when: "scenario_state == 'LAPSED' AND E2 < 40 AND return_since_catalyst > 0"
+    then:
+      action: TRIM
+      pct: 50
+      note: "촉매가 실적으로 전환되지 못함 — 기대 프리미엄 해소"
+
+# ═════════════════════════════════════════════════════════════
+# 이탈 (손절·정리)
+# ═════════════════════════════════════════════════════════════
+exit_rules:
+  thesis_broken: { when: "F < 45 OR hard_gate_triggered", action: "EXIT 100%" }
+  trend_broken:  { when: "monthly_close < ma_m12 for 2 months", action: "EXIT 100%" }
+  price_stop:    { when: "return_from_avg_cost <= -0.20", action: "EXIT 100%" }
+  time_stop:     { when: "months_since_first_buy >= 12 AND TOTAL < 60", action: "EXIT 100%" }
+  scenario_lapse: { when: "scenario_state == 'LAPSED'", action: "신규 중단 + 매도 룰 이관" }
+
+# ═════════════════════════════════════════════════════════════
+# 시나리오 상태머신 (§10-4)
+# WATCH/CONFIRM_PENDING 에서 매수를 물리적으로 차단하는 것이 핵심
+# ═════════════════════════════════════════════════════════════
+scenario_state_machine:
+  states:
+    WATCH:            { buy_allowed: false }
+    CONFIRM_PENDING:  { buy_allowed: false }
+    SCALE_IN:         { buy_allowed: true, max_tranche: 1 }
+    SCALE_UP:         { buy_allowed: true, max_tranche: 3 }
+    LAPSED:           { buy_allowed: false }
+    EXIT:             { buy_allowed: false }
+  transitions:
+    - { from: WATCH, to: CONFIRM_PENDING,
+        when: "E1 >= 60 AND E2 >= 55 AND overheat_veto_count < 3" }
+    - { from: CONFIRM_PENDING, to: SCALE_IN,
+        when: "scenario_confirmations >= 3 AND quad_gate_passed" }
+    - { from: SCALE_IN, to: SCALE_UP,
+        when: "earnings_confirmed_lagging OR net_buy_60d_sustained" }
+    - { from: CONFIRM_PENDING, to: LAPSED,
+        when: "days_since_catalyst > 90 AND scenario_confirmations < 3" }
+    - { from: [SCALE_IN, SCALE_UP], to: LAPSED,
+        when: "catalyst_invalidated OR E2 < 40" }
+    - { from: LAPSED, to: WATCH, when: "new_catalyst_evidence" }
+
+  confirmations:      # 확인 4항목 — 3개 이상이면 SCALE_IN 자격
+    earnings:   "segment_revenue_yoy > 0 OR contract_impact >= 0.10"
+    flow:       "foreign_net_60d > 0 OR inst_net_60d > 0"
+    chart:      "T1_monthly_trend OR T2_weekly_reversal"
+    disclosure: "followup_disclosure_exists"
+    required: 3
+
+# ═════════════════════════════════════════════════════════════
+# 경고 (매매 신호 아님 — 리포트 표시용)
+# ═════════════════════════════════════════════════════════════
+warnings:
+  - { id: WARN_ACCRUAL,       when: "accrual_pct >= 80",        msg: "이익의 현금 전환율 낮음" }
+  - { id: WARN_DILUTION,      when: "potential_dilution >= 0.15", msg: "희석 위험" }
+  - { id: WARN_CONCENTRATION, when: "top_customer_pct >= 0.50", msg: "고객 집중 위험" }
+  - { id: WARN_HYPE,          when: "hype_z >= 2.0",            msg: "여론 과열 조짐" }
+  - { id: WARN_PREPRICED,     when: "E3 >= 70",                 msg: "촉매 선반영 가능성" }
+  - { id: WARN_THIN_DATA,     when: "data_coverage < 0.70",     msg: "데이터 부족 — 신뢰도 하향" }
+  - { id: WARN_STALE_FIN,     when: "days_since_last_report > 200", msg: "재무 정보 노후" }

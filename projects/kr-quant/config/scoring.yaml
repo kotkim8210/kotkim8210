@@ -1,0 +1,234 @@
+# 7축 점수화 설정
+# 문서: docs/03-scoring-rules.md
+# ⚠️ 모든 값은 검증 전 초기값이다. docs/04-backtest.md 검증 프로토콜 통과 후 확정값으로 승격한다.
+version: "0.1.0"
+
+# ─────────────────────────────────────────────────────────────
+# 축 가중치 (합 = 100)
+# 설계 의도: 검증 가능한 축(F·D·S·T=70)이 다수결을 갖는다.
+#            흥분하기 쉬운 축(Q·C=15)은 구조적으로 눌러둔다. (INV-3)
+# ─────────────────────────────────────────────────────────────
+weights:
+  F: 22   # 재무 (Fundamental)
+  D: 12   # 공시 (Disclosure)
+  S: 18   # 수급 (Supply/Flow)
+  T: 18   # 기술 (Technical, 주/월봉)
+  E: 15   # 시나리오 (Event/Scenario)
+  Q: 8    # 정성 (Qualitative)
+  C: 7    # 역발상 (Contrarian)
+
+# 불변식 검사 — 로드 시 pydantic이 강제한다
+invariants:
+  weights_sum: 100
+  max_sentiment_weight: 20    # Q + C <= 20 (INV-3)
+
+# ─────────────────────────────────────────────────────────────
+# 정규화 정책
+# ─────────────────────────────────────────────────────────────
+normalization:
+  sector_level: ksic_mid            # 중분류 기준
+  min_peers: 10                     # 미만이면 대분류로 폴백
+  fallback_level: ksic_major
+  winsorize_pct: 0.01               # 상하위 1% 절단 후 백분위
+  self_history_years: 5             # 자기이력 Z점수 기준 기간
+
+missing_data:
+  strategy: renormalize             # 관측된 하위지표만으로 재정규화 (INV-5)
+  skip_threshold: 0.40              # 필수 지표 결측률 40% 초과 → SKIP
+
+# ─────────────────────────────────────────────────────────────
+# F축 — 재무 (내부 100점)
+# ─────────────────────────────────────────────────────────────
+axes:
+  F:
+    components:
+      F1_revenue_growth:      { points: 12, norm: sector_pct, direction: higher }
+      F2_op_profit_improve:   { points: 20, norm: sector_pct, direction: higher }
+      F3_profitability:       { points: 12, norm: sector_pct, direction: higher }
+      F4_cashflow_quality:    { points: 20, norm: mixed,      direction: higher }
+      F5_stability:           { points: 16, norm: absolute,   direction: higher }
+      F6_persistence:         { points: 10, norm: sector_pct, direction: higher }
+      F7_dilution:            { points: 10, norm: absolute,   direction: lower  }
+    # F4 — 이익의 질. 이익은 조작 가능하지만 현금은 어렵다.
+    cashflow_quality:
+      ocf_positive_quarters_target: 8      # 최근 8분기 중 OCF>0 개수
+      ocf_to_op_profit_min: 0.8            # OCF/영업이익 하한
+      accrual_penalty_pct: 80              # accrual_ratio 업종 상위 20% → 감점
+    # F5 — 절대 구간 배점 (파산 위험은 상대평가 대상이 아니다)
+    stability_bands:
+      debt_ratio:        { full: 100,  partial: 200, zero_above: 200 }   # %
+      interest_coverage: { full: 5.0,  partial: 1.0, zero_below: 1.0 }   # 배
+      netdebt_ebitda:    { full: 1.0,  partial: 3.0, zero_above: 3.0 }   # 배
+    dilution_bands:
+      share_growth_3y:   { full: 0.02, partial: 0.20, zero_above: 0.20 }
+      potential_dilution: { full: 0.05, partial: 0.15, zero_above: 0.15 }
+    # 게이트에서 쓰는 파생 지표 — 턴어라운드 경로를 살리는 장치
+    f_direction:
+      formula: "0.3*F1 + 0.5*F2 + 0.2*F4_trend"
+
+  # ───────────────────────────────────────────────────────────
+  # D축 — 공시
+  # ───────────────────────────────────────────────────────────
+  D:
+    components:
+      D1_earnings_disclosure: { points: 25 }
+      D2_treasury_stock:      { points: 20 }
+      D3_insider_ownership:   { points: 15 }
+      D4_capital_events:      { points: 15 }
+      D5_business_events:     { points: 15 }
+      D6_risk_resolution:     { points: 10 }
+    # D2 — 소각(소멸)이 취득보다 강한 신호다
+    treasury_weights:
+      cancellation: 1.0
+      acquisition: 0.6
+      disposal: -0.8
+    # D5 — 시나리오 트랙(E2)과 공유되는 핵심 지표
+    contract_impact:
+      strong: 0.30        # 계약금액/최근4Q매출 >= 0.30 → 강한 증거
+      meaningful: 0.10
+      noise_below: 0.05
+      annualize_multiyear: true   # 다년 계약은 연환산. 총액 그대로 쓰면 과대평가
+    capital_event_weights:
+      rights_offering: -1.0       # 유상증자 (규모 비례)
+      cb_bw_issue: -0.7
+      capital_reduction: -1.5     # 무상감자
+      stock_split: 0.0            # ★중립 — 이벤트 컨텍스트 해석기가 처리 (KP-10)
+
+  # ───────────────────────────────────────────────────────────
+  # S축 — 수급
+  # ───────────────────────────────────────────────────────────
+  S:
+    components:
+      S1_foreign:       { points: 28 }
+      S2_institution:   { points: 22 }
+      S3_pension:       { points: 14 }
+      S4_divergence:    { points: 16 }   # ★이 축의 알파
+      S5_value_traded:  { points: 10 }
+      S6_actor_rotation: { points: 10 }
+    lookback_days: [20, 60, 120]
+    normalize_by: [market_cap, period_value_traded]   # 소형주 노이즈 억제
+    pension_fallback: institution                      # 결측 시 폴백 + 신뢰도 표시
+    # S4 — 가격은 안 움직이는데 기관이 조용히 담는 구간
+    divergence:
+      price_return_60d_max: 0.0
+      net_buy_60d_min: 0.0
+
+  # ───────────────────────────────────────────────────────────
+  # T축 — 기술 (주봉·월봉 전용. 단기 지표는 계산하지 않는다)
+  # ───────────────────────────────────────────────────────────
+  T:
+    components:
+      T1_monthly_trend:    { points: 24 }
+      T2_weekly_reversal:  { points: 24 }
+      T3_breakout:         { points: 18 }
+      T4_volume_confirm:   { points: 10 }
+      T5_rsi_state:        { points: 12 }
+      T6_disparity:        { points: 12 }
+    monthly_ma: [12, 24, 60]
+    weekly_ma: [20, 60, 120]
+    box_lookback_weeks: 104
+    breakout_volume_ratio: 1.5
+    rsi:
+      period_weeks: 14
+      optimal: [45, 70]
+      penalty_above: 70
+      heavy_penalty_above: 80
+      oversold_bonus_below: 30      # 강세 다이버전스 동반 시에만
+    disparity:
+      monthly_ma_ref: 12
+      penalty_above: 140
+
+  # ───────────────────────────────────────────────────────────
+  # E축 — 시나리오 (§11)
+  # ───────────────────────────────────────────────────────────
+  E:
+    default_when_no_scenario: 50    # 시나리오 없음은 감점 사유가 아니다
+    components:
+      E1_policy_fit:      { points: 22, direction: higher }
+      E2_earnings_trans:  { points: 30, direction: higher }   # ★검증성 > 기대성
+      E3_prepriced_risk:  { points: 20, direction: lower  }
+      E4_speculative_heat: { points: 18, direction: lower  }
+      E5_persistence:     { points: 10, direction: higher }
+    e1_link_strength:
+      value_chain_coef:
+        direct: 1.0
+        tier1_vendor: 0.6
+        indirect: 0.2
+      policy_specificity_coef:
+        budget_allocated: 1.0
+        enforcement_dated: 0.8
+        bill_passed: 0.6
+        announced_only: 0.3
+      segment_parse_failure_penalty: 0.5   # KSIC만으로 매핑 시
+    e2_evidence_points:
+      contract_disclosed: 35
+      budget_executed: 20
+      segment_revenue_rising: 25
+      guidance_quantified: 10
+      leadtime_fit: 10
+      max_without_evidence: 20      # 발표만 있으면 E2 <= 20 → 매수 불가
+    e3_prepriced:
+      return_since_catalyst: 35
+      valuation_percentile: 25
+      excess_over_sector: 20
+      reaction_speed: 20
+    e4_overheat:
+      hype_z: 25
+      overheat_lexicon_freq: 20
+      volume_multiple: 20
+      retail_concentration: 20
+      market_alert_flag: 15
+    e5_persistence:
+      catalyst_duration: 40
+      repeat_order_history: 25
+      entry_barrier: 20
+      historical_car_6m: 15
+
+  # ───────────────────────────────────────────────────────────
+  # Q축 — 정성 / C축 — 역발상
+  # ───────────────────────────────────────────────────────────
+  Q:
+    components:
+      Q1_earnings_surprise: { points: 28 }
+      Q2_sector_position:   { points: 26 }
+      Q3_comprehensibility: { points: 14 }
+      Q4_moat_proxy:        { points: 22 }
+      Q5_governance:        { points: 10 }
+    consensus_source: none            # 미확보 시 프록시 사용
+    proxy_when_missing: yoy_plus_trend
+    proxy_confidence_penalty: 0.3     # 프록시 사용 시 신뢰도 감산
+
+  C:
+    components:
+      C1_sentiment_extreme: { points: 26 }
+      C2_valuation_position: { points: 24 }
+      C3_divergence:        { points: 30 }   # ★역발상의 정의 그 자체
+      C4_bad_news_priced:   { points: 20 }
+    # C3 — "다들 싫어하는데 숫자는 좋아지고 있음"이어야 만점
+    divergence_rule:
+      sentiment_pct_below: 20
+      f_axis_min: 60
+    valuation_pct_below: 30
+    # 과열 시 역방향 — 매도 룰 평가 대상으로 전환
+    overheat_cap:
+      sentiment_pct_above: 80
+      return_6m_above: 0.60
+      capped_value: 20
+
+# ─────────────────────────────────────────────────────────────
+# 등급 / 신뢰도
+# ─────────────────────────────────────────────────────────────
+grades:
+  S: 85
+  A: 75
+  B: 70
+  C: 60
+  D: 0
+
+confidence:
+  base: 100
+  proxy_penalty: 0.3          # × (1 - 0.3*proxy_usage_ratio)
+  disagreement_penalty: 0.2   # × (1 - 0.2*axis_disagreement)
+  # 축 간 점수 표준편차가 클수록 신뢰도 하락:
+  # "모두 애매한 종목"과 "의견이 갈리는 종목"을 구분하기 위함
+  disagreement_metric: axis_stdev_normalized

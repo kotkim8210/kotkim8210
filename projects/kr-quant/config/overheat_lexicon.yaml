@@ -1,0 +1,43 @@
+# 과열 관용구 사전 (E4 단타 과열 점수 · §10-3)
+# 이 표현들의 "등장 빈도" 자체를 지표로 쓴다. 내용의 진위가 아니라 온도를 재는 것이다.
+version: "0.1.0"
+
+# 가중치가 높을수록 강한 과열 신호
+extreme_bullish:
+  - { term: "무조건 오른", weight: 3.0 }
+  - { term: "집 팔아", weight: 3.0 }
+  - { term: "영끌", weight: 2.5 }
+  - { term: "빚투", weight: 2.5 }
+  - { term: "풀매수", weight: 2.5 }
+  - { term: "지금 아니면", weight: 2.0 }
+  - { term: "마지막 기회", weight: 2.0 }
+  - { term: "가즈아", weight: 2.0 }
+  - { term: "텐배거", weight: 1.5 }
+  - { term: "상한가 간다", weight: 2.0 }
+  - { term: "떡상", weight: 1.5 }
+  - { term: "존버", weight: 1.0 }
+
+capitulation:            # 극단 비관 — C1(역발상) 입력으로도 사용
+  - { term: "손절", weight: 1.0 }
+  - { term: "물렸", weight: 1.5 }
+  - { term: "상장폐지", weight: 2.0 }
+  - { term: "휴지조각", weight: 2.5 }
+  - { term: "탈출", weight: 1.5 }
+
+# 근거 있는 서술의 지표 — evidence_ratio 계산에 사용
+# 이 표현이 많을수록 감성 점수의 신뢰도가 올라간다
+evidence_markers:
+  - "영업이익"
+  - "매출액"
+  - "공시"
+  - "수주"
+  - "컨센서스"
+  - "가이던스"
+  - "현금흐름"
+  - "부채비율"
+
+scoring:
+  # 백분위 기준. 절대 빈도는 종목 인기도에 좌우되므로 상대화한다.
+  normalize: percentile_within_universe
+  lookback_days: 30
+  min_documents: 20        # 미만이면 판정 불가(None) — 0으로 처리하지 않는다
