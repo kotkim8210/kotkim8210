@@ -41,6 +41,20 @@
         "video-skills",
         "my-projects"
       ]
+    },
+    {
+      "file": "brain/inbox/2026-08-16-lh-행복주택-의왕고천-안양명학.md",
+      "ingested_at": "2026-08-16T09:10Z",
+      "topics": [
+        "lh-happy-house-youth"
+      ]
+    },
+    {
+      "file": "brain/inbox/2026-08-16-lh-3인가구-방3-경기인천.md",
+      "ingested_at": "2026-08-16T09:15Z",
+      "topics": [
+        "lh-public-rental-family"
+      ]
     }
   ]
 }
