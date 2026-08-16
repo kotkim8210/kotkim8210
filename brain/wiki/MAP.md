@@ -4,10 +4,10 @@
 > 클로드는 이 인덱스로 위치를 좁힌 뒤 관련 주제 문서 1~3개만 펼쳐 몇 초 만에 답한다.
 
 ## 📊 통계
-- 주제 문서: **10**
+- 주제 문서: **11**
 - 누적 통찰(insights): **4**
 - 보관(archive): 0
-- 마지막 수집(ingest): 2026-06-13 (branch-inventory → video-skills·my-projects 신설)
+- 마지막 수집(ingest): 2026-08-16 (인천·경기 공공임대 자격 조사 → incheon-public-housing-eligibility 신설)
 - 마지막 드림 시퀀스: 2026-06-14 (드림 #2 — 구식 항목 정리·브랜치 감사)
 
 ## 📚 주제 색인 (Topic Index)
@@ -24,6 +24,9 @@
 ### 내 작업·자산 (브랜치 색인)
 - [[my-projects]] — 흩어진 브랜치별 실제 프로젝트 지도(인스타·당근·성경저널·쿠팡·홍보처크롤러). `#프로젝트 #색인 #사업`
 - [[video-skills]] — 영상·유튜브 스킬 3종(watch·youtube-shorts·osmu) 색인. `#스킬 #영상 #유튜브`
+
+### 생활·주거
+- [[incheon-public-housing-eligibility]] — 40대 1인가구(월200·자산4천·무차량) 공공임대 자격 진단. 천원주택 대상 아님, 매입/전세임대 2순위 충족. `#주거 #인천 #공공임대 #자격조건`
 
 ### 워크플로 3단계
 - [[data-dumping]] — (1단계/수집기) 분류 없이 무가공 투입 → 정리 시간 제로화. `#수집기 #1단계`
@@ -62,6 +65,7 @@ my-projects ══(흩어짐의 해소)══ session-independence
 - [확인필요] [[data-dumping]] — "5분 내 스캔"은 데이터 규모에 따라 달라질 수 있는 예시 수치.
 - [확인필요] 설계 긴장 — '자기 언어 재작성'을 AI가 대신하면 사람의 학습 이득이 줄 수 있음(드림#1, INSIGHTS.md). 완화책 검토 필요.
 - [✅해결 2026-06-14] 기본 브랜치 main 전환 완료(default=main 확인). 새 세션이 통합 뇌를 로드함.
+- [확인필요] [[incheon-public-housing-eligibility]] — 2027년 iH 매입임대 1차 공고 시기, 전세임대 2순위 영구임대 자산기준 정확 금액. 예비입주자 대기기간이 2027년 초 이사 일정과 충돌 가능.
 - [미해결] [[my-projects]] — 잉여 브랜치 5개(festive-wright·graphify-setup·upbeat-goodall·index-work·merge-brain-into-main)는 main에 완전 병합 → 삭제 가능. 프로젝트·설정 브랜치는 보존. 장기적으로 프로젝트별 독립 레포 분리 검토.
 
 *(이 인덱스는 `/ingest`·`/dream` 실행 시마다 자동 갱신된다.)*
