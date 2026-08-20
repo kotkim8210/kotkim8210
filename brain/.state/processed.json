@@ -41,6 +41,16 @@
         "video-skills",
         "my-projects"
       ]
+    },
+    {
+      "file": "brain/inbox/2026-08-20-agent-browser-설치-트러블슈팅.md",
+      "ingested_at": "2026-08-20T10:45Z",
+      "topics": [
+        "agent-browser",
+        "remote-container-network",
+        "claude-code-skills",
+        "my-projects"
+      ]
     }
   ]
 }
