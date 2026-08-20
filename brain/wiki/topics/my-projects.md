@@ -3,9 +3,9 @@ title: 진행 중인 프로젝트 색인 (브랜치별 산출물 지도)
 slug: my-projects
 tags: [프로젝트, 색인, 사업, 콘텐츠, 브랜치]
 created: 2026-06-13
-updated: 2026-06-13
-sources: [2026-06-13-branch-inventory.md]
-related: [[video-skills]], [[claude-code-skills]], [[session-independence]]
+updated: 2026-08-20
+sources: [2026-06-13-branch-inventory.md, 2026-08-20-agent-browser-설치-트러블슈팅.md]
+related: [[video-skills]], [[claude-code-skills]], [[session-independence]], [[remote-container-network]]
 confidence: high
 status: active
 ---
@@ -38,6 +38,7 @@ status: active
 - [[video-skills]] — youtube-shorts·osmu 스킬이 콘텐츠 프로젝트(인스타·유튜브) 운영을 뒷받침.
 - [[session-independence]] — 이 색인 자체가 "세션이 흩어져도 하나의 뇌에서 전체를 본다"는 원칙의 실현.
 - [[claude-code-skills]] — 프로젝트마다 `.claude/` 설정이 달라 스킬 스코프 규칙의 영향을 받음.
+- [[remote-container-network]] — ⚠️ 쿠팡(`www.coupang.com`·`wing.coupang.com`)은 원격 세션에서 **Akamai 차단**으로 접속 불가. 쿠팡파트너스·재고관리 작업을 브라우저 자동화로 대체할 수 없고, 엑셀 수동 업로드 방식을 유지해야 한다. (2026-08-20-agent-browser-설치-트러블슈팅.md)
 
 ## 미해결/모순 (Open Questions)
 - [ ] 각 프로젝트를 독립 레포로 분리할지, 이 레포 서브폴더로 유지할지 결정.
