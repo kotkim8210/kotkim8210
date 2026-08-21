@@ -62,6 +62,32 @@ https://www.g2b.go.kr/pn/pnp/pnpe/UntyAtchFile/downloadFile.do
    서울남부 1권역: 2,948,625 ÷ 0.045 = 65,525,000원 = 추정가격의 **73.1%**.
 → **이 경로가 이전까지 못 보던 것을 보게 해준다: 입찰 건과 원가 구조, 그리고 참가업체 수.**
 
+### 🔓 경쟁강도 측정 경로 확보 (2026-08-20) — 나라장터 낙찰정보 API
+`apis.data.go.kr/1230000/as/ScsbidInfoService`. **엔드포인트는 살아 있고 서비스키만 필요하다**
+(키 없이 호출하면 `SERVICE_KEY_IS_NULL`, 없는 오퍼레이션은 다른 에러 → 이 차이로 키 없이 검증했다).
+
+유효 확인된 오퍼레이션:
+| 오퍼레이션 | 용도 |
+|---|---|
+| **`getOpengResultListInfoServc`** | **용역 개찰결과 목록** ← 응찰자 수의 원천 |
+| `getOpengResultListInfoServcPPSSrch` | 용역 개찰결과 (조달청 검색) |
+| `getScsbidListSttusServcPPSSrch` | 용역 낙찰목록 |
+| `getOpengResultListInfoCnstwkPPSSrch` | 공사 개찰결과 |
+| `getScsbidListSttusThngPPSSrch` | 물품 낙찰목록 |
+
+- 공식 설명: *"각 업무별로 최종낙찰자, **개찰순위**, 복수예비가격 및 예비가격 정보를 제공"*
+- **심의유형 개발·운영 모두 자동승인** → data.go.kr 가입 후 활용신청하면 키가 바로 나온다(약 10분).
+- **공고번호별 개찰결과 행 수 = 응찰자 수.** 이것이 경쟁강도의 유일한 실측 지표다.
+- 수집기: `tools/g2b_opening_results.py` (키를 `G2B_SERVICE_KEY`에 넣고 실행. **Decoding 키** 사용)
+
+**막힌 대안들** — 전부 확인함:
+| 경로 | 결과 |
+|---|---|
+| g2b.go.kr 개찰결과 직접 URL | SPA라 서버 렌더링 없음, 모든 시도 "페이지를 찾을 수 없습니다" |
+| 서울시 계약마당 `contract.seoul.go.kr` 개찰결과 | 열리지만 항목이 기관·사업명·투찰금액·투찰율·낙찰예정자뿐 — **응찰자 수 없음** |
+| g2bplus.kr | "개찰·낙찰현황(용역)" 메뉴는 있으나 **로그인·유료** |
+| pubdata.g2b.go.kr · pps.go.kr | 이 환경에서 접속 불가(HTTP 000) |
+
 ### ⚠️ 치명적 방법론 교훈 — 낙찰자만 세면 경쟁을 못 본다
 수의계약 공개 데이터에는 **낙찰자만** 있고 응찰자가 없다. 그래서 HHI를 계산하면
 "업체 17곳, HHI 1,107 = 경쟁적이나 독점 아님" 같은 결론이 나오는데, 같은 시장의
