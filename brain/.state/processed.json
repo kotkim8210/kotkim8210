@@ -41,6 +41,25 @@
         "video-skills",
         "my-projects"
       ]
+    },
+    {
+      "file": "brain/inbox/2026-08-15-학교청소-공공계약-실측조사.md",
+      "ingested_at": "2026-08-15T14:55Z",
+      "topics": [
+        "public-contract-data",
+        "school-cleaning-market",
+        "water-tank-cleaning"
+      ]
+    },
+    {
+      "file": "brain/inbox/2026-08-15-수도권-교차검증-인천948건.md",
+      "ingested_at": "2026-08-15T15:25Z",
+      "topics": [
+        "public-contract-data",
+        "school-cleaning-market",
+        "water-tank-cleaning",
+        "social-coop-procurement"
+      ]
     }
   ]
 }
