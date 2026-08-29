@@ -143,5 +143,24 @@ if miss:
 # 문서 본문에는 과거 리포트가 옛 표지 문구를 인용해 놓은 자리가 있어 정규식으로 재검사하면 오탐이 난다.
 PYEOF
 then echo "  ✓ 편집 리포트 전량 수록"; else echo "  ✗ 편집 리포트 누락"; FAIL=1; fi
+
+# ⑫ 편집 리포트 헤더의 회차 자수 (28차 검수 — 원고를 고치고 리포트 첫 줄만 구판으로 남았다.
+#    `novel/manuscript/NNN.md` (N,NNN자 형태는 리포트 헤더에서만 쓰는 표기라 인용문 오탐이 없다.)
+if python3 - <<'PYEOF'
+import pathlib, re, sys, os
+root = pathlib.Path(os.environ["NOVEL_ROOT"]) / "novel"
+def chars(n):
+    raw = (root / "manuscript" / f"{n:03d}.md").read_text(encoding="utf-8")
+    return len("\n".join(l for l in raw.split("\n") if not l.startswith("# ")))
+bad = []
+for f in sorted((root / "editorial").glob("edit-report-*.md")):
+    for n, rec in re.findall(r"novel/manuscript/(\d{3})\.md` \(([\d,]+)자", f.read_text(encoding="utf-8")):
+        a = chars(int(n))
+        if int(rec.replace(",", "")) != a:
+            bad.append(f"{f.name} {n}화: 기록 {rec} / 실제 {a:,}")
+if bad:
+    print("    " + " | ".join(bad)); sys.exit(1)
+PYEOF
+then echo "  ✓ 편집 리포트 헤더 자수"; else echo "  ✗ 편집 리포트 헤더 자수 불일치"; FAIL=1; fi
 if [ "$FAIL" = "1" ]; then echo "❌ 검증 실패 — 배포 금지"; exit 1; fi
 echo "✅ 전 항목 일치 — 배포 가능 (${EP}화 / ${FMT}자)"
