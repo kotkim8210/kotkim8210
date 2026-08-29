@@ -162,5 +162,38 @@ if bad:
     print("    " + " | ".join(bad)); sys.exit(1)
 PYEOF
 then echo "  ✓ 편집 리포트 헤더 자수"; else echo "  ✗ 편집 리포트 헤더 자수 불일치"; FAIL=1; fi
+
+# ⑬ 사이다 장부 — 회차 누락 + 보상 간격 산술 (31차 검수. 절단 감사가 '궁금함'을 관리한다면 이쪽은 '기분 좋음'을 관리한다.
+#    등급 판정은 사람이 하고, 게이트는 산술만 본다. 규칙은 장부 머리의 '규칙 적용 시작' 회차부터 적용.)
+if python3 - <<'PYEOF'
+import pathlib, re, sys, os
+root = pathlib.Path(os.environ["NOVEL_ROOT"]) / "novel"
+led = (root / "bible" / "catharsis-ledger.md").read_text(encoding="utf-8")
+eps = sorted(int(f.stem) for f in (root / "manuscript").glob("[0-9][0-9][0-9].md"))
+m = re.search(r"<!--\s*규칙 적용 시작:\s*(\d{3})\s*-->", led)
+if not m:
+    print("    장부 머리에 '규칙 적용 시작' 주석이 없다"); sys.exit(1)
+START = int(m.group(1))
+GRADE = {}
+for n, g in re.findall(r"^\|\s*\*{0,2}(\d{3})\*{0,2}\s*\|\s*[⭐\s]*\*{0,2}(응징|대리만족|소승|없음)\*{0,2}\s*\|", led, re.M):
+    GRADE[int(n)] = g
+missing = [n for n in eps if n not in GRADE]
+if missing:
+    print("    장부 누락 회차: " + ", ".join(f"{n:03d}" for n in missing)); sys.exit(1)
+RANK = {"없음": 0, "소승": 1, "대리만족": 2, "응징": 3}
+bad = []
+for label, need, limit in (("소승 이상", 1, 3), ("대리만족 이상", 2, 6), ("응징", 3, 10)):
+    run = 0
+    for n in eps:
+        if n < START:
+            continue
+        run = 0 if RANK[GRADE[n]] >= need else run + 1
+        if run > limit:
+            bad.append(f"{label} {limit}화 한도 초과 ({n:03d}화까지 {run}화 연속 없음)")
+            break
+if bad:
+    print("    " + " | ".join(bad)); sys.exit(1)
+PYEOF
+then echo "  ✓ 사이다 장부 (회차 수록 · 보상 간격)"; else echo "  ✗ 사이다 장부 위반"; FAIL=1; fi
 if [ "$FAIL" = "1" ]; then echo "❌ 검증 실패 — 배포 금지"; exit 1; fi
 echo "✅ 전 항목 일치 — 배포 가능 (${EP}화 / ${FMT}자)"
