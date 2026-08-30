@@ -182,8 +182,15 @@ if missing:
     print("    장부 누락 회차: " + ", ".join(f"{n:03d}" for n in missing)); sys.exit(1)
 RANK = {"없음": 0, "소승": 1, "대리만족": 2, "응징": 3}
 bad = []
-for label, need, limit in (("소승 이상", 1, 3), ("대리만족 이상", 2, 6), ("응징", 3, 10)):
+# 시작점에서 카운터를 0으로 리셋하면 이미 쌓인 부채를 게이트가 못 본다.
+# 시작점 직전까지의 연속 공백을 초기값으로 물려받는다. 응징만 예외(42화 부채는 소급 청산 불가).
+for label, need, limit, carry in (("소승 이상", 1, 3, True), ("대리만족 이상", 2, 6, True), ("응징", 3, 10, False)):
     run = 0
+    if carry:
+        for n in [x for x in eps if x < START][::-1]:
+            if RANK[GRADE[n]] >= need:
+                break
+            run += 1
     for n in eps:
         if n < START:
             continue
