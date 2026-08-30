@@ -154,10 +154,20 @@ def chars(n):
     return len("\n".join(l for l in raw.split("\n") if not l.startswith("# ")))
 bad = []
 for f in sorted((root / "editorial").glob("edit-report-*.md")):
-    for n, rec in re.findall(r"novel/manuscript/(\d{3})\.md` \(([\d,]+)자", f.read_text(encoding="utf-8")):
+    txt = f.read_text(encoding="utf-8")
+    tgt = re.findall(r"novel/manuscript/(\d{3})\.md` \(([\d,]+)자", txt)
+    for n, rec in tgt:
         a = chars(int(n))
         if int(rec.replace(",", "")) != a:
-            bad.append(f"{f.name} {n}화: 기록 {rec} / 실제 {a:,}")
+            bad.append(f"{f.name} {n}화 헤더: 기록 {rec} / 실제 {a:,}")
+    # 계측표의 자수 행도 본다 (33차 검수 — 헤더만 고치고 표는 구판으로 남았다).
+    # 대상 회차가 하나로 특정되는 리포트에만 적용한다(여러 화를 묶은 리포트는 건너뛴다).
+    if len(tgt) == 1:
+        a = chars(int(tgt[0][0]))
+        rows = re.findall(r"^\|\s*자수\s*\|\s*\*{0,2}([\d,]+)\*{0,2}\s*\|", txt, re.M)
+        # 수정 전/후 대조표에는 구값이 정당하게 남는다. 한 행이라도 실제와 맞으면 통과.
+        if rows and not any(int(r.replace(",", "")) == a for r in rows):
+            bad.append(f"{f.name} 계측표: {', '.join(rows)} / 실제 {a:,}")
 if bad:
     print("    " + " | ".join(bad)); sys.exit(1)
 PYEOF
