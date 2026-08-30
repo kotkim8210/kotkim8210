@@ -202,5 +202,21 @@ if bad:
     print("    " + " | ".join(bad)); sys.exit(1)
 PYEOF
 then echo "  ✓ 사이다 장부 (회차 수록 · 보상 간격)"; else echo "  ✗ 사이다 장부 위반"; FAIL=1; fi
+
+# ⑭ 화면 호흡 — 장면 구분선(⁂) 과다 (32차 검수. 001~028은 화당 2.1개였는데 056에서 51개까지 표류했다.
+#    ⁂를 내부 상태관리 단위로 쓴 것이 원인이라, 독자용 하드컷과 분리해 상한을 건다.)
+if python3 - <<'PYEOF'
+import pathlib, re, sys, os
+root = pathlib.Path(os.environ["NOVEL_ROOT"]) / "novel" / "manuscript"
+bad = []
+for f in sorted(root.glob("[0-9][0-9][0-9].md")):
+    n = int(f.stem)
+    c = f.read_text(encoding="utf-8").count("⁂")
+    if c > 25:
+        bad.append(f"{n:03d}화 {c}개")
+if bad:
+    print("    ⁂ 25개 초과: " + ", ".join(bad)); sys.exit(1)
+PYEOF
+then echo "  ✓ 화면 호흡 (장면 구분선 ≤25)"; else echo "  ✗ 장면 구분선 과다"; FAIL=1; fi
 if [ "$FAIL" = "1" ]; then echo "❌ 검증 실패 — 배포 금지"; exit 1; fi
 echo "✅ 전 항목 일치 — 배포 가능 (${EP}화 / ${FMT}자)"

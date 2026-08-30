@@ -112,6 +112,10 @@ for _f in sorted((NOVEL / "editorial").glob("edit-report-*.md")):
 if not _REPORTS:
     raise SystemExit("편집 리포트를 하나도 못 찾았다 — 경로 확인")
 LAST_REPORT = max(n for n, _, _ in _REPORTS)
+# ⚠ 구판 산출물 제거 — 회차마다 파일명이 바뀌어 스크래치패드에 001-008 … 001-055가 쌓였고,
+#   검수자가 그중 옛 파일을 열어 "056이 없다"는 오판이 났다(32차 검수). 최신 것만 남긴다.
+for _old in _P(_OUT).glob("*_원고_001-*.*"):
+    _old.unlink(missing_ok=True)
 REPORT_RANGE = f"#001~#{LAST_REPORT:03d}"
 MS_MD_NAME = f"죽은헌터의유언을집행합니다_원고_001-{LAST_EP:03d}.md"
 MS_PDF_NAME = f"죽은헌터의유언을집행합니다_원고_001-{LAST_EP:03d}.pdf"

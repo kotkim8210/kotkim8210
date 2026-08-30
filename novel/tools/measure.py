@@ -48,6 +48,7 @@ def measure(p):
             r'수첩을 (폈다|펴)', r'(잠깐|한참|한동안) (아무 말도 안|말이 없|대답을 안)',
             r'(두 번|세 번) 읽었다')
     stop=sum(len(re.findall(x, body)) for x in STOP)
+    cuts=body.count('⁂')  # §15 화면 호흡 — 장면 구분선 과다
     # §13-7 단문 연속 — 25자 이하 완결문 3연속 (경고 전용, 게이트 아님)
     SC=re.compile(r'(다|요|까|죠|네|군|오|소)[.!?]$')
     def sc(x): return len(re.sub(r'\s','',x))<=25 and bool(SC.search(x.strip()))
@@ -60,12 +61,12 @@ def measure(p):
             if run>=3: brief+=1
             run=0
     if run>=3: brief+=1
-    return chars, meta, round(100*len(dlg)/max(len(paras),1)), longest, over120, aph, laugh, warm, frag, rep, noun, brief, repw, stop
-print(f"{'회':>4} {'자수':>6} {'메타':>4} {'대화%':>5} {'최장':>5} {'120+':>5} {'경구':>4} {'웃음':>4} {'훈훈':>4} {'파편':>4} {'반복':>4} {'반복*':>5} {'체언':>4} {'단문':>4} {'정지':>4}")
+    return chars, meta, round(100*len(dlg)/max(len(paras),1)), longest, over120, aph, laugh, warm, frag, rep, noun, brief, repw, stop, cuts
+print(f"{'회':>4} {'자수':>6} {'메타':>4} {'대화%':>5} {'최장':>5} {'120+':>5} {'경구':>4} {'웃음':>4} {'훈훈':>4} {'파편':>4} {'반복':>4} {'반복*':>5} {'체언':>4} {'단문':>4} {'정지':>4} {'⁂':>4}")
 files=sorted(glob.glob(f'{_ROOT}/novel/manuscript/*.md'))
 for p in files[-9:]:
-    c,mt,r,lg,ov,ap,la,wa,fr,rp,nn,bf,rw,st = measure(p)
+    c,mt,r,lg,ov,ap,la,wa,fr,rp,nn,bf,rw,st,ct = measure(p)
     flag='⚠'+str(mt) if mt else '0'
-    print(f"{os.path.basename(p)[:3]:>4} {c:>6} {flag:>4} {r:>5} {lg:>5} {ov:>5} {ap:>4} {la:>4} {wa:>4} {fr:>4} {rp:>4} {rw:>5} {nn:>4} {bf:>4} {st:>4}")
+    print(f"{os.path.basename(p)[:3]:>4} {c:>6} {flag:>4} {r:>5} {lg:>5} {ov:>5} {ap:>4} {la:>4} {wa:>4} {fr:>4} {rp:>4} {rw:>5} {nn:>4} {bf:>4} {st:>4} {ct:>4}")
 tot=sum(measure(p)[0] for p in files)
 print(f"\n총 {len(files)}화 / {tot:,}자")
