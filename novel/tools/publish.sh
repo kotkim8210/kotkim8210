@@ -183,6 +183,11 @@ for f in sorted((root / "editorial").glob("edit-report-*.md")):
         # 수정 전/후 대조표에는 구값이 정당하게 남는다. 한 행이라도 실제와 맞으면 통과.
         if rows and not any(int(r.replace(",", "")) == a for r in rows):
             bad.append(f"{f.name} 계측표: {', '.join(rows)} / 실제 {a:,}")
+        # 증감 산술 — '(초고 N → +N)' 형태. 자수를 고치면 델타가 그대로 남는다(35차 검수).
+        for base, delta in re.findall(r"\(초고 ([\d,]+)\s*→\s*\+([\d,]+)\)", txt):
+            b, d = int(base.replace(",", "")), int(delta.replace(",", ""))
+            if b + d != a:
+                bad.append(f"{f.name} 증감: {base}+{delta}={b+d:,} / 실제 {a:,}")
 if bad:
     print("    " + " | ".join(bad)); sys.exit(1)
 PYEOF
