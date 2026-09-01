@@ -66,7 +66,11 @@ if python3 - <<'PYEOF'
 import re, sys, pathlib, os
 root = pathlib.Path(os.environ["NOVEL_ROOT"] + "/novel/bible")
 raw = (root / "state.md").read_text(encoding="utf-8")
-sec = raw.split("## 폐기 문구")[-1] if "## 폐기 문구" in raw else ""
+def _section(name):
+    if name not in raw: return ""
+    tail = raw.split(name, 1)[1]
+    return re.split(r"^## ", tail, maxsplit=1, flags=re.M)[0]
+sec = _section("## 폐기 문구")
 dead = re.findall(r"^- `([^`]+)`", sec, re.M)
 bad = []
 # 폐기로 '표시된' 자리는 통과시킨다 — 로그·정정 기록에는 원문이 남아야 한다
@@ -77,10 +81,21 @@ for f in sorted(root.glob("*.md")):
         if any(m in line for m in MARK): continue
         for d in dead:
             if d in line: bad.append(f"{f.name}:{i} '{d}'")
+# 원고 쪽 금지 표기 — state.md의 '## 원고 금지 표기' 목록 (34차 검수)
+# 캐논을 한 회차에서 고치면 형제 회차가 같은 오류를 반복한다. 지적받은 문장만 고치고 끝내지 않으려면
+# 그 표현 자체를 목록에 올려 전 회차를 훑어야 한다.
+msec = _section("## 원고 금지 표기")
+mdead = re.findall(r"^- `([^`]+)`", msec, re.M)
+if mdead:
+    mroot = pathlib.Path(os.environ["NOVEL_ROOT"] + "/novel/manuscript")
+    for f in sorted(mroot.glob("[0-9][0-9][0-9].md")):
+        for i, line in enumerate(f.read_text(encoding="utf-8").split("\n"), 1):
+            for d in mdead:
+                if d in line: bad.append(f"원고 {f.name}:{i} '{d}'")
 if bad:
     print("    " + " | ".join(bad)); sys.exit(1)
 PYEOF
-then echo "  ✓ 폐기 문구 잔재 (bible/)"; else echo "  ✗ 폐기 문구가 활성 바이블에 남아 있음"; FAIL=1; fi
+then echo "  ✓ 폐기 문구 잔재 (bible/ · 원고)"; else echo "  ✗ 폐기 문구가 남아 있음"; FAIL=1; fi
 # style-guide §13-1 파편 종결 / §13-2 동일 어미 3연속 (전 회차)
 if python3 - <<'PYEOF'
 import sys, glob, os, io
