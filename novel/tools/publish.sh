@@ -76,8 +76,17 @@ bad = []
 # 폐기로 '표시된' 자리는 통과시킨다 — 로그·정정 기록에는 원문이 남아야 한다
 MARK = ("폐기", "추정", "시정", "구버전", "수정 전", "교체")
 for f in sorted(root.glob("*.md")):
-    if f.name in ("state.md", "STATUS.md"): continue   # state=출처, STATUS=자동 생성
-    for i, line in enumerate(f.read_text(encoding="utf-8").split("\n"), 1):
+    if f.name == "STATUS.md": continue                 # state.md에서 자동 생성되므로 원본만 본다
+    body = f.read_text(encoding="utf-8")
+    if f.name == "state.md":
+        # 목록 자체는 당연히 그 문구를 담고 있다. 두 목록 절만 도려내고 나머지 본문을 검사한다.
+        # (36차 검수 — state.md를 통째로 제외해 뒀더니 정작 틀린 줄이 거기 있었다.)
+        for _h in ("## 폐기 문구", "## 원고 금지 표기"):
+            if _h in body:
+                _pre, _tail = body.split(_h, 1)
+                _rest = re.split(r"^## ", _tail, maxsplit=1, flags=re.M)
+                body = _pre + ("## " + _rest[1] if len(_rest) > 1 else "")
+    for i, line in enumerate(body.split("\n"), 1):
         if any(m in line for m in MARK): continue
         for d in dead:
             if d in line: bad.append(f"{f.name}:{i} '{d}'")
