@@ -74,7 +74,7 @@ sec = _section("## 폐기 문구")
 dead = re.findall(r"^- `([^`]+)`", sec, re.M)
 bad = []
 # 폐기로 '표시된' 자리는 통과시킨다 — 로그·정정 기록에는 원문이 남아야 한다
-MARK = ("폐기", "추정", "시정", "구버전", "수정 전", "교체")
+MARK = ("폐기", "추정", "시정", "구버전", "수정 전", "교체", "등재", "금지 목록")
 for f in sorted(root.glob("*.md")):
     if f.name == "STATUS.md": continue                 # state.md에서 자동 생성되므로 원본만 본다
     body = f.read_text(encoding="utf-8")
