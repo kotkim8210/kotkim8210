@@ -146,6 +146,16 @@ for n, rec in re.findall(r"\*\*(\d{3}) 「[^」]*」 ✅\*\*\(([\d,]+)자", src)
     a = chars(int(n))
     if int(rec.replace(",", "")) != a:
         bad.append(f"{n}: 기록 {rec} / 실제 {a:,}")
+# 연재 로그의 '⁂ N개 / 정지 N' 도 실측과 대조 (39차 검수 — 자수만 게이트가 보고 옆 칸은 안 봤다)
+STOP = (r'대답(을)? ?(하지|안) ?(않았다|했다)', r'(손|손끝|손가락)이 (멎었다|멈췄다)',
+        r'수첩을 (폈다|펴)', r'(잠깐|한참|한동안) (아무 말도 안|말이 없|대답을 안)',
+        r'(두 번|세 번) 읽었다')
+for n, c, st in re.findall(r"\*\*(\d{3}) 「[^」]*」 ✅\*\*.{0,120}?⁂ (\d+)개 / 정지 (\d+)", src, re.S):
+    body = pathlib.Path(os.environ["NOVEL_ROOT"] + f"/novel/manuscript/{int(n):03d}.md").read_text(encoding="utf-8")
+    body = "\n".join(l for l in body.split("\n") if not l.startswith("# "))
+    ac, ast = body.count("⁂"), sum(len(re.findall(x, body)) for x in STOP)
+    if int(c) != ac or int(st) != ast:
+        bad.append(f"{n} ⁂/정지: 기록 {c}/{st} / 실제 {ac}/{ast}")
 if bad:
     print("    " + " | ".join(bad)); sys.exit(1)
 PYEOF
