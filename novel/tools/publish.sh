@@ -67,9 +67,13 @@ import re, sys, pathlib, os
 root = pathlib.Path(os.environ["NOVEL_ROOT"] + "/novel/bible")
 raw = (root / "state.md").read_text(encoding="utf-8")
 def _section(name):
-    if name not in raw: return ""
-    tail = raw.split(name, 1)[1]
-    return re.split(r"^## ", tail, maxsplit=1, flags=re.M)[0]
+    # ⚠ 41차 검수 — 반드시 '행 머리의 제목'에만 매칭한다.
+    # state.md 본문이 `## 원고 금지 표기` 를 인용부호 안에서 먼저 언급하고 있어서,
+    # 단순 split 은 그 인용 지점에서 잘라 '폐기 문구' 목록을 원고 금지 목록으로 착각했다.
+    # 그 결과 34차에 만든 원고 전수 검사가 만들어진 날부터 실질적으로 꺼져 있었다.
+    m = re.search(r"^" + re.escape(name) + r".*$", raw, re.M)
+    if not m: return ""
+    return re.split(r"^## ", raw[m.end():], maxsplit=1, flags=re.M)[0]
 sec = _section("## 폐기 문구")
 dead = re.findall(r"^- `([^`]+)`", sec, re.M)
 bad = []
@@ -267,5 +271,26 @@ if bad:
     print("    ⁂ 25개 초과: " + ", ".join(bad)); sys.exit(1)
 PYEOF
 then echo "  ✓ 화면 호흡 (장면 구분선 ≤25)"; else echo "  ✗ 장면 구분선 과다"; FAIL=1; fi
+# ⑮ 편집 리포트 §1 — 제목의 'N종'과 실제 표 행 수 (41차 검수 신설)
+#    059 리포트에서 한 번, 060 리포트에서 또 한 번 같은 방식으로 어긋났고, 신설하면서 훑어 보니
+#    #031도 4종이라 써 놓고 5행이었다. 지침을 하나 더 넣을 때 제목 숫자를 안 고치는 것이 원인이다.
+if python3 - <<'PYEOF'
+import re, sys, pathlib, os
+NUM = {"1":1,"2":2,"3":3,"4":4,"5":5,"6":6,"7":7,"8":8,"9":9,
+       "일":1,"이":2,"삼":3,"사":4,"오":5,"육":6,"칠":7,"팔":8,"구":9}
+root = pathlib.Path(os.environ["NOVEL_ROOT"]) / "novel" / "editorial"
+bad = []
+for f in sorted(root.glob("edit-report-*.md")):
+    body = f.read_text(encoding="utf-8")
+    for m in re.finditer(r"^#{2,} .*?([0-9일이삼사오육칠팔구])종 (?:대조|이행)", body, re.M):
+        claimed = NUM[m.group(1)]
+        tail = re.split(r"^#{2,} ", body[m.end():], maxsplit=1, flags=re.M)[0]
+        rows = len(re.findall(r"^\| *[①②③④⑤⑥⑦⑧⑨]", tail, re.M))
+        if rows and claimed != rows:
+            bad.append(f"{f.name}: 제목 {claimed}종 / 표 {rows}행")
+if bad:
+    print("    " + " | ".join(bad)); sys.exit(1)
+PYEOF
+then echo "  ✓ 편집 리포트 §1 항목 수 (제목 N종 = 표 행 수)"; else echo "  ✗ 편집 리포트 §1 항목 수 불일치"; FAIL=1; fi
 if [ "$FAIL" = "1" ]; then echo "❌ 검증 실패 — 배포 금지"; exit 1; fi
 echo "✅ 전 항목 일치 — 배포 가능 (${EP}화 / ${FMT}자)"
