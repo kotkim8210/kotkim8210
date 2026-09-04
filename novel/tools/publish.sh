@@ -162,13 +162,18 @@ for n, rec in re.findall(r"\*\*(\d{3}) 「[^」]*」 ✅\*\*\(([\d,]+)자", src)
     if int(rec.replace(",", "")) != a:
         bad.append(f"{n}: 기록 {rec} / 실제 {a:,}")
 # 연재 로그의 '⁂ N개 / 정지 N' 도 실측과 대조 (39차 검수 — 자수만 게이트가 보고 옆 칸은 안 봤다)
-STOP = (r'대답(을)? ?(하지|안) ?(않았다|했다)', r'(손|손끝|손가락)이 (멎었다|멈췄다)',
-        r'수첩을 (폈다|펴)', r'(잠깐|한참|한동안) (아무 말도 안|말이 없|대답을 안)',
-        r'(두 번|세 번) 읽었다')
+# ⚠⚠ 48차 — 여기 STOP 패턴 사본이 있었다. measure.py를 44·48차에 두 번 고쳤는데
+#    게이트는 제 사본을 쓰느라 둘 다 못 받았고, 게이트와 CLI가 다른 값을 냈다.
+#    README 첫 줄의 단일 출처 원칙을 게이트 자신이 어기고 있었다 → measure를 import 한다.
+sys.path.insert(0, os.environ["NOVEL_TOOLS"])
+import io as _io
+_o = sys.stdout; sys.stdout = _io.StringIO()
+import measure as _ms
+sys.stdout = _o
 for n, c, st in re.findall(r"\*\*(\d{3}) 「[^」]*」 ✅\*\*.{0,120}?⁂ (\d+)개 / 정지 (\d+)", src, re.S):
-    body = pathlib.Path(os.environ["NOVEL_ROOT"] + f"/novel/manuscript/{int(n):03d}.md").read_text(encoding="utf-8")
-    body = "\n".join(l for l in body.split("\n") if not l.startswith("# "))
-    ac, ast = body.count("⁂"), sum(len(re.findall(x, body)) for x in STOP)
+    _f = os.environ["NOVEL_ROOT"] + f"/novel/manuscript/{int(n):03d}.md"
+    _r = _ms.measure(_f)
+    ac, ast = _r[14], _r[13]
     if int(c) != ac or int(st) != ast:
         bad.append(f"{n} ⁂/정지: 기록 {c}/{st} / 실제 {ac}/{ast}")
 if bad:

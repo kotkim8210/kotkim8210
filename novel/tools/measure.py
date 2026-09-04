@@ -15,7 +15,8 @@ def measure(p):
     aph=len(re.findall(r'(는 것이다|법이다|뿐이었다|는 뜻이었다|것은 아니었다)\.', '\n'.join(narr)))
     laugh=len(re.findall(r'웃|피식|농담', '\n'.join(paras)))
     warm=len(re.findall(r'보온병|김치|담요|보리차|계란|반찬|밥', '\n'.join(paras)))
-    meta=len(re.findall(r'(?:[0-9]+|[일이삼사오육칠팔구십백]+)\s*화(?:\s*전|에서|입니다|였|야|다)', body))
+    # 48차 — 'N화에'(가장 자연스러운 메타 실수 형태)를 못 잡고 있었다. 조사를 넓힌다.
+    meta=len(re.findall(r'(?:[0-9]+|[일이삼사오육칠팔구십백]+)\s*화(?:\s*전|에서|에|입니다|였|야|다|의|를|는|가|도|부터|까지)', body))
     # §13-1 파편 종결(관형절·명사구만 남기고 끊기) / §13-2 동일 어미 3연속
     frag=sum(1 for x in narr if re.search(r'(의|던|하는|같은|무렵|때|채|만큼|한 번도|조차)\.$', x) and len(x)<60)
     ends=[(re.search(r'([가-힣]{2,3}다)\.$', x).group(1) if re.search(r'([가-힣]{2,3}다)\.$', x) else None) for x in narr]
@@ -48,7 +49,15 @@ def measure(p):
             # 44차 — 주어가 생략된 재정지('…다시 멈췄다')를 못 잡아 실제보다 적게 세고 있었다.
             r'수첩을 (폈다|펴)', r'(잠깐|한참|한동안) (아무 말도 안|말이 없|대답을 안)',
             r'(두 번|세 번) 읽었다')
-    stop=sum(len(re.findall(x, body)) for x in STOP)
+    # 48차 — 한 문장이 두 패턴에 걸리면 두 번 세던 문제(예: '한겸은 잠깐 대답을 안 했다').
+    # 44차의 '덜 세기'와 반대 방향의 같은 결함이라, 겹치는 구간을 합쳐 한 번만 센다.
+    _sp=[]
+    for x in STOP:
+        _sp += [m.span() for m in re.finditer(x, body)]
+    _sp.sort(); stop=0; _end=-1
+    for a,b in _sp:
+        if a >= _end: stop+=1; _end=b
+        else: _end=max(_end,b)
     cuts=body.count('⁂')  # §15 화면 호흡 — 장면 구분선 과다
     # §13-7 단문 연속 — 25자 이하 완결문 3연속 (경고 전용, 게이트 아님)
     SC=re.compile(r'(다|요|까|죠|네|군|오|소)[.!?]$')
