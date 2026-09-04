@@ -75,7 +75,15 @@ def _section(name):
     if not m: return ""
     return re.split(r"^## ", raw[m.end():], maxsplit=1, flags=re.M)[0]
 sec = _section("## 폐기 문구")
-dead = re.findall(r"^- `([^`]+)`", sec, re.M)
+# ⚠ 42차 — 한 줄에 백틱 항목을 둘 이상 쓰면 첫 개만 등록되던 구멍이 있었다.
+# 목록의 각 항목 줄에서 백틱 term을 전부 걷는다(설명문 안의 백틱은 " — " 앞부분만 보므로 안 걸린다).
+def _terms(section):
+    out = []
+    for ln in section.split("\n"):
+        if not ln.startswith("- `"): continue
+        out += re.findall(r"`([^`]+)`", ln.split(" — ", 1)[0])
+    return out
+dead = _terms(sec)
 bad = []
 # 폐기로 '표시된' 자리는 통과시킨다 — 로그·정정 기록에는 원문이 남아야 한다
 MARK = ("폐기", "추정", "시정", "구버전", "수정 전", "교체", "등재", "금지 목록")
@@ -98,13 +106,16 @@ for f in sorted(root.glob("*.md")):
 # 캐논을 한 회차에서 고치면 형제 회차가 같은 오류를 반복한다. 지적받은 문장만 고치고 끝내지 않으려면
 # 그 표현 자체를 목록에 올려 전 회차를 훑어야 한다.
 msec = _section("## 원고 금지 표기")
-mdead = re.findall(r"^- `([^`]+)`", msec, re.M)
+mdead = _terms(msec)
 if mdead:
     mroot = pathlib.Path(os.environ["NOVEL_ROOT"] + "/novel/manuscript")
     for f in sorted(mroot.glob("[0-9][0-9][0-9].md")):
         for i, line in enumerate(f.read_text(encoding="utf-8").split("\n"), 1):
             for d in mdead:
                 if d in line: bad.append(f"원고 {f.name}:{i} '{d}'")
+# 42차 — 이 게이트는 두 번 '조용히 덜 검사'했다(제목 split 오매칭 / 한 줄 다중 항목).
+# 읽은 항목 수를 항상 찍어서, 목록이 통째로 안 잡히면 사람 눈에 보이게 한다.
+print(f"    [폐기 {len(dead)}종 · 원고 금지 {len(mdead)}종 검사]")
 if bad:
     print("    " + " | ".join(bad)); sys.exit(1)
 PYEOF
