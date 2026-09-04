@@ -308,5 +308,27 @@ if bad:
     print("    " + " | ".join(bad)); sys.exit(1)
 PYEOF
 then echo "  ✓ 편집 리포트 §1 항목 수 (제목 N종 = 표 행 수)"; else echo "  ✗ 편집 리포트 §1 항목 수 불일치"; FAIL=1; fi
+# ⑯ 편집 리포트 §1이 상시 검수 항목을 전부 담았는지 (49차 검수 신설)
+#    #035가 상시 다섯 중 둘만 돌렸고, 빠진 상시-47 자리에서 정확히 사고가 났다.
+#    항목을 회차마다 손으로 옮겨 적으면 옮기다 빠진다 — 형제 desync와 같은 병이라 게이트로 만든다.
+if python3 - <<'PYEOF'
+import re, sys, pathlib, os
+sg = (pathlib.Path(os.environ["NOVEL_ROOT"]) / "novel/bible/style-guide.md").read_text(encoding="utf-8")
+ids = re.findall(r"^- `(상시-\d+)`", sg, re.M)
+if not ids:
+    print("    style-guide §16 상시 항목 목록을 못 읽었다"); sys.exit(1)
+root = pathlib.Path(os.environ["NOVEL_ROOT"]) / "novel/editorial"
+bad = []
+for f in sorted(root.glob("edit-report-*.md")):
+    n = int(re.search(r"(\d+)", f.name).group(1))
+    if n < 35: continue          # 목록 신설 이전 리포트는 소급하지 않는다
+    body = f.read_text(encoding="utf-8")
+    miss = [i for i in ids if i not in body]
+    if miss: bad.append(f"{f.name}: {', '.join(miss)} 누락")
+print(f"    [상시 {len(ids)}종 · 리포트 #035~ 대조]")
+if bad:
+    print("    " + " | ".join(bad)); sys.exit(1)
+PYEOF
+then echo "  ✓ 편집 리포트 상시 검수 항목 전량"; else echo "  ✗ 편집 리포트에 상시 항목 누락"; FAIL=1; fi
 if [ "$FAIL" = "1" ]; then echo "❌ 검증 실패 — 배포 금지"; exit 1; fi
 echo "✅ 전 항목 일치 — 배포 가능 (${EP}화 / ${FMT}자)"
