@@ -132,7 +132,10 @@ for n in range(1, LAST_EP + 1):
     eps.append((n, title, body, len("\n".join(l for l in raw.split("\n") if not l.startswith("# ")))))
 
 total_chars = sum(e[3] for e in eps)
-today = "2026-08-09"
+# 44차 — 하드코딩된 날짜가 개정본 표지·STATUS에 옛 기준일로 찍히고 있었다.
+# 사람이 적는 숫자를 없앤다는 이 도구의 원칙에 정면으로 어긋나던 자리다.
+import datetime as _dt
+today = _dt.date.today().isoformat()
 _n = eps[-1][0]
 ARC_LABEL = ("1부 A1 시작" if _n <= 7 else "1부 A1 완료 · A2 진행" if _n <= 15
     else "1부 A1~A2 완료 · A3 진행" if _n <= 28 else "1부 A1~A3 완료 · A4 진행" if _n <= 43

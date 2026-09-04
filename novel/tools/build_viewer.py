@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import datetime as _dt
+_TODAY = _dt.date.today().isoformat()
 """novel/ 원본 파일 → 단일 HTML 뷰어 생성기"""
 import html as H
 import re
@@ -410,7 +412,7 @@ ul{padding-left:1.3em} li{margin:.35em 0}
 
 <div class="layout">
   <aside class="sidebar">
-    <div class="brand">죽은 헌터의 유언을<br>집행합니다<small>프로젝트 뷰어 · 2026-08-09</small></div>
+    <div class="brand">죽은 헌터의 유언을<br>집행합니다<small>프로젝트 뷰어 · {_TODAY}</small></div>
     <nav aria-label="문서 목록">@@NAV@@</nav>
   </aside>
   <div>
