@@ -330,5 +330,40 @@ if bad:
     print("    " + " | ".join(bad)); sys.exit(1)
 PYEOF
 then echo "  ✓ 편집 리포트 상시 검수 항목 전량"; else echo "  ✗ 편집 리포트에 상시 항목 누락"; FAIL=1; fi
+# ⑰ 원고에서 지운 문장이 바이블에 인용문으로 살아 있는지 (51차 검수 신설)
+#    50차에서 곽두철 대사를 고쳤는데 state/STATUS/plot-outline이 옛 대사를 인용문으로 갖고 있었다.
+#    47차 원칙("트리 전체를 grep")을 지켰는데도 놓쳤다 — 의미 키워드로 grep했지 '문장 자체'로 안 했기 때문이다.
+#    → 커밋 전 working tree에서 원고에서 사라진 줄을 뽑아 bible/에 남아 있는지 기계로 본다.
+#    editorial/은 역사·정정 기록 계층이라 제외한다(옛 문장을 인용하는 것이 정상).
+if python3 - <<'PYEOF'
+import re, sys, subprocess, pathlib, os
+root = os.environ["NOVEL_ROOT"]
+try:
+    d = subprocess.run(["git","-C",root,"diff","HEAD","--","novel/manuscript"],
+                       capture_output=True, text=True, timeout=30).stdout
+except Exception as e:
+    print(f"    [git diff 실패 — 검사 생략: {e}]"); sys.exit(0)
+removed = []
+for ln in d.split("\n"):
+    if not ln.startswith("-") or ln.startswith("---"): continue
+    t = ln[1:].strip()
+    if len(t) < 14: continue                      # 짧은 대사는 오탐이 많다
+    if t.startswith(("#", "⁂", "*", "**")): continue
+    removed.append(t)
+if not removed:
+    print("    [원고 삭제 문장 0 — 검사 생략]"); sys.exit(0)
+bible = list((pathlib.Path(root)/"novel"/"bible").glob("*.md"))
+texts = {f.name: f.read_text(encoding="utf-8") for f in bible}
+bad = []
+for t in removed:
+    for name, body in texts.items():
+        if t in body:
+            bad.append(f"{name}: '{t[:28]}…'")
+            break
+print(f"    [원고 삭제 문장 {len(removed)}개 · bible/ 대조]")
+if bad:
+    print("    옛 문장이 바이블에 남아 있음 → " + " | ".join(bad[:5])); sys.exit(1)
+PYEOF
+then echo "  ✓ 원고 삭제 문장이 바이블에 잔존하지 않음"; else echo "  ✗ 원고에서 지운 문장이 바이블에 남아 있음"; FAIL=1; fi
 if [ "$FAIL" = "1" ]; then echo "❌ 검증 실패 — 배포 금지"; exit 1; fi
 echo "✅ 전 항목 일치 — 배포 가능 (${EP}화 / ${FMT}자)"
