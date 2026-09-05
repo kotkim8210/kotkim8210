@@ -338,8 +338,16 @@ then echo "  ✓ 편집 리포트 상시 검수 항목 전량"; else echo "  ✗
 if python3 - <<'PYEOF'
 import re, sys, subprocess, pathlib, os
 root = os.environ["NOVEL_ROOT"]
+#    ⚠ 53차 — 기준선을 HEAD에서 '최신 회차가 태어난 커밋'으로 넓혔다.
+#    HEAD 대조는 커밋하는 순간 시야가 0이 된다. 회차를 쓰고 커밋한 뒤 역검수로 고치면
+#    그 삭제분은 다음 실행에서 이미 HEAD 안이라 안 보인다. 실제로 52차가 그렇게 통과했다.
+#    한 회차의 개정 주기 전체(집필→역검수 n회)를 한 구간으로 본다.
 try:
-    d = subprocess.run(["git","-C",root,"diff","HEAD","--","novel/manuscript"],
+    last = sorted((pathlib.Path(root)/"novel"/"manuscript").glob("[0-9][0-9][0-9].md"))[-1]
+    base = subprocess.run(["git","-C",root,"log","--diff-filter=A","--format=%H","-1","--",
+                           f"novel/manuscript/{last.name}"],
+                          capture_output=True, text=True, timeout=30).stdout.strip() or "HEAD"
+    d = subprocess.run(["git","-C",root,"diff",base,"--","novel/manuscript"],
                        capture_output=True, text=True, timeout=30).stdout
 except Exception as e:
     print(f"    [git diff 실패 — 검사 생략: {e}]"); sys.exit(0)
