@@ -373,5 +373,39 @@ if bad:
     print("    옛 문장이 바이블에 남아 있음 → " + " | ".join(bad[:5])); sys.exit(1)
 PYEOF
 then echo "  ✓ 원고 삭제 문장이 바이블에 잔존하지 않음"; else echo "  ✗ 원고에서 지운 문장이 바이블에 남아 있음"; FAIL=1; fi
+# ⑱ 편집 리포트 §1의 계측 3종(⁂ / 정지 / 대화%)이 measure 실측과 일치하는가 — 63차 검수
+#    게이트 ⑫는 리포트 *헤더의 자수*만 보고, §1 대조표의 계측 칸은 아무도 안 봤다.
+#    같은 칸이 세 번 낡았다(61·63차, 그리고 63차 재검수). 순수 숫자라 게이트가 감당한다.
+#    ⚠ 신설 전 실측: #036~#041 여섯 건에 돌려 오탐 0 · 진짜 1건(#041 대화 55 vs 실측 56).
+if python3 - <<'PYEOF'
+import re, sys, glob, os, io as _io
+root = os.environ["NOVEL_ROOT"]
+sys.path.insert(0, os.environ["NOVEL_TOOLS"])
+_o = sys.stdout; sys.stdout = _io.StringIO()
+import measure as _ms
+sys.stdout = _o
+bad = []; n = 0
+for f in sorted(glob.glob(root + "/novel/editorial/edit-report-*.md")):
+    raw = open(f, encoding="utf-8").read()
+    h = re.search(r"^# 편집 리포트 #\d+ — (\d{3})화", raw, re.M)
+    if not h: continue
+    ep = h.group(1)
+    row = re.search(r"^\|[^|\n]*`⁂`[^|\n]*\|[^|\n]*\|(.*)$", raw, re.M)
+    if not row: continue
+    m = re.search(r"\*\*\s*(\d+)\s*/\s*(\d+)(?:\s*/\s*(\d+)%)?", row.group(1))
+    if not m: continue
+    r = _ms.measure(root + f"/novel/manuscript/{ep}.md")
+    cuts, stop, talk = r[14], r[13], r[2]
+    n += 1
+    got = (int(m.group(1)), int(m.group(2)))
+    if got != (cuts, stop):
+        bad.append(f"{os.path.basename(f)} {ep}화 ⁂/정지 기록 {got[0]}/{got[1]} / 실측 {cuts}/{stop}")
+    elif m.group(3) and int(m.group(3)) != talk:
+        bad.append(f"{os.path.basename(f)} {ep}화 대화 기록 {m.group(3)}% / 실측 {talk}%")
+print(f"    [리포트 §1 계측 {n}건 대조]")
+if bad:
+    print("    " + " | ".join(bad[:4])); sys.exit(1)
+PYEOF
+then echo "  ✓ 편집 리포트 §1 계측(⁂·정지·대화%)"; else echo "  ✗ 리포트 §1 계측이 실측과 불일치"; FAIL=1; fi
 if [ "$FAIL" = "1" ]; then echo "❌ 검증 실패 — 배포 금지"; exit 1; fi
 echo "✅ 전 항목 일치 — 배포 가능 (${EP}화 / ${FMT}자)"
