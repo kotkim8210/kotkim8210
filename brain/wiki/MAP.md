@@ -4,10 +4,10 @@
 > 클로드는 이 인덱스로 위치를 좁힌 뒤 관련 주제 문서 1~3개만 펼쳐 몇 초 만에 답한다.
 
 ## 📊 통계
-- 주제 문서: **10**
+- 주제 문서: **13**
 - 누적 통찰(insights): **4**
 - 보관(archive): 0
-- 마지막 수집(ingest): 2026-06-13 (branch-inventory → video-skills·my-projects 신설)
+- 마지막 수집(ingest): 2026-08-01 (webnovel-research-dump → 웹소설 수익화 클러스터 3편 신설)
 - 마지막 드림 시퀀스: 2026-06-14 (드림 #2 — 구식 항목 정리·브랜치 감사)
 
 ## 📚 주제 색인 (Topic Index)
@@ -24,6 +24,12 @@
 ### 내 작업·자산 (브랜치 색인)
 - [[my-projects]] — 흩어진 브랜치별 실제 프로젝트 지도(인스타·당근·성경저널·쿠팡·홍보처크롤러). `#프로젝트 #색인 #사업`
 - [[video-skills]] — 영상·유튜브 스킬 3종(watch·youtube-shorts·osmu) 색인. `#스킬 #영상 #유튜브`
+
+### 웹소설 수익화 (창작 사업)
+- [[webnovel-market-playbook]] — 연재 수익은 부업 하한, 대박은 웹툰·영상 IP 확장(재벌집 230배). 문피아→유료화→IP 루트. `#웹소설 #수익화 #IP`
+- [[webnovel-hit-formula]] — 1화 후킹·절단신공·사이다 리듬 + 회빙환/헌터/상태창 메타. 떡밥 장부 운용. `#웹소설 #작법 #후킹`
+- [[webnovel-character-patterns]] — 인물 묘사가 독자 평가 1순위(69%). 먼치킨의 제약 설계·조연 조율·개성 부여 기술. `#웹소설 #캐릭터`
+- 📕 실전 프로젝트: 레포 루트 `novel/` — 연재작 「죽은 헌터의 유언을 집행합니다」 (바이블·떡밥 장부·원고·편집 리포트)
 
 ### 워크플로 3단계
 - [[data-dumping]] — (1단계/수집기) 분류 없이 무가공 투입 → 정리 시간 제로화. `#수집기 #1단계`
@@ -56,6 +62,11 @@ my-projects ──(콘텐츠 운영 도구)──► video-skills
    └ 인스타/유튜브 콘텐츠 프로젝트 ◄─ youtube-shorts·osmu 스킬이 뒷받침
 my-projects ══(흩어짐의 해소)══ session-independence
    └ 17개 브랜치로 흩어진 작업을 brain 색인 하나로 = "하나의 뇌" 목표 실현
+
+── [웹소설 수익화 클러스터] ──
+webnovel-market-playbook ──(무엇이 팔리나)──► webnovel-hit-formula ──(누가 이야기를 끄는가)──► webnovel-character-patterns
+   └ 시장(돈) → 구조(스토리) → 인물(개성)의 3층 학습 스택. 실행체는 novel/ 프로젝트
+webnovel-market-playbook ──(포트폴리오 편입)──► my-projects
 ```
 
 ## ⚠️ 미해결 모순 / 확인필요

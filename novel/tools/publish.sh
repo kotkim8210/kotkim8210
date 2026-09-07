@@ -1,0 +1,411 @@
+#!/bin/bash
+# 발행 파이프라인 — 순서 고정 + 실패 시 즉시 중단 + 산출물 검증
+set -euo pipefail
+TOOLS="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export NOVEL_TOOLS="$TOOLS"
+export NOVEL_ROOT="${NOVEL_ROOT:-$(cd "$TOOLS/../.." && pwd)}"
+export NOVEL_OUT="${NOVEL_OUT:-/tmp/claude-0/-home-user-kotkim8210/c058c336-4e2b-5e83-9e93-9b4f05f88f8f/scratchpad}"
+mkdir -p "$NOVEL_OUT"
+
+cd "$NOVEL_OUT"
+echo "── 1/4 계측"; python3 "$TOOLS/measure.py" | tail -3
+echo "── 2/4 문서 빌드"; python3 "$TOOLS/build_downloads.py" | tail -4
+echo "── 3/4 뷰어 빌드"; python3 "$TOOLS/build_viewer.py" | tail -1
+echo "── 4/4 산출물 검증"
+LAST=$(ls novel 2>/dev/null || true)
+TOTAL=$(python3 -c "
+import glob, os
+fs=sorted(glob.glob(os.environ['NOVEL_ROOT'] + '/novel/manuscript/*.md'))
+print(sum(len('\n'.join(l for l in open(p,encoding='utf-8').read().split('\n') if not l.startswith('# '))) for p in fs))
+")
+EP=$(ls $NOVEL_ROOT/novel/manuscript/*.md | wc -l)
+MS=$(printf "죽은헌터의유언을집행합니다_원고_001-%03d.md" "$EP")
+FAIL=0
+chk(){ if grep -q "$2" "$1"; then echo "  ✓ $3"; else echo "  ✗ $3 — '$2' 없음"; FAIL=1; fi; }
+FMT=$(python3 -c "print(f'{$TOTAL:,}')")
+chk "$MS" "총 ${FMT}자" "원고 표지 자수"
+chk "$MS" "$(printf '001~%03d화' $EP)" "원고 표지 회차"
+chk "죽은헌터의유언을집행합니다_제작문서.md" "${FMT}자" "제작문서 STATUS 자수"
+# 활성 플롯이 문서에 실제로 실렸는지: 최신 회차 요약 키워드
+LASTTITLE=$(head -1 "$(ls $NOVEL_ROOT/novel/manuscript/*.md | tail -1)" | sed 's/^# [0-9]*\. //')
+chk "죽은헌터의유언을집행합니다_제작문서.md" "「${LASTTITLE}」 ✅" "활성 플롯에 최신 회차 요약 반영"
+# bible/state.md 의 '최종 반영' 회차가 실제 최신 회차와 같은지 (서사 상태가 본문보다 뒤처지는 것을 막는다 — 23차 검수)
+if python3 - <<'PYEOF'
+import re, sys, pathlib, os
+root = pathlib.Path(os.environ["NOVEL_ROOT"] + "/novel")
+last = max(int(f.stem) for f in (root / "manuscript").glob("[0-9][0-9][0-9].md"))
+raw = (root / "bible" / "state.md").read_text(encoding="utf-8")
+m = re.search(r"<!--\s*최종 반영:\s*(\d+)\s*-->", raw)
+if not m:
+    print("    state.md에 '<!-- 최종 반영: NNN -->' 주석이 없음"); sys.exit(1)
+if int(m.group(1)) != last:
+    print(f"    state.md 최종 반영 {int(m.group(1)):03d} / 실제 최신 {last:03d}"); sys.exit(1)
+PYEOF
+then echo "  ✓ 서사 상태(state.md) 최신 회차 반영"; else echo "  ✗ 서사 상태가 본문보다 뒤처짐"; FAIL=1; fi
+# 시스템 창의 享年 값이 캐릭터 바이블과 일치하는지 (26차 검수 — 34/38 오기)
+if python3 - <<'PYEOF'
+import re, sys, pathlib, os
+root = pathlib.Path(os.environ["NOVEL_ROOT"] + "/novel")
+chars = (root / "bible" / "characters.md").read_text(encoding="utf-8")
+canon = {}
+for nm, ag in re.findall(r"([가-힣]{2,4})\s*\(([^)]*享年\s*\d+[^)]*)\)", chars):
+    m = re.search(r"享年\s*(\d+)", ag)
+    if m: canon.setdefault(nm, m.group(1))
+bad = []
+for f in sorted((root / "manuscript").glob("[0-9][0-9][0-9].md")):
+    for i, line in enumerate(f.read_text(encoding="utf-8").split("\n"), 1):
+        for nm, ag in re.findall(r"([가-힣]{2,4})\s*\(\s*享年\s*(\d+)\s*\)", line):
+            if nm in canon and canon[nm] != ag:
+                bad.append(f"{f.stem}:{i} {nm} 享年{ag} (바이블 {canon[nm]})")
+if bad:
+    print("    " + " | ".join(bad)); sys.exit(1)
+PYEOF
+then echo "  ✓ 享年 값이 캐릭터 바이블과 일치"; else echo "  ✗ 享年 불일치"; FAIL=1; fi
+# 폐기 문구가 활성 바이블(bible/)에 남아 있는지 — state.md의 목록이 출처 (24차 검수)
+if python3 - <<'PYEOF'
+import re, sys, pathlib, os
+root = pathlib.Path(os.environ["NOVEL_ROOT"] + "/novel/bible")
+raw = (root / "state.md").read_text(encoding="utf-8")
+def _section(name):
+    # ⚠ 41차 검수 — 반드시 '행 머리의 제목'에만 매칭한다.
+    # state.md 본문이 `## 원고 금지 표기` 를 인용부호 안에서 먼저 언급하고 있어서,
+    # 단순 split 은 그 인용 지점에서 잘라 '폐기 문구' 목록을 원고 금지 목록으로 착각했다.
+    # 그 결과 34차에 만든 원고 전수 검사가 만들어진 날부터 실질적으로 꺼져 있었다.
+    m = re.search(r"^" + re.escape(name) + r".*$", raw, re.M)
+    if not m: return ""
+    return re.split(r"^## ", raw[m.end():], maxsplit=1, flags=re.M)[0]
+sec = _section("## 폐기 문구")
+# ⚠ 42차 — 한 줄에 백틱 항목을 둘 이상 쓰면 첫 개만 등록되던 구멍이 있었다.
+# 목록의 각 항목 줄에서 백틱 term을 전부 걷는다(설명문 안의 백틱은 " — " 앞부분만 보므로 안 걸린다).
+def _terms(section):
+    out = []
+    for ln in section.split("\n"):
+        if not ln.startswith("- `"): continue
+        out += re.findall(r"`([^`]+)`", ln.split(" — ", 1)[0])
+    return out
+dead = _terms(sec)
+bad = []
+# 폐기로 '표시된' 자리는 통과시킨다 — 로그·정정 기록에는 원문이 남아야 한다
+MARK = ("폐기", "추정", "시정", "구버전", "수정 전", "교체", "등재", "금지 목록", "하향", "한 칸 더 간", "순환논리")
+for f in sorted(root.glob("*.md")):
+    if f.name == "STATUS.md": continue                 # state.md에서 자동 생성되므로 원본만 본다
+    body = f.read_text(encoding="utf-8")
+    if f.name == "state.md":
+        # 목록 자체는 당연히 그 문구를 담고 있다. 두 목록 절만 도려내고 나머지 본문을 검사한다.
+        # (36차 검수 — state.md를 통째로 제외해 뒀더니 정작 틀린 줄이 거기 있었다.)
+        for _h in ("## 폐기 문구", "## 원고 금지 표기"):
+            if _h in body:
+                _pre, _tail = body.split(_h, 1)
+                _rest = re.split(r"^## ", _tail, maxsplit=1, flags=re.M)
+                body = _pre + ("## " + _rest[1] if len(_rest) > 1 else "")
+    for i, line in enumerate(body.split("\n"), 1):
+        if any(m in line for m in MARK): continue
+        for d in dead:
+            if d in line: bad.append(f"{f.name}:{i} '{d}'")
+# 원고 쪽 금지 표기 — state.md의 '## 원고 금지 표기' 목록 (34차 검수)
+# 캐논을 한 회차에서 고치면 형제 회차가 같은 오류를 반복한다. 지적받은 문장만 고치고 끝내지 않으려면
+# 그 표현 자체를 목록에 올려 전 회차를 훑어야 한다.
+msec = _section("## 원고 금지 표기")
+mdead = _terms(msec)
+if mdead:
+    mroot = pathlib.Path(os.environ["NOVEL_ROOT"] + "/novel/manuscript")
+    for f in sorted(mroot.glob("[0-9][0-9][0-9].md")):
+        for i, line in enumerate(f.read_text(encoding="utf-8").split("\n"), 1):
+            for d in mdead:
+                if d in line: bad.append(f"원고 {f.name}:{i} '{d}'")
+# 42차 — 이 게이트는 두 번 '조용히 덜 검사'했다(제목 split 오매칭 / 한 줄 다중 항목).
+# 읽은 항목 수를 항상 찍어서, 목록이 통째로 안 잡히면 사람 눈에 보이게 한다.
+print(f"    [폐기 {len(dead)}종 · 원고 금지 {len(mdead)}종 검사]")
+if bad:
+    print("    " + " | ".join(bad)); sys.exit(1)
+PYEOF
+then echo "  ✓ 폐기 문구 잔재 (bible/ · 원고)"; else echo "  ✗ 폐기 문구가 남아 있음"; FAIL=1; fi
+# style-guide §13-1 파편 종결 / §13-2 동일 어미 3연속 (전 회차)
+if python3 - <<'PYEOF'
+import sys, glob, os, io
+sys.path.insert(0, os.environ["NOVEL_TOOLS"])
+_o = sys.stdout; sys.stdout = io.StringIO()
+import measure
+fs = sorted(glob.glob(os.environ["NOVEL_ROOT"] + "/novel/manuscript/[0-9][0-9][0-9].md"))
+sys.stdout = _o
+bad = []
+for f in fs:
+    r = measure.measure(f)
+    if r[8] or r[9]: bad.append(f"{os.path.basename(f)[:3]}: 파편{r[8]} 반복{r[9]}")
+if bad:
+    print("    " + " | ".join(bad)); sys.exit(1)
+PYEOF
+then echo "  ✓ 어미 규칙 (§13-1 파편 · §13-2 계사 3연속)"; else echo "  ✗ 어미 규칙 위반"; FAIL=1; fi
+# 유료 분량 범위(4,200~5,500자) — 30화 이후 전 회차. 상한 초과는 배포 금지 (20차 검수)
+if python3 - <<'PYEOF'
+import sys, pathlib, os
+bad = []
+for f in sorted(pathlib.Path(os.environ["NOVEL_ROOT"] + "/novel/manuscript").glob("[0-9][0-9][0-9].md")):
+    n = int(f.stem)
+    if n < 30: continue
+    c = len("\n".join(l for l in f.read_text(encoding="utf-8").split("\n") if not l.startswith("# ")))
+    if not (4200 <= c <= 5500): bad.append(f"{n:03d}: {c:,}")
+if bad:
+    print("    " + " | ".join(bad)); sys.exit(1)
+PYEOF
+then echo "  ✓ 유료 분량 범위 (030~)"; else echo "  ✗ 유료 분량 범위 이탈"; FAIL=1; fi
+# 활성 플롯 아웃라인에 적힌 회차별 자수가 실제 원고와 일치하는지 (19차 검수 결함 — 수기 숫자는 반드시 썩는다)
+if python3 - <<'PYEOF'
+import re, sys, pathlib, os
+def chars(n):
+    raw = pathlib.Path(os.environ["NOVEL_ROOT"] + f"/novel/manuscript/{n:03d}.md").read_text(encoding="utf-8")
+    return len("\n".join(l for l in raw.split("\n") if not l.startswith("# ")))
+src = pathlib.Path(os.environ["NOVEL_ROOT"] + "/novel/bible/plot-outline.md").read_text(encoding="utf-8")
+bad = []
+for n, rec in re.findall(r"\*\*(\d{3}) 「[^」]*」 ✅\*\*\(([\d,]+)자", src):
+    a = chars(int(n))
+    if int(rec.replace(",", "")) != a:
+        bad.append(f"{n}: 기록 {rec} / 실제 {a:,}")
+# 연재 로그의 '⁂ N개 / 정지 N' 도 실측과 대조 (39차 검수 — 자수만 게이트가 보고 옆 칸은 안 봤다)
+# ⚠⚠ 48차 — 여기 STOP 패턴 사본이 있었다. measure.py를 44·48차에 두 번 고쳤는데
+#    게이트는 제 사본을 쓰느라 둘 다 못 받았고, 게이트와 CLI가 다른 값을 냈다.
+#    README 첫 줄의 단일 출처 원칙을 게이트 자신이 어기고 있었다 → measure를 import 한다.
+sys.path.insert(0, os.environ["NOVEL_TOOLS"])
+import io as _io
+_o = sys.stdout; sys.stdout = _io.StringIO()
+import measure as _ms
+sys.stdout = _o
+for n, c, st in re.findall(r"\*\*(\d{3}) 「[^」]*」 ✅\*\*.{0,120}?⁂ (\d+)개 / 정지 (\d+)", src, re.S):
+    _f = os.environ["NOVEL_ROOT"] + f"/novel/manuscript/{int(n):03d}.md"
+    _r = _ms.measure(_f)
+    ac, ast = _r[14], _r[13]
+    if int(c) != ac or int(st) != ast:
+        bad.append(f"{n} ⁂/정지: 기록 {c}/{st} / 실제 {ac}/{ast}")
+if bad:
+    print("    " + " | ".join(bad)); sys.exit(1)
+PYEOF
+then echo "  ✓ 활성 플롯 회차별 자수"; else echo "  ✗ 활성 플롯 회차별 자수 불일치"; FAIL=1; fi
+
+# ⑪ 편집 리포트 전량이 제작문서 본문에 실제로 들어갔는지 (28차 검수 — 표지 REPORT_RANGE는 glob 자동인데
+#    본문 목록은 하드코딩이라 #026이 통째로 빠진 적이 있다. 표지와 본문을 서로 대조한다.)
+if python3 - <<'PYEOF'
+import pathlib, re, sys, os
+SP = pathlib.Path(os.environ["NOVEL_OUT"])
+doc = (SP / "죽은헌터의유언을집행합니다_제작문서.md").read_text(encoding="utf-8")
+have = {int(x) for x in re.findall(r"^#+ *\d+\. 편집 리포트 #(\d{3})", doc, re.M)}
+want = {int(f.stem.split("-")[-1])
+        for f in pathlib.Path(os.environ["NOVEL_ROOT"] + "/novel/editorial").glob("edit-report-*.md")}
+miss = sorted(want - have)
+if miss:
+    print("    본문 누락 리포트: " + ", ".join(f"#{n:03d}" for n in miss)); sys.exit(1)
+# 표지 REPORT_RANGE는 본문과 동일한 glob(_REPORTS)에서 파생되므로 구조상 어긋날 수 없다.
+# 문서 본문에는 과거 리포트가 옛 표지 문구를 인용해 놓은 자리가 있어 정규식으로 재검사하면 오탐이 난다.
+PYEOF
+then echo "  ✓ 편집 리포트 전량 수록"; else echo "  ✗ 편집 리포트 누락"; FAIL=1; fi
+
+# ⑫ 편집 리포트 헤더의 회차 자수 (28차 검수 — 원고를 고치고 리포트 첫 줄만 구판으로 남았다.
+#    `novel/manuscript/NNN.md` (N,NNN자 형태는 리포트 헤더에서만 쓰는 표기라 인용문 오탐이 없다.)
+if python3 - <<'PYEOF'
+import pathlib, re, sys, os
+root = pathlib.Path(os.environ["NOVEL_ROOT"]) / "novel"
+def chars(n):
+    raw = (root / "manuscript" / f"{n:03d}.md").read_text(encoding="utf-8")
+    return len("\n".join(l for l in raw.split("\n") if not l.startswith("# ")))
+bad = []
+for f in sorted((root / "editorial").glob("edit-report-*.md")):
+    txt = f.read_text(encoding="utf-8")
+    tgt = re.findall(r"novel/manuscript/(\d{3})\.md` \(([\d,]+)자", txt)
+    for n, rec in tgt:
+        a = chars(int(n))
+        if int(rec.replace(",", "")) != a:
+            bad.append(f"{f.name} {n}화 헤더: 기록 {rec} / 실제 {a:,}")
+    # 계측표의 자수 행도 본다 (33차 검수 — 헤더만 고치고 표는 구판으로 남았다).
+    # 대상 회차가 하나로 특정되는 리포트에만 적용한다(여러 화를 묶은 리포트는 건너뛴다).
+    if len(tgt) == 1:
+        a = chars(int(tgt[0][0]))
+        rows = re.findall(r"^\|\s*자수\s*\|\s*\*{0,2}([\d,]+)\*{0,2}\s*\|", txt, re.M)
+        # 수정 전/후 대조표에는 구값이 정당하게 남는다. 한 행이라도 실제와 맞으면 통과.
+        if rows and not any(int(r.replace(",", "")) == a for r in rows):
+            bad.append(f"{f.name} 계측표: {', '.join(rows)} / 실제 {a:,}")
+        # 증감 산술 — '(초고 N → +N)' 형태. 자수를 고치면 델타가 그대로 남는다(35차 검수).
+        for base, delta in re.findall(r"\(초고 ([\d,]+)\s*→\s*\+([\d,]+)\)", txt):
+            b, d = int(base.replace(",", "")), int(delta.replace(",", ""))
+            if b + d != a:
+                bad.append(f"{f.name} 증감: {base}+{delta}={b+d:,} / 실제 {a:,}")
+if bad:
+    print("    " + " | ".join(bad)); sys.exit(1)
+PYEOF
+then echo "  ✓ 편집 리포트 헤더 자수"; else echo "  ✗ 편집 리포트 헤더 자수 불일치"; FAIL=1; fi
+
+# ⑬ 사이다 장부 — 회차 누락 + 보상 간격 산술 (31차 검수. 절단 감사가 '궁금함'을 관리한다면 이쪽은 '기분 좋음'을 관리한다.
+#    등급 판정은 사람이 하고, 게이트는 산술만 본다. 규칙은 장부 머리의 '규칙 적용 시작' 회차부터 적용.)
+if python3 - <<'PYEOF'
+import pathlib, re, sys, os
+root = pathlib.Path(os.environ["NOVEL_ROOT"]) / "novel"
+led = (root / "bible" / "catharsis-ledger.md").read_text(encoding="utf-8")
+eps = sorted(int(f.stem) for f in (root / "manuscript").glob("[0-9][0-9][0-9].md"))
+m = re.search(r"<!--\s*규칙 적용 시작:\s*(\d{3})\s*-->", led)
+if not m:
+    print("    장부 머리에 '규칙 적용 시작' 주석이 없다"); sys.exit(1)
+START = int(m.group(1))
+GRADE = {}
+for n, g in re.findall(r"^\|\s*\*{0,2}(\d{3})\*{0,2}\s*\|\s*[⭐\s]*\*{0,2}(응징|대리만족|소승|없음)\*{0,2}\s*\|", led, re.M):
+    GRADE[int(n)] = g
+missing = [n for n in eps if n not in GRADE]
+if missing:
+    print("    장부 누락 회차: " + ", ".join(f"{n:03d}" for n in missing)); sys.exit(1)
+RANK = {"없음": 0, "소승": 1, "대리만족": 2, "응징": 3}
+bad = []
+# 시작점에서 카운터를 0으로 리셋하면 이미 쌓인 부채를 게이트가 못 본다.
+# 시작점 직전까지의 연속 공백을 초기값으로 물려받는다. 응징만 예외(42화 부채는 소급 청산 불가).
+for label, need, limit, carry in (("소승 이상", 1, 3, True), ("대리만족 이상", 2, 6, True), ("응징", 3, 10, False)):
+    run = 0
+    if carry:
+        for n in [x for x in eps if x < START][::-1]:
+            if RANK[GRADE[n]] >= need:
+                break
+            run += 1
+    for n in eps:
+        if n < START:
+            continue
+        run = 0 if RANK[GRADE[n]] >= need else run + 1
+        if run > limit:
+            bad.append(f"{label} {limit}화 한도 초과 ({n:03d}화까지 {run}화 연속 없음)")
+            break
+if bad:
+    print("    " + " | ".join(bad)); sys.exit(1)
+PYEOF
+then echo "  ✓ 사이다 장부 (회차 수록 · 보상 간격)"; else echo "  ✗ 사이다 장부 위반"; FAIL=1; fi
+
+# ⑭ 화면 호흡 — 장면 구분선(⁂) 과다 (32차 검수. 001~028은 화당 2.1개였는데 056에서 51개까지 표류했다.
+#    ⁂를 내부 상태관리 단위로 쓴 것이 원인이라, 독자용 하드컷과 분리해 상한을 건다.)
+if python3 - <<'PYEOF'
+import pathlib, re, sys, os
+root = pathlib.Path(os.environ["NOVEL_ROOT"]) / "novel" / "manuscript"
+bad = []
+for f in sorted(root.glob("[0-9][0-9][0-9].md")):
+    n = int(f.stem)
+    c = f.read_text(encoding="utf-8").count("⁂")
+    if c > 25:
+        bad.append(f"{n:03d}화 {c}개")
+if bad:
+    print("    ⁂ 25개 초과: " + ", ".join(bad)); sys.exit(1)
+PYEOF
+then echo "  ✓ 화면 호흡 (장면 구분선 ≤25)"; else echo "  ✗ 장면 구분선 과다"; FAIL=1; fi
+# ⑮ 편집 리포트 §1 — 제목의 'N종'과 실제 표 행 수 (41차 검수 신설)
+#    059 리포트에서 한 번, 060 리포트에서 또 한 번 같은 방식으로 어긋났고, 신설하면서 훑어 보니
+#    #031도 4종이라 써 놓고 5행이었다. 지침을 하나 더 넣을 때 제목 숫자를 안 고치는 것이 원인이다.
+if python3 - <<'PYEOF'
+import re, sys, pathlib, os
+NUM = {"1":1,"2":2,"3":3,"4":4,"5":5,"6":6,"7":7,"8":8,"9":9,
+       "일":1,"이":2,"삼":3,"사":4,"오":5,"육":6,"칠":7,"팔":8,"구":9}
+root = pathlib.Path(os.environ["NOVEL_ROOT"]) / "novel" / "editorial"
+bad = []
+for f in sorted(root.glob("edit-report-*.md")):
+    body = f.read_text(encoding="utf-8")
+    for m in re.finditer(r"^#{2,} .*?([0-9일이삼사오육칠팔구])종 (?:대조|이행)", body, re.M):
+        claimed = NUM[m.group(1)]
+        tail = re.split(r"^#{2,} ", body[m.end():], maxsplit=1, flags=re.M)[0]
+        rows = len(re.findall(r"^\| *[①②③④⑤⑥⑦⑧⑨]", tail, re.M))
+        if rows and claimed != rows:
+            bad.append(f"{f.name}: 제목 {claimed}종 / 표 {rows}행")
+if bad:
+    print("    " + " | ".join(bad)); sys.exit(1)
+PYEOF
+then echo "  ✓ 편집 리포트 §1 항목 수 (제목 N종 = 표 행 수)"; else echo "  ✗ 편집 리포트 §1 항목 수 불일치"; FAIL=1; fi
+# ⑯ 편집 리포트 §1이 상시 검수 항목을 전부 담았는지 (49차 검수 신설)
+#    #035가 상시 다섯 중 둘만 돌렸고, 빠진 상시-47 자리에서 정확히 사고가 났다.
+#    항목을 회차마다 손으로 옮겨 적으면 옮기다 빠진다 — 형제 desync와 같은 병이라 게이트로 만든다.
+if python3 - <<'PYEOF'
+import re, sys, pathlib, os
+sg = (pathlib.Path(os.environ["NOVEL_ROOT"]) / "novel/bible/style-guide.md").read_text(encoding="utf-8")
+ids = re.findall(r"^- `(상시-\d+)`", sg, re.M)
+if not ids:
+    print("    style-guide §16 상시 항목 목록을 못 읽었다"); sys.exit(1)
+root = pathlib.Path(os.environ["NOVEL_ROOT"]) / "novel/editorial"
+bad = []
+for f in sorted(root.glob("edit-report-*.md")):
+    n = int(re.search(r"(\d+)", f.name).group(1))
+    if n < 35: continue          # 목록 신설 이전 리포트는 소급하지 않는다
+    body = f.read_text(encoding="utf-8")
+    miss = [i for i in ids if i not in body]
+    if miss: bad.append(f"{f.name}: {', '.join(miss)} 누락")
+print(f"    [상시 {len(ids)}종 · 리포트 #035~ 대조]")
+if bad:
+    print("    " + " | ".join(bad)); sys.exit(1)
+PYEOF
+then echo "  ✓ 편집 리포트 상시 검수 항목 전량"; else echo "  ✗ 편집 리포트에 상시 항목 누락"; FAIL=1; fi
+# ⑰ 원고에서 지운 문장이 바이블에 인용문으로 살아 있는지 (51차 검수 신설)
+#    50차에서 곽두철 대사를 고쳤는데 state/STATUS/plot-outline이 옛 대사를 인용문으로 갖고 있었다.
+#    47차 원칙("트리 전체를 grep")을 지켰는데도 놓쳤다 — 의미 키워드로 grep했지 '문장 자체'로 안 했기 때문이다.
+#    → 커밋 전 working tree에서 원고에서 사라진 줄을 뽑아 bible/에 남아 있는지 기계로 본다.
+#    editorial/은 역사·정정 기록 계층이라 제외한다(옛 문장을 인용하는 것이 정상).
+if python3 - <<'PYEOF'
+import re, sys, subprocess, pathlib, os
+root = os.environ["NOVEL_ROOT"]
+#    ⚠ 53차 — 기준선을 HEAD에서 '최신 회차가 태어난 커밋'으로 넓혔다.
+#    HEAD 대조는 커밋하는 순간 시야가 0이 된다. 회차를 쓰고 커밋한 뒤 역검수로 고치면
+#    그 삭제분은 다음 실행에서 이미 HEAD 안이라 안 보인다. 실제로 52차가 그렇게 통과했다.
+#    한 회차의 개정 주기 전체(집필→역검수 n회)를 한 구간으로 본다.
+try:
+    last = sorted((pathlib.Path(root)/"novel"/"manuscript").glob("[0-9][0-9][0-9].md"))[-1]
+    base = subprocess.run(["git","-C",root,"log","--diff-filter=A","--format=%H","-1","--",
+                           f"novel/manuscript/{last.name}"],
+                          capture_output=True, text=True, timeout=30).stdout.strip() or "HEAD"
+    d = subprocess.run(["git","-C",root,"diff",base,"--","novel/manuscript"],
+                       capture_output=True, text=True, timeout=30).stdout
+except Exception as e:
+    print(f"    [git diff 실패 — 검사 생략: {e}]"); sys.exit(0)
+removed = []
+for ln in d.split("\n"):
+    if not ln.startswith("-") or ln.startswith("---"): continue
+    t = ln[1:].strip()
+    if len(t) < 14: continue                      # 짧은 대사는 오탐이 많다
+    if t.startswith(("#", "⁂", "*", "**")): continue
+    removed.append(t)
+if not removed:
+    print("    [원고 삭제 문장 0 — 검사 생략]"); sys.exit(0)
+bible = list((pathlib.Path(root)/"novel"/"bible").glob("*.md"))
+texts = {f.name: f.read_text(encoding="utf-8") for f in bible}
+bad = []
+for t in removed:
+    for name, body in texts.items():
+        if t in body:
+            bad.append(f"{name}: '{t[:28]}…'")
+            break
+print(f"    [원고 삭제 문장 {len(removed)}개 · bible/ 대조]")
+if bad:
+    print("    옛 문장이 바이블에 남아 있음 → " + " | ".join(bad[:5])); sys.exit(1)
+PYEOF
+then echo "  ✓ 원고 삭제 문장이 바이블에 잔존하지 않음"; else echo "  ✗ 원고에서 지운 문장이 바이블에 남아 있음"; FAIL=1; fi
+# ⑱ 편집 리포트 §1의 계측 3종(⁂ / 정지 / 대화%)이 measure 실측과 일치하는가 — 63차 검수
+#    게이트 ⑫는 리포트 *헤더의 자수*만 보고, §1 대조표의 계측 칸은 아무도 안 봤다.
+#    같은 칸이 세 번 낡았다(61·63차, 그리고 63차 재검수). 순수 숫자라 게이트가 감당한다.
+#    ⚠ 신설 전 실측: #036~#041 여섯 건에 돌려 오탐 0 · 진짜 1건(#041 대화 55 vs 실측 56).
+if python3 - <<'PYEOF'
+import re, sys, glob, os, io as _io
+root = os.environ["NOVEL_ROOT"]
+sys.path.insert(0, os.environ["NOVEL_TOOLS"])
+_o = sys.stdout; sys.stdout = _io.StringIO()
+import measure as _ms
+sys.stdout = _o
+bad = []; n = 0
+for f in sorted(glob.glob(root + "/novel/editorial/edit-report-*.md")):
+    raw = open(f, encoding="utf-8").read()
+    h = re.search(r"^# 편집 리포트 #\d+ — (\d{3})화", raw, re.M)
+    if not h: continue
+    ep = h.group(1)
+    row = re.search(r"^\|[^|\n]*`⁂`[^|\n]*\|[^|\n]*\|(.*)$", raw, re.M)
+    if not row: continue
+    m = re.search(r"\*\*\s*(\d+)\s*/\s*(\d+)(?:\s*/\s*(\d+)%)?", row.group(1))
+    if not m: continue
+    r = _ms.measure(root + f"/novel/manuscript/{ep}.md")
+    cuts, stop, talk = r[14], r[13], r[2]
+    n += 1
+    got = (int(m.group(1)), int(m.group(2)))
+    if got != (cuts, stop):
+        bad.append(f"{os.path.basename(f)} {ep}화 ⁂/정지 기록 {got[0]}/{got[1]} / 실측 {cuts}/{stop}")
+    elif m.group(3) and int(m.group(3)) != talk:
+        bad.append(f"{os.path.basename(f)} {ep}화 대화 기록 {m.group(3)}% / 실측 {talk}%")
+print(f"    [리포트 §1 계측 {n}건 대조]")
+if bad:
+    print("    " + " | ".join(bad[:4])); sys.exit(1)
+PYEOF
+then echo "  ✓ 편집 리포트 §1 계측(⁂·정지·대화%)"; else echo "  ✗ 리포트 §1 계측이 실측과 불일치"; FAIL=1; fi
+if [ "$FAIL" = "1" ]; then echo "❌ 검증 실패 — 배포 금지"; exit 1; fi
+echo "✅ 전 항목 일치 — 배포 가능 (${EP}화 / ${FMT}자)"

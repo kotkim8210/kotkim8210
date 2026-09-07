@@ -1,1 +1,5 @@
 .claude/settings.local.json
+
+# 빌드 캐시
+__pycache__/
+*.pyc
