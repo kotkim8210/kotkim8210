@@ -3,9 +3,9 @@ title: 영상·유튜브 스킬 모음 (watch · youtube-shorts · osmu)
 slug: video-skills
 tags: [스킬, 영상, 유튜브, 쇼츠, 자동화]
 created: 2026-06-13
-updated: 2026-06-13
-sources: [2026-06-13-branch-inventory.md, 2026-06-13-skill-install-session.md]
-related: [[claude-code-skills]], [[my-projects]]
+updated: 2026-09-20
+sources: [2026-06-13-branch-inventory.md, 2026-06-13-skill-install-session.md, 2026-09-20-youtube-다계정-연좌제-전략.md]
+related: [[claude-code-skills]], [[my-projects]], [[reused-content]], [[youtube-multi-account]]
 confidence: high
 status: active
 ---
@@ -31,7 +31,18 @@ GitHub 브랜치에 흩어져 있던 영상·유튜브 관련 Claude 스킬 3종
 - 기능: OSMU 영상(역사·금융 '나락' 롱폼+클립) 반자동 제작. "N화 X주제로 만들어줘" → 대본(lean config) → auto.py → factcheck_todo.json의 [수치확인]·[실명위험]을 web_search로 자동 검증 → 사람 할 일만 안내.
 - 핵심 규칙: 고증 검증을 사용자에게 떠넘기지 않음(기억 아닌 스킬로 강제). 3화 '일본 부동산 버블' 대본 포함.
 
+## 재사용 콘텐츠 위험 등급 (2026-09-20 추가)
+| 스킬 | 등급 | 근거 | 운영 지침 |
+|---|---|---|---|
+| youtube-shorts-creator-ultimate | **C (높음)** | 타인 영상(해외 CC) 현지화·재유통 | 격리 계정 배치, 초기 수익화 보류, 실질변형 게이트 C1~C3 필수 |
+| osmu-video-builder | **B (낮음~중간)** | 공개 자료 기반 재구성, 해설이 주 | 주력 채널 후보 |
+| watch | — | 제작 도구(리서치용), 산출물 아님 | 해당 없음 |
+
+⚠️ **CC 라이선스는 재사용 콘텐츠 판정을 면제하지 않는다.** 법적 권리와 원본 기여는 별개 심사다. 상세: [[reused-content]]
+
 ## 연결고리 (Connections)
+- [[reused-content]] — 이 스킬들의 재사용 콘텐츠 위험 등급: youtube-shorts=**C등급(높음)**, osmu=**B등급**. 등급이 채널 배치를 결정한다.
+- [[youtube-multi-account]] — C등급 스킬 산출물은 격리 계정에 두고 초기 수익화를 보류하는 것이 전략의 핵심.
 - [[claude-code-skills]] — 이들은 모두 user-invocable(슬래시 호출) 또는 스크립트 포함 스킬. 설치 스코프 규칙 적용.
 - [[my-projects]] — youtube-shorts·osmu는 실제 콘텐츠 프로젝트(인스타·유튜브 채널 운영)와 직접 연결됨.
 

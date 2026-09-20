@@ -3,9 +3,9 @@ title: 진행 중인 프로젝트 색인 (브랜치별 산출물 지도)
 slug: my-projects
 tags: [프로젝트, 색인, 사업, 콘텐츠, 브랜치]
 created: 2026-06-13
-updated: 2026-06-13
-sources: [2026-06-13-branch-inventory.md]
-related: [[video-skills]], [[claude-code-skills]], [[session-independence]]
+updated: 2026-09-20
+sources: [2026-06-13-branch-inventory.md, 2026-09-20-youtube-다계정-연좌제-전략.md]
+related: [[video-skills]], [[claude-code-skills]], [[session-independence]], [[reused-content]], [[youtube-multi-account]]
 confidence: high
 status: active
 ---
@@ -34,7 +34,14 @@ status: active
 - 🗑️ **삭제 가능**(잉여, main에 완전 병합 → 지식 손실 0): `festive-wright`, `graphify-setup`(옛 기본), `upbeat-goodall`, `index-work`, `merge-brain-into-main`
 - 🔒 **보존**(고유 작업물 보유): 위 프로젝트 5개 + 인프라 3개 + `zealous-galileo`(karpathy 스킬 `d5b6709`). 삭제 전 해당 작업을 main에 병합하거나 독립 레포로 이전 필요.
 
+## 💎 미인식 자산 — 콘텐츠 소재로서의 가치 (2026-09-20)
+위 프로젝트들(당근스토어 자동화·쿠팡파트너스·홍보처 크롤러·성경저널 POD·인스타 자동화)은 모두 **직접 실행한 1인칭 경험**이다.
+→ 유튜브 재사용 콘텐츠 판정 위험이 **구조적으로 0인 A등급 소재**이며, 현재 콘텐츠화되지 않고 있다.
+→ 해외 쇼츠 현지화(C등급)보다 **안전하고 차별화도 높은 채널 소재**. 상세 기준: [[reused-content]]
+
 ## 연결고리 (Connections)
+- [[reused-content]] — 아래 이커머스·자동화 프로젝트들은 1인칭 실전 경험이라 **A등급(재사용 위험 구조적 0)**. 가장 저평가된 채널 소재.
+- [[youtube-multi-account]] — 어떤 프로젝트를 어느 계정 슬롯의 채널로 낼지 결정하는 전략 문서.
 - [[video-skills]] — youtube-shorts·osmu 스킬이 콘텐츠 프로젝트(인스타·유튜브) 운영을 뒷받침.
 - [[session-independence]] — 이 색인 자체가 "세션이 흩어져도 하나의 뇌에서 전체를 본다"는 원칙의 실현.
 - [[claude-code-skills]] — 프로젝트마다 `.claude/` 설정이 달라 스킬 스코프 규칙의 영향을 받음.
